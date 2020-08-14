@@ -25,9 +25,7 @@ routesProtected.use((req, res, next) =>{
 });
 
 router.get('/',async(req, res) => {
-    console.log(req)
     const users = await User.find();
-
        res.json(users);
 });
 
