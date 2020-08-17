@@ -31,7 +31,7 @@ router.get('/',async(req, res) => {
 
 router.post('/login', async(req, res) => {
     User.findOne({
-        user: req.body.user
+        email: req.body.user
       })
         .then(user => {
             if(user){
