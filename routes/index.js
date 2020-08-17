@@ -25,15 +25,13 @@ routesProtected.use((req, res, next) =>{
 });
 
 router.get('/',async(req, res) => {
-    console.log(req)
     const users = await User.find();
-
        res.json(users);
 });
 
 router.post('/login', async(req, res) => {
     User.findOne({
-        user: req.body.user
+        email: req.body.user
       })
         .then(user => {
             if(user){
