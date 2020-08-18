@@ -7,6 +7,7 @@ const GoogleStrategy = require("passport-google-oauth2");
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const userController = require('../controllers/UserController');
 const User = require('../models/User');
 
 
@@ -25,42 +26,12 @@ routesProtected.use((req, res, next) =>{
         });
     }else{
         res.status(400).json({message:'No se envio Token.'});
-    }    
+    }
 });
 
-router.get('/',async(req, res) => {
-    const users = await User.find();
-       res.json(users);
-});
+router.get('/', userController.getUsers);
 
-router.post('/login', async(req, res) => {
-    User.findOne({
-        email: req.body.user
-      })
-        .then(user => {
-            if(user){
-                if(bcrypt.compareSync(req.body.password, user.password)){
-                    const payload = {
-                        check:  true,
-                        user_data: user
-                       };
-
-                    let token = jwt.sign(payload, process.env.SECRET_KEY, {
-                        expiresIn: 1440
-                      })
-
-                    res.send(token)
-                }else{
-                    res.status(400).json({err:'1', message:'Contraseña incorrecta'})
-                }
-            }else{
-                res.status(400).json({err:'2', message:'Usuario Incorrecto'})
-            }
-        })
-        .catch(err => {
-            res.status(400).json({error: err})
-        })
-});
+router.post('/login', userController.Login);
 
 
 router.get('/login/google', async() =>{
