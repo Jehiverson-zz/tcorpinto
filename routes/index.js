@@ -63,30 +63,27 @@ router.post('/login', async(req, res) => {
 });
 
 
-router.get('/login/google', async() =>{
-  
-    new GoogleStrategy({
-        //Options for the google strat
-        callbackURL: "/auth/google/redirect",
-        clientID:process.env.clientID,
-        clientSecret: process.env.clientSecret
-      },
-      (accesstoken, refeshToken, profile,email, done) => {
-          console.log(email);
-          var email = email.emails[0].value;
-          user.findOne({ email }, (err, usuario) => {
-            if (!usuario) {
-              return done(null, false, {
-                message: `Email ${email} no esta registrado`
-              });
-            } else {
-               
-                  return done(null, usuario); 
+router.post('/login/google', async(req, res) =>{
+    User.findOne({
+        email: req.body.user
+      })
+        .then(user => {
+            if(user){
+                    const payload = {
+                        check:  true,
+                        user_data: user
+                       };
+                    let token = jwt.sign(payload, process.env.SECRET_KEY, {
+                        expiresIn: 1440
+                      })
+                    res.send(token)
+            }else{
+                res.status(400).json({err:'2', message:'Usuario Incorrecto'})
             }
-          });
-      }
-      )
-    
+        })
+        .catch(err => {
+            res.status(400).json({error: err})
+        })
 })
 
 module.exports = router;
