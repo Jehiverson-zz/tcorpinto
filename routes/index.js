@@ -8,6 +8,7 @@ const GoogleStrategy = require("passport-google-oauth2");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userController = require('../controllers/UserController');
+const ticketController = require('../controllers/TicketController');
 const User = require('../models/User');
 
 
@@ -59,5 +60,12 @@ router.get('/login/google', async() =>{
       )
     
 })
+
+
+
+/*-------------------------------------------
+----------------- TOCKETS -------------------
+---------------------------------------------*/
+router.get('/ticketstras', ticketController.getSystemTransfer)
 
 module.exports = router;
