@@ -20,7 +20,7 @@ async function Login(req, res) {
                     expiresIn: 1440
                 })
 
-                res.send(token)
+                res.send({token, user})
             } else {
                 res.status(400).json({ err: '1', message: 'Contraseña incorrecta' })
             }
