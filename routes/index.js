@@ -63,6 +63,7 @@ router.post('/login/google', async(req, res) =>{
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
-router.get('/ticketstras', ticketController.getSystemTransfer)
+router.get('/tickets/transfer', ticketController.getSystemTransfer)
+router.get('/tickets/stores', ticketController.getStore)
 
 module.exports = router;
