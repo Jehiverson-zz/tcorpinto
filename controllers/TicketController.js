@@ -5,7 +5,6 @@ const Store = require('../models/Store');
 
 //Obtiene los tikets que se trasladan a otro sistema
 async function getSystemTransfer(req, res) { //trassystem_show
-    console.log(req)
     let ticketSystem = await TicketSystem.find({
         status: 'Pendiente',
         $or: [
@@ -30,6 +29,12 @@ async function getSystemTransfer(req, res) { //trassystem_show
     });
 }
 
+async function getStore(req,res){
+    let result = await Store.find();
+    return res.json({result})
+}
+
 module.exports = {
-    getSystemTransfer
+    getSystemTransfer,
+    getStore
 }
