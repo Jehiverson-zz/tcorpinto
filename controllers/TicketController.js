@@ -3,6 +3,25 @@
 const TicketSystem = require("../models/TicketSystem");
 const Store = require('../models/Store');
 
+function storeTicketSystemTransfer(req, res) {
+    let params = req.body;
+    let ticket = new TicketSystem();
+    params.map(data => {
+        //if (data.upc && data.alu && data.size && data.store && data.factura) {
+            ticket.upc = data.upc;
+            ticket.alu = data.alu;
+            ticket.size = data.size;
+            ticket.fact = data.factura;
+            ticket.store_created = "tienda usuario";
+            ticket.store_asigned = data.store;
+
+            console.log(ticket);
+        // } else {
+        //     console.log('FALTAN DATOS')
+        // }
+    })
+}
+
 //Obtiene los tikets que se trasladan a otro sistema
 async function getSystemTransfer(req, res) { //trassystem_show
     let ticketSystem = await TicketSystem.find({
@@ -29,12 +48,13 @@ async function getSystemTransfer(req, res) { //trassystem_show
     });
 }
 
-async function getStore(req,res){
+async function getStore(req, res) {
     let result = await Store.find();
-    return res.json({result})
+    return res.json({ result })
 }
 
 module.exports = {
+    storeTicketSystemTransfer,
     getSystemTransfer,
-    getStore
+    getStore,
 }
