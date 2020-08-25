@@ -15,24 +15,30 @@ const binnacleSaleController = require('../controllers/BinnacleSaleController');
 const routesProtected = express.Router();
 
 routesProtected.use((req, res, next) =>{
+
     const token = req.headers.token;
     if(token){
+        console.log(token)
         jwt.verify(token, process.env.SECRET_KEY, (err, decoded) =>{
+            console.log("1")
             if(err){
+                console.log("2")
                 res.json({message:'Token Inválida.'});
             }else{
+                console.log("3")
                 req.decoded = decoded;
                 next();
             }
         });
     }else{
         res.status(400).json({message:'No se envio Token.'});
+        console.log("Murio")
     }
 });
 
-router.get('/', userController.getUsers);
+router.get('/',routesProtected,userController.getUsers);
 
-router.post('/login', userController.Login);
+router.post('/login',userController.Login);
 
 
 router.post('/login/google', async(req, res) =>{
@@ -61,7 +67,8 @@ router.post('/login/google', async(req, res) =>{
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
-router.get('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
+router.get('/binnacles/sales_show_report', routesProtected, binnacleSaleController.getBinnacleSale)
+router.get('/binnacles/sales_show',routesProtected, binnacleSaleController.getBinnacleSale)
 
 
 /*-------------------------------------------
