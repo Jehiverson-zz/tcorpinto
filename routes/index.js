@@ -67,6 +67,7 @@ router.get('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
+router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer)
 router.get('/tickets/transfer', ticketController.getSystemTransfer)
 router.get('/tickets/stores', ticketController.getStore)
 
