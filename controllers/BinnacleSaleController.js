@@ -17,7 +17,7 @@ async function getBinnacleSaleReport(req, res) {
     let sales = await BinnacleSaleByte.find().sort({ date_created: -1 });
 
     sales.map((res) =>{
-        dataStore.push({"fechaCreacion": Moment(res.date_created).format('DD-MM-YYYY'), 
+        dataStore.push({"fechaCreacion": new Date(res.date_created), 
                         "tienda": res.store_creat,
                         "ventas": res.sale_daily,
                         "metas": res.daily_goal,
