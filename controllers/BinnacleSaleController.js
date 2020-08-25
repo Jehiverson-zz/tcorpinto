@@ -14,7 +14,7 @@ async function getBinnacleSale(req, res) {
 //Obtiene los colaboradores
 async function getBinnacleSaleReport(req, res) { 
     const dataStore = [];
-    let sales = await BinnacleSaleByte.find().sort({ date_created: -1 }).limit(1000);
+    let sales = await BinnacleSaleByte.find().sort({ date_created: -1 }).limit(5000);
 
     sales.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
