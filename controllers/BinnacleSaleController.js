@@ -11,10 +11,13 @@ async function getBinnacleSale(req, res) {
     return res.json({sales});
 }
 
-//Obtiene los colaboradores
+
+//Obtiene los colaboradores date_created: { $regex: dateSales },
 async function getBinnacleSaleReport(req, res) { 
     const dataStore = [];
-    let sales = await BinnacleSaleByte.find().sort({ date_created: -1 }).limit(30000);
+    let sales = await BinnacleSaleByte.find({
+        date_created: { $regex: "2020" },
+    });
 
     sales.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
