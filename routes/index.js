@@ -67,7 +67,7 @@ router.post('/login/google', async(req, res) =>{
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
-router.get('/binnacles/sales_show_report', routesProtected, binnacleSaleController.getBinnacleSale)
+router.get('/binnacles/sales_show_report', routesProtected, binnacleSaleController.getBinnacleSaleReport)
 router.get('/binnacles/sales_show',routesProtected, binnacleSaleController.getBinnacleSale)
 
 
