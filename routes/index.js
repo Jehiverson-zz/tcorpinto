@@ -2,15 +2,15 @@ const express = require('express');
 const { Router } = require('express');
 const router = Router();
 
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth2");
-
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+//Models
+const User = require('../models/User');
+//Controllers
 const userController = require('../controllers/UserController');
 const ticketController = require('../controllers/TicketController');
-const User = require('../models/User');
-
+const collaboratorController = require('../controllers/CollaboratorController');
+const binnacleSaleController = require('../controllers/BinnacleSaleController');
 
 const routesProtected = express.Router();
 
@@ -58,6 +58,10 @@ router.post('/login/google', async(req, res) =>{
         })
 })
 
+/*-------------------------------------------
+----------------- TOCKETS -------------------
+---------------------------------------------*/
+router.get('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 
 
 /*-------------------------------------------
@@ -65,5 +69,12 @@ router.post('/login/google', async(req, res) =>{
 ---------------------------------------------*/
 router.get('/tickets/transfer', ticketController.getSystemTransfer)
 router.get('/tickets/stores', ticketController.getStore)
+
+
+/*-------------------------------------------
+----------------- COLLABORATOR --------------
+---------------------------------------------*/
+
+router.get('/collaborator/get',collaboratorController.getCollaborator)
 
 module.exports = router;
