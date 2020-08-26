@@ -25,7 +25,7 @@ async function getBinnacleSaleReport(req, res) {
         date_created: { $gte:"2018-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
     });
 
-    /*salesNew.map((res) =>{
+    salesNew.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
                         "tienda": res.store_creat,
                         "ventas": res.sale_daily,
@@ -81,7 +81,7 @@ async function getBinnacleSaleReport(req, res) {
                         "Observacion_Metodos": res.obs_method,
                         "Factores_que_afectaron_venta": res.fact
                     })
-    })*/
+    })
 
     salesBefore_2020_2018.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
