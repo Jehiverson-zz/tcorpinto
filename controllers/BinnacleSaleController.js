@@ -149,21 +149,9 @@ async function getBinnacleSaleReport(req, res) {
                     })
     })
 
-    salesBefore_2015_2017.map((res) =>{
-        dataStore.push({"fechaCreacion": new Date(res.date_created), 
-                        "tienda": res.store_creat,
-                        "ventas": res.sale_daily,
-                        "metas": res.daily_goal,
-                        "venta_año_anterior": res.year_before_sale,
-                        "total_personas": res.people_totals,
-                        "total_vendores": res.sales_totals,
-                        "manager": res.manager,
-                        "fact": res.fact,
-                        "diferencia": res.diff
-                    })
-    })
 
-    return res.json({dataStore});
+
+    return res.json({salesBefore_2015_2017});
 }
 
 module.exports = {
