@@ -146,7 +146,7 @@ async function getBinnacleSaleReport(req, res) {
     
     
     
-    return res.json({sales1});
+    return res.json({dataStore});
 }
 
 module.exports = {
