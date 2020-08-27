@@ -24,11 +24,6 @@ async function getBinnacleSaleReport(req, res) {
     let salesBefore_2020_2018 = await BinnacleSaleByteBefore.find({
         date_created: { $gte:"2018-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
     });
-
-    let salesBefore_2015_2017 = await BinnacleSaleByteBefore.find({
-        date_created: { $gte:"2015-01-01T19:02:12.501+00:00", $lt:"2017-12-31T19:02:12.501+00:00" },
-    });
-
     
 
     salesNew.map((res) =>{
@@ -153,7 +148,7 @@ async function getBinnacleSaleReport(req, res) {
 
 
 
-    return res.json({salesBefore_2015_2017});
+    return res.json({dataStore});
 }
 
 module.exports = {
