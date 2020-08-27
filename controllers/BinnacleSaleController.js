@@ -22,7 +22,7 @@ async function getBinnacleSaleReport(req, res) {
     });
 
     let salesBefore_2020_2018 = await BinnacleSaleByteBefore.find({
-        date_created: { $gte:"2017-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
+        date_created: { $gte:"2016-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
     });
     
 
