@@ -92,7 +92,7 @@ async function getBinnacleSaleReport(req, res) {
                     })
     })
 
-    salesBefore_2020_2018.map((res) =>{
+    salesBefore_2020_2017.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
                         "tienda": res.store_creat,
                         "ventas": res.sale_daily,
