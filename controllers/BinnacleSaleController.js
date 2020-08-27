@@ -88,7 +88,11 @@ async function getBinnacleSaleReport(req, res) {
     })
 
     salesBefore_2020_2010.map((res) =>{
-        dataStore.push({"fechaCreacion": new Date(res.date_created), 
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({"fechaCreacion": fecha, 
+                        "Dia":Moment(fecha).format('DD'),
+                        "Mes":Moment(fecha).format('MM'),
+                        "Año":Moment(fecha).format('YYYY'),
                         "tienda": res.store_creat,
                         "ventas": res.sale_daily,
                         "metas": res.daily_goal,
