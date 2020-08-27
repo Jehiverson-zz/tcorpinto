@@ -22,7 +22,7 @@ async function getBinnacleSaleReport(req, res) {
     });
 
     let salesBefore_2020_2010 = await BinnacleSaleByteBefore.find({
-        date_created: { $gte:"2010-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
+        date_created: { $gte:"2020-08-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
     });
 
     salesNew.map((res) =>{
@@ -87,7 +87,19 @@ async function getBinnacleSaleReport(req, res) {
                     })
     })
 
-    salesBefore_2020_2010.map((res) =>{
+    return res.json({dataStore});
+}
+
+async function getBinnacleSaleReportBefore(req, res) {
+    const dataStore = [];
+    let dateInic = req.params.id +"-01-01T19:02:12.501+00:00"
+    let dateFin = req.params.id +"-12-31T19:02:12.501+00:00"
+    console.log(dateInic,dateFin)
+    let salesBefore = await BinnacleSaleByteBefore.find({
+        date_created: { $gte: dateInic, $lt: dateFin },
+    });
+
+    salesBefore.map((res) =>{
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({"fechaCreacion": fecha, 
                         "Dia":Moment(fecha).format('DD'),
@@ -154,5 +166,6 @@ async function getBinnacleSaleReport(req, res) {
 
 module.exports = {
     getBinnacleSale,
-    getBinnacleSaleReport
+    getBinnacleSaleReport,
+    getBinnacleSaleReportBefore
 }
