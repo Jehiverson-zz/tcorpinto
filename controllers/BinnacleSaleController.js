@@ -22,11 +22,11 @@ async function getBinnacleSaleReport(req, res) {
     });
 
     let salesBefore_2020_2018 = await BinnacleSaleByteBefore.find({
-        date_created: { $gte:"2016-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
+        date_created: { $gte:"2010-01-01T19:02:12.501+00:00", $lt:"2016-08-18T19:02:12.501+00:00" },
     });
     
 
-    salesNew.map((res) =>{
+    /*salesNew.map((res) =>{
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({"fechaCreacion": fecha, 
                         "Dia":Moment(fecha).format('DD'),
@@ -86,7 +86,7 @@ async function getBinnacleSaleReport(req, res) {
                         "Observacion_Metodos": res.obs_method,
                         "Factores_que_afectaron_venta": res.fact
                     })
-    })
+    })*/
 
     salesBefore_2020_2018.map((res) =>{
         dataStore.push({"fechaCreacion": new Date(res.date_created), 
