@@ -2,6 +2,7 @@
 
 const TicketSystem = require("../models/TicketSystem");
 const Store = require('../models/Store');
+const TicketInmediate = require('../models/TicketInmediate');
 
 function storeTicketSystemTransfer(req, res) {
     let params = req.body;
@@ -53,8 +54,14 @@ async function getStore(req, res) {
     return res.json({ result })
 }
 
+async function getTicketsInmediate(req,res){
+    let result = await TicketInmediate.find();
+    return res.json({ result })
+}
+
 module.exports = {
     storeTicketSystemTransfer,
+    getTicketsInmediate,
     getSystemTransfer,
     getStore,
 }
