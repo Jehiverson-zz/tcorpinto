@@ -55,7 +55,7 @@ async function getStore(req, res) {
 }
 
 async function getTicketsInmediate(req,res){
-    let result = await TicketInmediate.find();
+    let result = await TicketInmediate.find().sort( { timestamp: -1 } );
     return res.json({ result })
 }
 
