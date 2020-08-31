@@ -71,9 +71,6 @@ router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSal
 router.get('/binnacles/sales_show',routesProtected, binnacleSaleController.getBinnacleSale)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
-//ReporteLourdes
-router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
-
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
