@@ -1,7 +1,6 @@
 'use strict'
 
 const Store = require('../models/Store');
-<<<<<<< HEAD
 const TicketSystem = require("../models/TicketSystem");
 const TicketInmediates = require("../models/TicketInmediates");
 const TicketPhoto = require("../models/TicketPhoto");
@@ -11,11 +10,6 @@ const cloudinary = require('../cloudinary.config');
 
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {
-=======
-const TicketInmediate = require('../models/TicketInmediate');
-const Moment = require('moment');
-function storeTicketSystemTransfer(req, res) {
->>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
     let params = req.body;
     let Ticket = new TicketSystem();
     console.log(params)
@@ -1340,8 +1334,8 @@ async function getTicketsInmediate(req,res){
 
 module.exports = {
     storeTicketSystemTransfer,
-<<<<<<< HEAD
     storeTicketInmediates,
+    getTicketsInmediate,
     storeTicketPhotoRetreats,
     storeTicketExternalRetreats,
     getSystemTransferCreate,
@@ -1353,9 +1347,5 @@ module.exports = {
     inactivateExternalRetreats,
     completeTicket,
     completePhotoRetreats,
-=======
-    getTicketsInmediate,
-    getSystemTransfer,
->>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
     getStore,
 }
