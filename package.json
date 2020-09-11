@@ -2,11 +2,14 @@
   "name": "JavascriptFazt",
   "autor": "Jehiverson Rodriguez",
   "version": "1.0.0",
+  "engines": {
+    "node": "12.x"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "start": "cross-env NODE_ENV=production node index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
@@ -23,7 +26,11 @@
     "i": "^0.3.6",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
+<<<<<<< HEAD
     "moment-timezone": "^0.5.31",
+=======
+    "moment": "^2.27.0",
+>>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
     "mongoose": "^5.9.26",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",

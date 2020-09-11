@@ -2,37 +2,49 @@ const express = require('express');
 const { Router } = require('express');
 const router = Router();
 
+<<<<<<< HEAD
 // const passport = require("passport");
 // const GoogleStrategy = require("passport-google-oauth2");
 
+=======
+>>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+//Models
+const User = require('../models/User');
+//Controllers
 const userController = require('../controllers/UserController');
 const ticketController = require('../controllers/TicketController');
-const User = require('../models/User');
-
+const collaboratorController = require('../controllers/CollaboratorController');
+const binnacleSaleController = require('../controllers/BinnacleSaleController');
 
 const routesProtected = express.Router();
 
 routesProtected.use((req, res, next) =>{
+
     const token = req.headers.token;
     if(token){
+        console.log(token)
         jwt.verify(token, process.env.SECRET_KEY, (err, decoded) =>{
+            console.log("1")
             if(err){
+                console.log("2")
                 res.json({message:'Token Inválida.'});
             }else{
+                console.log("3")
                 req.decoded = decoded;
                 next();
             }
         });
     }else{
         res.status(400).json({message:'No se envio Token.'});
+        console.log("Murio")
     }
 });
 
-router.get('/', userController.getUsers);
+router.get('/',routesProtected,userController.getUsers);
 
-router.post('/login', userController.Login);
+router.post('/login',userController.Login);
 
 
 router.post('/login/google', async(req, res) =>{
@@ -58,7 +70,15 @@ router.post('/login/google', async(req, res) =>{
         })
 })
 
-
+/*-------------------------------------------
+----------------- TOCKETS -------------------
+---------------------------------------------*/
+router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSaleReport)
+router.get('/binnacles/sales_show',routesProtected, binnacleSaleController.getBinnacleSale)
+router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
+router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
+//ReporteLourdes
+router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
 
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
@@ -77,5 +97,12 @@ router.put('/ticket/external_retreats/inactive/:id', ticketController.inactivate
 router.put('/ticket/complete/:id', ticketController.completeTicket);
 router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
 router.get('/tickets/stores', ticketController.getStore);
+
+
+/*-------------------------------------------
+----------------- COLLABORATOR --------------
+---------------------------------------------*/
+
+router.get('/collaborator/get',collaboratorController.getCollaborator)
 
 module.exports = router;
