@@ -2,6 +2,12 @@ const express = require('express');
 const { Router } = require('express');
 const router = Router();
 
+<<<<<<< HEAD
+// const passport = require("passport");
+// const GoogleStrategy = require("passport-google-oauth2");
+
+=======
+>>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 //Models
@@ -77,9 +83,20 @@ router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
-router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer)
-router.get('/tickets/transfer', ticketController.getSystemTransfer)
-router.get('/tickets/stores', ticketController.getStore)
+router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer);
+router.post('/tickets/add/inmediates', ticketController.storeTicketInmediates);
+router.post('/tickets/add/photo_retreats', ticketController.storeTicketPhotoRetreats);
+router.post('/tickets/add/external_retreats', ticketController.storeTicketExternalRetreats);
+router.post('/tickets/transfer_created', ticketController.getSystemTransferCreate);
+router.post('/tickets/transfer_assigned', ticketController.getSystemTransferAssigned);
+router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
+router.post('/tickets/external_retreats', ticketController.getExernalRetreats);
+router.put('/ticket/inactive/:id', ticketController.inactivateTicket);
+router.put('/ticket/photo_retreats/inactive/:id', ticketController.inactivatePhotoRetreats);
+router.put('/ticket/external_retreats/inactive/:id', ticketController.inactivateExternalRetreats);
+router.put('/ticket/complete/:id', ticketController.completeTicket);
+router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
+router.get('/tickets/stores', ticketController.getStore);
 
 
 /*-------------------------------------------
