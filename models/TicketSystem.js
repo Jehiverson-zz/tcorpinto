@@ -5,11 +5,15 @@ const { Schema } = mongoose;
 const path = require('path');
 const fileSchema = new Schema ({
 
-    upc: {type: String },
-    alu: {type: String },
-    siz: {type: String },
-
-    fact:  {type: String},
+    bill:  {type: String},
+    product: [
+        {
+            upc: {type: String },
+            alu: {type: String },
+            size: {type: String },
+            bill: {type: String },
+        }
+    ],
     status: {type: String},
     retailn:{type: String},
     store_created: {type: String },
