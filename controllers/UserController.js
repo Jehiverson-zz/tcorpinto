@@ -4,7 +4,8 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-async function Login(req, res) {
+async function Login(req, res) { 
+    console.log("login");
     User.findOne({
         email: req.body.user
     })
@@ -19,6 +20,8 @@ async function Login(req, res) {
                 let token = jwt.sign(payload, process.env.SECRET_KEY, {
                     expiresIn: 1440
                 })
+
+                console.log(token)
 
                 res.send({token, user})
             } else {
