@@ -270,7 +270,7 @@ async function getTicketsInmediate(req,res){
     timestamp:1,
     timestampend:1 
     }).sort( { timestamp: -1 } );
-    console.log(result);
+
     result.map((res) =>{
         let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
