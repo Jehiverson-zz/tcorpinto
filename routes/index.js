@@ -2,12 +2,9 @@ const express = require('express');
 const { Router } = require('express');
 const router = Router();
 
-<<<<<<< HEAD
 // const passport = require("passport");
 // const GoogleStrategy = require("passport-google-oauth2");
 
-=======
->>>>>>> 1df3679dcfce00e7d6c475754197c49267be046a
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 //Models
