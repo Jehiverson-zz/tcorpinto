@@ -57,7 +57,7 @@ router.post('/login/google', async(req, res) =>{
                     let token = jwt.sign(payload, process.env.SECRET_KEY, {
                         expiresIn: 1440
                       })
-                    res.send(token)
+                    res.send({token, user})
             }else{
                 res.status(400).json({err:'2', message:'Usuario Incorrecto'})
             }
@@ -101,5 +101,14 @@ router.get('/tickets/stores', ticketController.getStore);
 ---------------------------------------------*/
 
 router.get('/collaborator/get',collaboratorController.getCollaborator)
+
+
+/*-------------------------------------------
+-----------------Datos De Ventas-------------
+---------------------------------------------*/
+
+router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate)
+
+
 
 module.exports = router;

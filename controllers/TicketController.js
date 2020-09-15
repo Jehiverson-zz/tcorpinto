@@ -1171,6 +1171,7 @@ async function getTicketsInmediate(req,res){
 module.exports = {
     storeTicketSystemTransfer,
     storeTicketInmediates,
+    getTicketsInmediate,
     storeTicketPhotoRetreats,
     storeTicketExternalRetreats,
     getSystemTransferCreate,
@@ -1182,6 +1183,5 @@ module.exports = {
     inactivateExternalRetreats,
     completeTicket,
     completePhotoRetreats,
-    getTicketsInmediate,
     getStore,
 }

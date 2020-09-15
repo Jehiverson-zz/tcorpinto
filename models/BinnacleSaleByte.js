@@ -7,8 +7,8 @@ const fileSchema = new Schema ({
     sale_daily: {type:Number,default:0},
     daily_goal: {type: Number,default:0},
     year_before_sale:{type:Number,default:0},
-    manager:{type:String},
-    compilance_manager:{type:Number},
+    manager:{type:String,default:""},
+    compilance_manager:{type:Number,default:0},
     people_totals:{type:Number,default:0},
     sales_totals:{type:Number,default:0},
     diff:{type:Number,default:0},
@@ -47,7 +47,7 @@ const fileSchema = new Schema ({
     ticket_dollars:{type: Number,default:0},
     missing:{type: Number,default:0},
     box_square:{type: Number,default:0},
-    
+    diference:{type: Number, default:0},
     numb_send_cash_value:{type:Number,default:0},
     lifeMilesNum:{type:String,default:"-"},
     lifeMilesVa:{type:Number,default:0},
@@ -62,7 +62,6 @@ const fileSchema = new Schema ({
     fact:{type:String,default:"-"},
     date_created:{type:String,default:""},
     date_update_conta:{ type: Date}
-    
 });
 
 fileSchema.virtual('uniqueId')
