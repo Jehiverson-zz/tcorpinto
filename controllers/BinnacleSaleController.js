@@ -1,5 +1,5 @@
 'use strict'
-
+const nodemailer = require('nodemailer');
 const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 
@@ -284,66 +284,66 @@ async function setBinnacleSalesCreate(req, res) {
     let sale = new BinnacleSaleByte();
    
     sale.store_creat= params.store;
-    sale.sale_daily = params.data.sales.venta_diaria; 
-    sale.daily_goal = params.data.sales.meta;
-    sale.year_before_sale = params.data.sales.venta_anterior;
-    sale.manager= params.data.sales.encargado;
-    sale.fact= params.data.sales.factoresDeVenta;
-    //sale.compilance_manager = params.data.sales.;
-    sale.people_totals= params.data.sales.no_personas;
-    sale.sales_totals= params.data.sales.no_ventas;
-    sale.diff= params.data.sales.faltante;
+    sale.sale_daily = params.sales.venta_diaria; 
+    sale.daily_goal = params.sales.meta;
+    sale.year_before_sale = params.sales.venta_anterior;
+    sale.manager= params.sales.encargado;
+    sale.fact= params.sales.factoresDeVenta;
+    //sale.compilance_manager = params.sales.;
+    sale.people_totals= params.sales.no_personas;
+    sale.sales_totals= params.sales.no_ventas;
+    sale.diff= params.sales.faltante;
     //System
-    sale.fac_sis_from= params.data.sales.facturas_sis_desde;
-    sale.fac_sis_to= params.data.sales.facturas_sis_hasta;
-    sale.total_sis= params.data.sales.facturas_sis_total;
+    sale.fac_sis_from= params.sales.facturas_sis_desde;
+    sale.fac_sis_to= params.sales.facturas_sis_hasta;
+    sale.total_sis= params.sales.facturas_sis_total;
     //manual
-    sale.fac_man_from= params.data.sales.facturas_man_desde;
-    sale.fac_man_to= params.data.sales.facturas_man_hasta;
-    sale.total_man= params.data.sales.facturas_man_total;
+    sale.fac_man_from= params.sales.facturas_man_desde;
+    sale.fac_man_to= params.sales.facturas_man_hasta;
+    sale.total_man= params.sales.facturas_man_total;
     //COD
-    sale.fact_send_CE_from= params.data.sales.facturas_cod_desde;
-    sale.fact_send_CE_to= params.data.sales.facturas_cod_hasta;
-    sale.fact_send_CEV= params.data.sales.facturas_cod_total;
+    sale.fact_send_CE_from= params.sales.facturas_cod_desde;
+    sale.fact_send_CE_to= params.sales.facturas_cod_hasta;
+    sale.fact_send_CEV= params.sales.facturas_cod_total;
     //note credito
-    sale.fact_nt_c_f= params.data.sales.facturas_nota_desde;
-    sale.fact_nt_c_to= params.data.sales.facturas_nota_hasta;
-    sale.fact_nt_c= params.data.sales.facturas_nota_total;
+    sale.fact_nt_c_f= params.sales.facturas_nota_desde;
+    sale.fact_nt_c_to= params.sales.facturas_nota_hasta;
+    sale.fact_nt_c= params.sales.facturas_nota_total;
     //Method
-    sale.cash_quetzales= params.data.sales.efectivoQuetzales;
-    sale.cash_dolares= params.data.sales.efectivoQuetzalesDolares;
-    sale.credomatic= params.data.sales.credomatic;
-    sale.visa= params.data.sales.visa;
-    sale.visaOnline= params.data.sales.visaOnline;
-    sale.visaDolares= params.data.sales.visaDolares;
-    sale.masterCard= params.data.sales.masterCard;
-    sale.credicuotas= params.data.sales.credicuotas;
-    sale.visaCuotas= params.data.sales.visaCuotas;
-    sale.numb_send_cash_value=params.data.sales.valorEnvioEfectivo;
-    sale.lifeMilesNum= params.data.sales.lifeMilesNumber;
-    sale.lifeMilesVa= params.data.sales.lifeMilesValor;
-    sale.extIva= params.data.sales.exencionIva;
-    sale.loyalty= params.data.sales.loyalty;
-    sale.Authorized_Expenditure_v= params.data.sales.gastosAutorizados;
-    sale.retreats= params.data.sales.retirosMercaderia;
-    sale.total_on= params.data.sales.ventaEnLinea;
-    sale.note_credit= params.data.sales.notaDeCredito;
-    sale.missing= params.data.sales.faltante;
-    sale.box_square=params.data.sales.cuadreDeCaja;
-    sale.diference=params.data.sales.diferencia;
-    sale.cashBackVa= params.data.sales.cashback;
-    sale.giftcard= params.data.sales.giftcard;
-    sale.obs_method= params.data.sales.observaciones;
+    sale.cash_quetzales= params.sales.efectivoQuetzales;
+    sale.cash_dolares= params.sales.efectivoQuetzalesDolares;
+    sale.credomatic= params.sales.credomatic;
+    sale.visa= params.sales.visa;
+    sale.visaOnline= params.sales.visaOnline;
+    sale.visaDolares= params.sales.visaDolares;
+    sale.masterCard= params.sales.masterCard;
+    sale.credicuotas= params.sales.credicuotas;
+    sale.visaCuotas= params.sales.visaCuotas;
+    sale.numb_send_cash_value=params.sales.valorEnvioEfectivo;
+    sale.lifeMilesNum= params.sales.lifeMilesNumber;
+    sale.lifeMilesVa= params.sales.lifeMilesValor;
+    sale.extIva= params.sales.exencionIva;
+    sale.loyalty= params.sales.loyalty;
+    sale.Authorized_Expenditure_v= params.sales.gastosAutorizados;
+    sale.retreats= params.sales.retirosMercaderia;
+    sale.total_on= params.sales.ventaEnLinea;
+    sale.note_credit= params.sales.notaDeCredito;
+    sale.missing= params.sales.faltante;
+    sale.box_square=params.sales.cuadreDeCaja;
+    sale.diference=params.sales.diferencia;
+    sale.cashBackVa= params.sales.cashback;
+    sale.giftcard= params.sales.giftcard;
+    sale.obs_method= params.sales.observaciones;
     sale.ticket_quetzales="";
-    sale.date_ticket_cash_quetzales=Date.now;
-    sale.date_ticket_cash_dollars=Date.now;
+    sale.date_ticket_cash_quetzales=Date.now();
+    sale.date_ticket_cash_dollars=Date.now();
     sale.ticket_dollars="";
     sale.date_created= defaultdate;
     sale.ticket_quetzales="";
-    sale.date_update_conta = Date.now;
+    sale.date_update_conta = Date.now();
     sale.vendors = [];
     
-    params.data.vendors.map(res => {
+    params.vendors.map(res => {
         let vendors = {
             name: res.nombre,
             venta: res.venta
@@ -353,7 +353,7 @@ async function setBinnacleSalesCreate(req, res) {
 
     sale.vendorsDescount = [];
 
-    params.data.vendorsDescount.map(res => {
+    params.vendorsDescount.map(res => {
         let vendorsDescount = {
             name: res.nombre,
             venta: res.venta
@@ -364,16 +364,102 @@ async function setBinnacleSalesCreate(req, res) {
     await sale.save(async (err, sale) => {
         if (err) return res.status(500).send({ message: 'Error al crear dato de venta!' });
         if (sale) {
-            console.log("Lo logramos")
-        }
-    });
+            let result_email = await email(
+                sale,
+                `<table border="0" align="left" width="590" cellpadding="0" cellspacing="0" class="container590">
+                   
+                    <tr>
+                        <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="center"
+                            style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;"
+                            class="main-header">
 
-    console.log(sale.vendorsDescount)
+
+                            <div style="line-height: 35px">
+
+                                <span style="color: #5caad2;">{{store}}</span> Venta {{sale_daily}}
+
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left">
+                            <table border="0" width="400" align="left" cellpadding="0" cellspacing="0"
+                                class="container590">
+                                <tr>
+                                    <td align="left" style="color:black">
+
+                                        <b style="color:black">Meta:</b><p>{{daily_goal}}</p><br>
+                                        <b style="color:black">Venta Año Anterior:</b><p>{{year_before_sale}}</p><br>
+                                        <b style="color:black">Encargado:</b><p>{{manager}}</p><br>
+                                        <b style="color:black">Clíentes:</b><p>{{people_totals}}</p><br>
+                                        <b style="color:black">Ventas:</b><p>{{sales_totals}}</p><br>
+                                        <b style="color:black">{{seller1}}</b><p>{{seller_total1}}</p><br>
+                                        <b style="color:black">{{seller2}}</b><p>{{seller_total2}}</p><br>
+                                        <b style="color:black">{{seller3}}</b><p>{{seller_total3}}</p><br>
+                                        <b style="color:black">{{seller4}}</b><p>{{seller_total4}}</p><br>
+                                        <b style="color:black">{{seller5}}</b><p>{{seller_total5}}</p><br>
+                                        <b style="color:black">{{seller6}}</b><p>{{seller_total6}}</p><br>
+                                        <b style="color:black">{{seller7}}</b><p>{{seller_total7}}</p><br>
+                                        <b style="color:black">{{seller8}}</b><p>{{seller_total8}}</p><br>
+                                        <b style="color:black">{{seller9}}</b><p>{{seller_total9}}</p><br>
+                                        <b style="color:black">{{seller10}}</b><p>{{seller_total10}}</p><br>
+                                        <b style="color:black">Factores que afectaron la venta:</b> <h2 for="" style="color:black">{{fact}}</h2>
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+
+
+
+                </table>`
+            );
+            console.log(result_email)
+            return res.status(200).send({ message: 'Ticket creado exitosamente!' }); 
+        }
+    });      
 
    return res.json({"response":"Yes!"});
 }
 
 
+async function email(data,template) {
+    //let randsend = randomNumber();
+    let Moment = require("moment-timezone");
+    let hoy = Moment().tz("America/Guatemala")._d;
+    let dd = hoy.getDate();
+    let mm = hoy.getMonth() + 1;
+    let yyyy = hoy.getFullYear();
+ 
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+        host: "smtp.dreamhost.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: "soporte@tickets.corpinto.com", // generated ethereal user
+            pass: "m1$0n@lc0rp!nt0" // generated ethereal password
+        }
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+        from: 'soporte@tickets.corpinto.com', // sender address
+        to: "jehivis@gmail.com", // list of receivers
+        subject:
+            `Dato de venta diaria ${dd}/${mm}/${yyyy} de la tienda`,
+        text: "", // plain text body
+        html: template, // html body
+    }, async function (err, json) {
+        if(err) console.log(`ERROR EN EL ENVÍO: ${err}`);   
+        if(json) console.log(`CORREO SE ENVIADO EXITOSAMENTE`);
+    });
+}
 
 module.exports = {
     getBinnacleSale,

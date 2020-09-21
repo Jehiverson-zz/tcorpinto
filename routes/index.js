@@ -1,6 +1,5 @@
 const express = require('express');
-const { Router } = require('express');
-const router = Router();
+const router = express.Router();
 
 // const passport = require("passport");
 // const GoogleStrategy = require("passport-google-oauth2");
@@ -86,12 +85,14 @@ router.post('/tickets/add/photo_retreats', ticketController.storeTicketPhotoRetr
 router.post('/tickets/add/external_retreats', ticketController.storeTicketExternalRetreats);
 router.post('/tickets/transfer_created', ticketController.getSystemTransferCreate);
 router.post('/tickets/transfer_assigned', ticketController.getSystemTransferAssigned);
+router.post('/tickets/immediate_deliveries_assigned', ticketController.getTicketsInmediatesAssigned);
+router.post('/tickets/immediate_deliveries_created', ticketController.getTicketsInmediatesCreated);
 router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
 router.post('/tickets/external_retreats', ticketController.getExernalRetreats);
 router.put('/ticket/inactive/:id', ticketController.inactivateTicket);
 router.put('/ticket/photo_retreats/inactive/:id', ticketController.inactivatePhotoRetreats);
-router.put('/ticket/external_retreats/inactive/:id', ticketController.inactivateExternalRetreats);
-router.put('/ticket/complete/:id', ticketController.completeTicket);
+router.put('/ticket/external_retreats/inactive/:id', routesProtected, ticketController.inactivateExternalRetreats);
+router.put('/ticket/complete/:id', routesProtected, ticketController.completeTicket);
 router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
 router.get('/tickets/stores', ticketController.getStore);
 

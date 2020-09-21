@@ -7,6 +7,7 @@ const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
 const nodemailer = require('nodemailer');
 const cloudinary = require('../cloudinary.config');
+const Moment = require('moment');
 
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {
@@ -127,10 +128,149 @@ async function storeTicketSystemTransfer(req, res) {
 }
 //Crea los tickets de entragas inmediatas
 async function storeTicketInmediates(req, res) {
-    let params = req;
     let Inmediates = new TicketInmediates();
-    //let result = await cloudinary.uploader.upload(req.files.image.path);
-    console.log(params)
+    let params = JSON.parse(req.body.data);
+    let file = req.file;
+    let result = await cloudinary.uploader.upload(file.path);
+    let address_send = `Nombre: ${params[0].client},Dirreccion: ${params[0].address},Celular 1: ${params[0].phone1},Celular 2: ${params[0].phone2},Horarios: ${params[0].hours},Total a cobrar: ${params[0].total};`
+
+    Inmediates.store_created = params[0].store_created;
+    Inmediates.store_asigned = params[0].store_asigned;
+    Inmediates.store_asigned = params[0].store_asigned;
+    Inmediates.status = 'Pendiente';
+    Inmediates.fact = params[0].bill;
+    Inmediates.fact_img = result.public_id;
+    Inmediates.desc = address_send;
+
+    params.map(data => {
+        let producto = {
+            upc: data.upc,
+            alu: data.alu,
+            size: data.size,
+        }
+        Inmediates.product.push(producto);
+    })
+
+    await Inmediates.save(async (err, storedTicket) => {
+        if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
+        if (storedTicket) {
+            email(
+                params,
+                'Nuevo Ticket Entregas Inmediatas',
+                `<!-- pre-header -->
+                <table style="display:none!important;">
+                    <tr>
+                        <td>
+                            <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
+                                Información De Envío Inmediato
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <!-- pre-header end -->
+                <!-- header -->
+                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
+                    <tr>
+                        <td align="center">
+                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
+                                <tr>
+                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <!-- end header -->
+                <!-- big image section -->
+                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
+                    <tr>
+                        <td align="center">
+                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
+                                <tr>
+                                    <td align="center" class="section-img">
+                                        <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="http://bienestarspm.uach.cl/wp-content/uploads/2018/08/306470.png" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
+                                        <div style="line-height: 35px">
+                                            NUEVO TICKET ENTREGAS INMEDIATAS
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
+                                            <tr>
+                                                <td height="2" style="font-size: 2px; line-height: 2px;">&nbsp;</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" width="600" align="center" cellpadding="0" cellspacing="0" class="container590">
+                                            <tr>
+                                                <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
+                                                    <div style="color:black">
+                                                        <b> Se solicito un envió inmediato de mercadería por la tienda ${params[0].store_created}. El traslado saldrá de la tienda ${params[0].store_asigned} y será a ${params[0].desc}</b>
+                                                        <br>
+                                                    </b>
+                                                    <p>listado de articulos solicitados:</p>
+                                                 <table class="table">
+                                                    <thead>
+                                                        <th scope="col" width: 20px>UPC</th>
+                                                        <th scope="col" width: 20px>ALU</th>
+                                                        <th scope="col" width: 20px>TALLA</th>
+                                                    </thead>
+                                                    <tbody>
+                                                    ${
+                                                        params.map(x => {
+                                                            return (
+                                                                `<tr>
+                                                                     <td>${x.upc}</td>
+                                                                     <td>${x.alu}</td>
+                                                                     <td>${x.size}</td>
+                                                                </tr>`
+                                                            )
+                                                        })
+                                                    }
+                                                    </tbody>
+                                                    </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="hide">
+                        <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
+                    </tr>
+                </table>
+                <!-- end section -->`
+            )
+            return res.status(200).send({ message: 'Ticket creado exitosamente!', ticekt: storedTicket })
+        }
+    });
+    console.log(Inmediates, result,file);
 }
 //Crea los tickets de retiros de fotografias
 async function storeTicketPhotoRetreats(req, res) {
@@ -316,32 +456,26 @@ async function storeTicketExternalRetreats(req, res) {
                 <!-- pre-header end -->
                 <!-- header -->
                 <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
-            
                     <tr>
                         <td align="center">
                             <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-            
                                 <tr>
                                     <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                                 </tr>
                                 <tr>
                                     <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                                 </tr>
-            
                             </table>
                         </td>
                     </tr>
                 </table>
                 <!-- end header -->
-            
                 <!-- big image section -->
                 <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-            
                     <tr>
                         <td align="center">
                             <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
                                 <tr>
-            
                                     <td align="center" class="section-img">
                                         <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://s3.amazonaws.com/iconbros/icons/icon_pngs/000/000/701/original/receipt.png?1513421069" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
                                     </td>
@@ -351,20 +485,14 @@ async function storeTicketExternalRetreats(req, res) {
                                 </tr>
                                 <tr>
                                     <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
-            
-            
                                         <div style="line-height: 35px">
-            
                                             <span style="color: #5caad2;"></span>Solicitud de retiro de mercadería</span>
-            
                                         </div>
                                     </td>
                                 </tr>
-            
                                 <tr>
                                     <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
                                 </tr>
-            
                                 <tr>
                                     <td align="center">
                                         <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
@@ -374,18 +502,14 @@ async function storeTicketExternalRetreats(req, res) {
                                         </table>
                                     </td>
                                 </tr>
-            
                                 <tr>
                                     <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
                                 </tr>
-            
                                 <tr>
                                     <td align="center" style="color:black">
                                         <table border="0" width="400" align="center" cellpadding="0" cellspacing="0" class="container590">
                                             <tr>
                                                 <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px;">
-            
-            
                                                     <div style="line-height: 24px">
                                                      ${params[0].person_retreats} acaba de solicitar un retiro de mercadería en la tienda ${params[0].store_created}, por favor dar seguimiento dentro de la plataforma. 
                                                     </div>
@@ -394,19 +518,15 @@ async function storeTicketExternalRetreats(req, res) {
                                         </table>
                                     </td>
                                 </tr>
-            
                             </table>
-            
                         </td>
                     </tr>
-            
                     <tr class="hide">
                         <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
                     </tr>
-            
                 </table>
                 <!-- end section -->`
             )
@@ -438,6 +558,32 @@ async function getSystemTransferAssigned(req, res) {
 
     return res.status(200).json({
         ticketSystem
+    });
+}
+//Ontiene los tikets de entrgas inmediatas creados por una tienda
+async function getTicketsInmediatesCreated(req,res) {
+    let ticketInmediates = await TicketInmediates.find({
+        status: 'Pendiente',
+        $or: [
+            { store_created: req.body.store }
+        ]
+    }).sort({ timestamp: -1 });
+    console.log(ticketInmediates)
+    return res.status(200).json({
+        ticketInmediates
+    });
+}
+//Ontiene los tikets de entrgas inmediatas asignamdos a una tienda
+async function getTicketsInmediatesAssigned(req,res) {
+    let ticketInmediates = await TicketInmediates.find({
+        status: 'Pendiente',
+        $or: [
+            { store_asigned: req.body.store }
+        ]
+    }).sort({ timestamp: -1 });
+    console.log(ticketInmediates)
+    return res.status(200).json({
+        ticketInmediates
     });
 }
 //Obtiene los tikets de retiros de fotografía
@@ -487,35 +633,26 @@ async function inactivateTicket(req, res) {
             <!-- pre-header end -->
             <!-- header -->
             <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
-        
                 <tr>
                     <td align="center">
                         <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-        
                             <tr>
                                 <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                             </tr>
-        
-                
-        
                             <tr>
                                 <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                             </tr>
-        
                         </table>
                     </td>
                 </tr>
             </table>
             <!-- end header -->
-        
             <!-- big image section -->
             <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-        
                 <tr>
                     <td align="center">
                         <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
                             <tr>
-        
                                 <td align="center" class="section-img">
                                     <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
                                 </td>
@@ -525,20 +662,14 @@ async function inactivateTicket(req, res) {
                             </tr>
                             <tr>
                                 <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
-        
-        
                                     <div style="line-height: 35px">
-        
                                         TICKET TRASLADO DE SISTEMA CANCELADO
-        
                                     </div>
                                 </td>
                             </tr>
-        
                             <tr>
                                 <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
                             </tr>
-        
                             <tr>
                                 <td align="center">
                                     <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
@@ -548,7 +679,6 @@ async function inactivateTicket(req, res) {
                                     </table>
                                 </td>
                             </tr>
-        
                             <tr>
                                 <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
                             </tr>
@@ -574,7 +704,6 @@ async function inactivateTicket(req, res) {
                 <tr>
                     <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
                 </tr>
-        
             </table>
             <!-- end section -->`
             )
@@ -605,35 +734,26 @@ async function inactivatePhotoRetreats(req, res) {
                 <!-- pre-header end -->
                 <!-- header -->
                 <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
-            
                     <tr>
                         <td align="center">
                             <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-            
                                 <tr>
                                     <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                                 </tr>
-            
-                    
-            
                                 <tr>
                                     <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                                 </tr>
-            
                             </table>
                         </td>
                     </tr>
                 </table>
                 <!-- end header -->
-            
                 <!-- big image section -->
                 <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-            
                     <tr>
                         <td align="center">
                             <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
                                 <tr>
-            
                                     <td align="center" class="section-img">
                                         <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
                                     </td>
@@ -643,20 +763,14 @@ async function inactivatePhotoRetreats(req, res) {
                                 </tr>
                                 <tr>
                                     <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
-            
-            
                                         <div style="line-height: 35px">
-            
                                             TICKET PARA FOTOS CANCELADO
-            
                                         </div>
                                     </td>
                                 </tr>
-            
                                 <tr>
                                     <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
                                 </tr>
-            
                                 <tr>
                                     <td align="center">
                                         <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
@@ -666,18 +780,14 @@ async function inactivatePhotoRetreats(req, res) {
                                         </table>
                                     </td>
                                 </tr>
-            
                                 <tr>
                                     <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
                                 </tr>
-            
                                 <tr>
                                     <td align="center">
                                         <table border="0" width="600" align="center" cellpadding="0" cellspacing="0" class="container590">
                                             <tr>
                                                 <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
-            
-            
                                                     <div style="color:black">
                                                     La tienda {{store}} ha cancelado el ticket de petición de Retiro de mercadería para fotos
                                                     </div>
@@ -686,22 +796,15 @@ async function inactivatePhotoRetreats(req, res) {
                                         </table>
                                     </td>
                                 </tr>
-            
-                               
-            
-            
                             </table>
-            
                         </td>
                     </tr>
-            
                     <tr class="hide">
                         <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
                     </tr>
-            
                 </table>
                 <!-- end section -->`
             )
@@ -884,7 +987,7 @@ async function email(data, titulo, template) {
 
 async function getTicketsInmediate(req,res){
     const dataStore = [];
-    let result = await TicketInmediate.find({},{
+    let result = await TicketInmediates.find({},{
     upc: 1,
     alu: 1,
     siz: 1,
@@ -1176,6 +1279,8 @@ module.exports = {
     storeTicketExternalRetreats,
     getSystemTransferCreate,
     getSystemTransferAssigned,
+    getTicketsInmediatesAssigned,
+    getTicketsInmediatesCreated,
     getPhotoRetreats,
     getExernalRetreats,
     inactivateTicket,
