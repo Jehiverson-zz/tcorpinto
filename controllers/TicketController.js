@@ -3,6 +3,7 @@
 const Store = require('../models/Store');
 const TicketSystem = require("../models/TicketSystem");
 const TicketInmediates = require("../models/TicketInmediates");
+const TicketInmediate = require("../models/TicketInmediates");
 const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
 const nodemailer = require('nodemailer');
@@ -987,7 +988,7 @@ async function email(data, titulo, template) {
 
 async function getTicketsInmediate(req,res){
     const dataStore = [];
-    let result = await TicketInmediates.find({},{
+    let result = await TicketInmediate.find({},{
     upc: 1,
     alu: 1,
     siz: 1,
