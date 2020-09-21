@@ -1,43 +1,22 @@
 
-    require('dotenv').config();  
+require('dotenv').config();
+
+const mongoose = require('mongoose');
+const app = require('./app');
 
 
-const express = require('express');
-const morgan = require('morgan');
-const multer = require('multer');
-const bodyParser = require('body-parser');
-const path = require('path');
-var cors = require('cors')
+//CONECCION A LA BASE DE DATOS
+mongoose.Promise = global.Promise;
 
-//inicializacion 
-const app = express();
-app.use(cors())
-require('./database');
+mongoose.connect(process.env.MONGODB_URL, {
+    useUnifiedTopology: true,
+    useNewUrlParser:true
+}).then(() => {
+    console.log('[ DATABASE RUNNING CORRECTLY ]')
 
-//puerto
-app.set('port', process.env.PORT || 3000);
-
-//Middlewares
-app.use(morgan('dev'));
-app.use(express.urlencoded({extended: false}));
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-app.use(express.json());
-const storage = multer.diskStorage({
-    destination: path.join(__dirname,'public/uploads'),
-    filename(req, file, cb){
-        cb(null, new Date().getTime()+ path.extname(file.originalname));
-    }
-})
-app.use(multer({storage}).single('image'));
-
-//Routes
-app.use(require('./routes/index.js'))
-
-//Static files
-app.use(express.static(path.join(__dirname,'public')));
-
-//empezar servidor
-app.listen(app.get('port'), ()=>{
-    console.log('El puerto se encuentra en ', app.get('port'));
-});
+    //CREAR SERVIDOR
+    app.set('port', process.env.PORT || 3000);
+    app.listen(app.get('port'),()=>{
+        console.log(`[ THE SERVER IS RUNNING IN THE PORT: '${app.get('port')}' ]`);
+    })
+}).catch(err => console.log(err));
