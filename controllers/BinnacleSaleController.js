@@ -2,18 +2,150 @@
 const nodemailer = require('nodemailer');
 const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
-
-const Moment = require('moment');
+let Moment = require("moment-timezone");
+let momentToday = require("moment");
+    let hoy = Moment().tz("America/Guatemala")._d;
+    let dd = hoy.getDate();
+    let mm = hoy.getMonth() + 1;
+    let yyyy = hoy.getFullYear();
 //Obtiene los colaboradores
 async function getBinnacleSale(req, res) { 
-    let sales = await BinnacleSaleByte.find({
-        store_creat:"Guess Oakland"
-    }).sort({ date_created: -1 }).limit(50);
-    
-    return res.json({sales});
+
+    const dataStore = [];
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: "2020-08" },
+    });
+
+    let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+        date_created: { $gte:"2020-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
+    });
+
+    salesNew.map((res) =>{
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({"fechaCreacion": fecha, 
+                        "Dia":Moment(fecha).format('DD'),
+                        "Mes":Moment(fecha).format('MM'),
+                        "Año":Moment(fecha).format('YYYY'),
+                        "tienda": res.store_creat,
+                        "ventas": res.sale_daily,
+                        "metas": res.daily_goal,
+                        "venta_año_anterior": res.year_before_sale,
+                        "total_personas": res.people_totals,
+                        "total_vendores": res.sales_totals,
+                        "manager": res.manager,
+                        "fact": res.fact,
+                        "diferencia": res.diff,
+
+                        "factura_sistema_de": res.fac_sis_from,
+                        "factura_sistema_hasta": res.fac_sis_to,
+                        "total_sistema": res.total_sis,
+
+                        "factura_manual_de": res.fac_man_from,
+                        "factura_manual_hasta": res.fac_man_to,
+                        "total_manual": res.total_man,
+
+                        "nota_credito_de": res.fact_nt_c_f,
+                        "nota_credito_hasta": res.fact_nt_c_to,
+                        "nota_credito_total": res.fact_nt_c,
+
+                        "total_online": res.total_on,
+
+                        "efectivo_quetzales": res.cash_quetzales,
+                        "efectivo_dolares": res.cash_dolares,
+                        
+                        "credomatic": res.credomatic,
+                        "visa": res.visa,
+                        "visa_dolares": res.visaDolares,
+                        "masterCard": res.masterCard,
+                        "crediCuotas": res.credicuotas,
+                        "visaCuotas": res.visaCuotas,
+
+                        "factura_send_contra_entrega_desde": res.fact_send_CE_from,
+                        "factura_send_contra_entrega_hasta": res.fact_send_CE_to,
+                        "factura_send_contra_entrega_total": res.fact_send_CEV,
+
+                        "nota_de_credito": res.note_credit,
+                        "ticket_quetzales": res.ticket_quetzales,
+                        "missing": res.missing,
+                        "cuadre_de_caja": res.box_square,
+                        "Numero_de_envio_en_efectivo": res.numb_send_cash_value,
+                        "Numero_Life_Miles": res.lifeMilesNum,
+                        "Numero_Life_Miles_Valor": res.lifeMilesVa,
+                        "Execto_iva": res.extIva,
+                        "Loyalty": res.loyalty,
+                        "Gasto_Autorizado": res.Authorized_Expenditure_v,
+                        "Retiros": res.retreats,
+                        "Cashback_valor": res.cashBackVa,
+                        "Giftcard": res.giftcard,
+                        "Observacion_Metodos": res.obs_method,
+                        "Factores_que_afectaron_venta": res.fact
+                    })
+    })
+
+    salesBefore_2020.map((res) =>{
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({"fechaCreacion": fecha, 
+                        "Dia":Moment(fecha).format('DD'),
+                        "Mes":Moment(fecha).format('MM'),
+                        "Año":Moment(fecha).format('YYYY'),
+                        "tienda": res.store_creat,
+                        "ventas": res.sale_daily,
+                        "metas": res.daily_goal,
+                        "venta_año_anterior": res.year_before_sale,
+                        "total_personas": res.people_totals,
+                        "total_vendores": res.sales_totals,
+                        "manager": res.manager,
+                        "fact": res.fact,
+                        "diferencia": res.diff,
+
+                        "factura_sistema_de": res.fac_sis_from,
+                        "factura_sistema_hasta": res.fac_sis_to,
+                        "total_sistema": res.total_sis,
+
+                        "factura_manual_de": res.fac_man_from,
+                        "factura_manual_hasta": res.fac_man_to,
+                        "total_manual": res.total_man,
+
+                        "nota_credito_de": res.fact_nt_c_f,
+                        "nota_credito_hasta": res.fact_nt_c_to,
+                        "nota_credito_total": res.fact_nt_c,
+
+                        "total_online": res.total_on,
+
+                        "efectivo_quetzales": res.cash_quetzales,
+                        "efectivo_dolares": res.cash_dolares,
+                        
+                        "credomatic": res.credomatic,
+                        "visa": res.visa,
+                        "visa_dolares": res.visaDolares,
+                        "masterCard": res.masterCard,
+                        "crediCuotas": res.credicuotas,
+                        "visaCuotas": res.visaCuotas,
+
+                        "factura_send_contra_entrega_desde": res.fact_send_CE_from,
+                        "factura_send_contra_entrega_hasta": res.fact_send_CE_to,
+                        "factura_send_contra_entrega_total": res.fact_send_CEV,
+
+                        "nota_de_credito": res.note_credit,
+                        "ticket_quetzales": res.ticket_quetzales,
+                        "missing": res.missing,
+                        "cuadre_de_caja": res.box_square,
+                        "Numero_de_envio_en_efectivo": res.numb_send_cash_value,
+                        "Numero_Life_Miles": res.lifeMilesNum,
+                        "Numero_Life_Miles_Valor": res.lifeMilesVa,
+                        "Execto_iva": res.extIva,
+                        "Loyalty": res.loyalty,
+                        "Gasto_Autorizado": res.Authorized_Expenditure_v,
+                        "Retiros": res.retreats,
+                        "Cashback_valor": res.cashBackVa,
+                        "Giftcard": res.giftcard,
+                        "Observacion_Metodos": res.obs_method,
+                        "Factores_que_afectaron_venta": res.fact
+                    })
+    })
+    console.log()
+    return res.json({salesNew});
 }
-
-
 //Obtiene los colaboradores date_created: { $regex: dateSales },
 async function getBinnacleSaleReport(req, res) { 
     const dataStore = [];
@@ -148,7 +280,7 @@ async function getBinnacleSaleReport(req, res) {
                         "Factores_que_afectaron_venta": res.fact
                     })
     })
-
+    console.log("Fue",salesNew);
     return res.json({dataStore});
 }
 
@@ -280,6 +412,7 @@ async function setBinnacleSalesCreate(req, res) {
     .tz("America/Guatemala")
     .format("YYYY-MM-DD");
 
+    var dateEmail  = Moment().tz('America/Guatemala').format('DD/MM/YYYY')
     let params = req.body;
     let sale = new BinnacleSaleByte();
    
@@ -346,7 +479,7 @@ async function setBinnacleSalesCreate(req, res) {
     params.vendors.map(res => {
         let vendors = {
             name: res.nombre,
-            venta: res.venta
+            sale: res.venta
         }
         sale.vendors.push(vendors);
     } )
@@ -356,109 +489,133 @@ async function setBinnacleSalesCreate(req, res) {
     params.vendorsDescount.map(res => {
         let vendorsDescount = {
             name: res.nombre,
-            venta: res.venta
+            sale: res.venta
         }
         sale.vendorsDescount.push(vendorsDescount);
     } )
-
+    var emailValid = false
     await sale.save(async (err, sale) => {
-        if (err) return res.status(500).send({ message: 'Error al crear dato de venta!' });
+        if (err) return res.status(500).send({ valid: false });
         if (sale) {
-            let result_email = await email(
-                sale,
-                `<table border="0" align="left" width="590" cellpadding="0" cellspacing="0" class="container590">
+            let transporter = nodemailer.createTransport({
+                host: "smtp.dreamhost.com",
+                port: 587,
+                secure: false, // true for 465, false for other ports
+                auth: {
+                    user: "soporte@tickets.corpinto.com", // generated ethereal user
+                    pass: "m1$0n@lc0rp!nt0" // generated ethereal password
+                }
+            });
+            // send mail with defined transport object
+            await transporter.sendMail({
+                from: '"Datos de venta" <soporte@tickets.corpinto.com>', // sender address
+                to: "jehivis@gmail.com", // list of receivers
+                cc: params.email,
+                subject:
+                    `Dato de venta diaria ${dateEmail} de la tienda ${sale.store_creat}`,
+                text: "", // plain text body
+                html: `<table border="0" align="left" width="590" cellpadding="0" cellspacing="0" class="container590">
                    
-                    <tr>
-                        <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td align="center"
-                            style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;"
-                            class="main-header">
+                <tr>
+                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center"
+                        style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;"
+                        class="main-header">
 
 
-                            <div style="line-height: 35px">
+                        <div style="line-height: 35px">
 
-                                <span style="color: #5caad2;">{{store}}</span> Venta {{sale_daily}}
+                            <span style="color: #5caad2;">${sale.store_creat}</span> Venta Q. ${sale.sale_daily}
 
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="left">
-                            <table border="0" width="400" align="left" cellpadding="0" cellspacing="0"
-                                class="container590">
-                                <tr>
-                                    <td align="left" style="color:black">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left">
+                        <table border="0" width="400" align="left" cellpadding="0" cellspacing="0"
+                            class="container590">
+                            <tr>
+                                <td align="left" style="color:black">
 
-                                        <b style="color:black">Meta:</b><p>{{daily_goal}}</p><br>
-                                        <b style="color:black">Venta Año Anterior:</b><p>{{year_before_sale}}</p><br>
-                                        <b style="color:black">Encargado:</b><p>{{manager}}</p><br>
-                                        <b style="color:black">Clíentes:</b><p>{{people_totals}}</p><br>
-                                        <b style="color:black">Ventas:</b><p>{{sales_totals}}</p><br>
-                                        <b style="color:black">{{seller1}}</b><p>{{seller_total1}}</p><br>
-                                        <b style="color:black">{{seller2}}</b><p>{{seller_total2}}</p><br>
-                                        <b style="color:black">{{seller3}}</b><p>{{seller_total3}}</p><br>
-                                        <b style="color:black">{{seller4}}</b><p>{{seller_total4}}</p><br>
-                                        <b style="color:black">{{seller5}}</b><p>{{seller_total5}}</p><br>
-                                        <b style="color:black">{{seller6}}</b><p>{{seller_total6}}</p><br>
-                                        <b style="color:black">{{seller7}}</b><p>{{seller_total7}}</p><br>
-                                        <b style="color:black">{{seller8}}</b><p>{{seller_total8}}</p><br>
-                                        <b style="color:black">{{seller9}}</b><p>{{seller_total9}}</p><br>
-                                        <b style="color:black">{{seller10}}</b><p>{{seller_total10}}</p><br>
-                                        <b style="color:black">Factores que afectaron la venta:</b> <h2 for="" style="color:black">{{fact}}</h2>
+                                    <b style="color:black">Meta:</b><p>${sale.daily_goal}</p><br>
+                                    <b style="color:black">Venta Año Anterior:</b><p>${sale.year_before_sale}</p><br>
+                                    <b style="color:black">Encargado:</b><p>${sale.manager}</p><br>
+                                    <b style="color:black">Clíentes:</b><p>${sale.people_totals}</p><br>
+                                    <b style="color:black">Ventas:</b><p>${sale.sales_totals}</p><br>
+                                    <b style="color:black">Total de los vendedores:</b><br>
+                                    ${
+                                        sale.vendors.map((x,i) => {
+                                            return (
+                                               `<p style="color:black">
+                                                    <b style="color:black">
+                                                        ${i+1} Vendedor:</b> 
+                                                            ${x.name} 
+                                                    <b style="color:black">
+                                                        Venta:</b> 
+                                                            ${x.sale}
+                                                </p>`
+                                            )
+                                        })
+                                    }
+                                   
+                                    ${
+                                        sale.vendorsDescount.map((x,i) => {
+                                            return (
+                                                `
+                                                ${
+                                                    i===0? `<b style="color:black">Total Descuento Vendedores:</b><br>`: ``
+                                                  }
+                                                <p style="color:black"><b style="color:black">${i+1}. Vendedor:</b> ${x.name} <b style="color:black">Descuento:</b> Q. ${x.sale}</p>`
+                                            )
+                                        })
+                                    }
+                                    <b style="color:black">Factores que afectaron la venta:</b> <h2 for="" style="color:black">${sale.fact}</h2>
 
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
 
 
 
 
-                </table>`
-            );
-            console.log(result_email)
-            return res.status(200).send({ message: 'Ticket creado exitosamente!' }); 
+            </table>`, // html body
+            }, async function (err, json) {
+                if(err) console.log("Error en el Mensaje!")  
+                if(json){console.log("Mensaje Enviado!")}
+            });
+            
         }
-    });      
-
-   return res.json({"response":"Yes!"});
+        emailValid = true
+    });   
+    setTimeout(function(){ 
+        if(emailValid === true){
+            return res.json({status:true, message: 'Dato de venta creado exitosamente!', color:"green" });
+        }else{
+            return res.json({status:false, message: 'Oups! Tenemos un error a enviar correo, puedes intentar ingresarlo de nuevo', color:"red" });
+        }
+     }, 2000);
+    
 }
-
-
-async function email(data,template) {
-    //let randsend = randomNumber();
-    let Moment = require("moment-timezone");
-    let hoy = Moment().tz("America/Guatemala")._d;
-    let dd = hoy.getDate();
-    let mm = hoy.getMonth() + 1;
-    let yyyy = hoy.getFullYear();
- 
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: "smtp.dreamhost.com",
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: "soporte@tickets.corpinto.com", // generated ethereal user
-            pass: "m1$0n@lc0rp!nt0" // generated ethereal password
-        }
-    });
-
-    // send mail with defined transport object
-    let info = await transporter.sendMail({
-        from: 'soporte@tickets.corpinto.com', // sender address
-        to: "jehivis@gmail.com", // list of receivers
-        subject:
-            `Dato de venta diaria ${dd}/${mm}/${yyyy} de la tienda`,
-        text: "", // plain text body
-        html: template, // html body
-    }, async function (err, json) {
-        if(err) console.log(`ERROR EN EL ENVÍO: ${err}`);   
-        if(json) console.log(`CORREO SE ENVIADO EXITOSAMENTE`);
-    });
+/* Valida si existe un dato de venta anterior*/
+async function validationDataSale(req, res) {
+    var mm_f = 0;
+    if(mm > 9){
+        mm_f = mm  
+    }else{
+        mm_f = "0"+mm
+    } 
+    const dateValid = yyyy+"-"+mm_f+"-"+dd;
+    
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: Moment().tz('America/Guatemala').format('YYYY-MM-DD') }
+    },{date_created:1,store_creat:1,sale_daily:1,manager:1,year_before_sale:1});
+    //console.log(Moment().tz('America/Guatemala').format('YYYY-MM-DD'),dateValid)
+    console.log(salesNew)
+    return res.json({salesNew});
 }
 
 module.exports = {
@@ -466,6 +623,6 @@ module.exports = {
     getBinnacleSaleReport,
     getBinnacleSaleReportBefore,
     getBinnacleSaleReportTotal,
-
+    validationDataSale,
     setBinnacleSalesCreate
 }

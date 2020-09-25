@@ -70,7 +70,7 @@ router.post('/login/google', async(req, res) =>{
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
 router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSaleReport)
-router.get('/binnacles/sales_show',routesProtected, binnacleSaleController.getBinnacleSale)
+router.get('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
 //ReporteLourdes
@@ -101,15 +101,15 @@ router.get('/tickets/stores', ticketController.getStore);
 ----------------- COLLABORATOR --------------
 ---------------------------------------------*/
 
-router.get('/collaborator/get',collaboratorController.getCollaborator)
+router.get('/collaborator/get',collaboratorController.getCollaborator);
 
 
 /*-------------------------------------------
 -----------------Datos De Ventas-------------
 ---------------------------------------------*/
 
-router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate)
-
+router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate);
+router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
 
 
 module.exports = router;
