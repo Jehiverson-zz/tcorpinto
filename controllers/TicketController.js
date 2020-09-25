@@ -3,11 +3,12 @@
 const Store = require('../models/Store');
 const TicketSystem = require("../models/TicketSystem");
 const TicketInmediates = require("../models/TicketInmediates");
+const TicketInmediate = require("../models/TicketInmediate");
 const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
 const nodemailer = require('nodemailer');
 const cloudinary = require('../cloudinary.config');
-const Moment = require('moment')
+const Moment = require('moment');
 
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {

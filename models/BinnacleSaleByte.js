@@ -61,7 +61,19 @@ const fileSchema = new Schema ({
     store_creat:{type:String,default:"-"},
     fact:{type:String,default:"-"},
     date_created:{type:String,default:""},
-    date_update_conta:{ type: Date}
+    date_update_conta:{ type: Date},
+    vendors: [
+        {
+            sale: {type: Number, default: 0 },
+            name: {type: String, default: ""},
+        }
+    ],
+    vendorsDescount: [
+        {
+            sale: {type: Number, default: 0 },
+            name: {type: String, default: ""},
+        }
+    ],
 });
 
 fileSchema.virtual('uniqueId')
