@@ -12,11 +12,11 @@ let momentToday = require("moment");
 async function getBinnacleSale(req, res) { 
 
     const dataStore = [];
-    let salesNew = await BinnacleSaleByte.find({
+    var salesNew = await BinnacleSaleByte.find({
         date_created: { $regex: "2020-08" },
     });
 
-    let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+    var salesBefore_2020 = await BinnacleSaleByteBefore.find({
         date_created: { $gte:"2020-01-01T19:02:12.501+00:00", $lt:"2020-08-18T19:02:12.501+00:00" },
     });
 
@@ -143,7 +143,7 @@ async function getBinnacleSale(req, res) {
                         "Factores_que_afectaron_venta": res.fact
                     })
     })
-    console.log()
+    
     return res.json({salesNew});
 }
 //Obtiene los colaboradores date_created: { $regex: dateSales },
