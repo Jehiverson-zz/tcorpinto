@@ -7,28 +7,28 @@ const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
 const nodemailer = require('nodemailer');
 const cloudinary = require('../cloudinary.config');
+const Moment = require('moment')
 
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {
     let params = req.body;
     let Ticket = new TicketSystem();
-    console.log(params)
+
     //Se genera en el ticket de la tranferencia
     Ticket.status = 'Pendiente';
     Ticket.store_created = params[0].store_created;
     Ticket.store_asigned = params[0].store_asigned;
-
+    Ticket.fact = params[0].bill
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
             upc: data.upc,
             alu: data.alu,
-            size: data.size,
-            bill: data.bill,
+            siz: data.size,
         }
         Ticket.product.push(producto);
     })
-
+    console.log(Ticket)
     await Ticket.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
@@ -131,7 +131,7 @@ async function storeTicketInmediates(req, res) {
     let params = JSON.parse(req.body.data);
     let file = req.file;
     let result = await cloudinary.uploader.upload(file.path);
-    let address_send = `Nombre: ${params[0].client},Dirreccion: ${params[0].address},Celular 1: ${params[0].phone1},Celular 2: ${params[0].phone2},Horarios: ${params[0].hours},Total a cobrar: ${params[0].total};`
+    let address_send = `Nombre: ${params[0].client}, Dirreccion: ${params[0].address}, Celular 1: ${params[0].phone1}, Celular 2: ${params[0].phone2}, Horarios: ${params[0].hours}, Total a cobrar: ${params[0].total};`
 
     Inmediates.store_created = params[0].store_created;
     Inmediates.store_asigned = params[0].store_asigned;
@@ -145,7 +145,7 @@ async function storeTicketInmediates(req, res) {
         let producto = {
             upc: data.upc,
             alu: data.alu,
-            size: data.size,
+            siz: data.size,
         }
         Inmediates.product.push(producto);
     })
@@ -287,7 +287,7 @@ async function storeTicketPhotoRetreats(req, res) {
         let producto = {
             upc: data.upc,
             alu: data.alu,
-            size: data.size,
+            siz: data.size,
         }
         Ticket.product.push(producto);
     })
@@ -430,7 +430,7 @@ async function storeTicketExternalRetreats(req, res) {
         let producto = {
             upc: data.upc,
             alu: data.alu,
-            size: data.size,
+            siz: data.size,
         }
         Ticket.product.push(producto);
     })
@@ -533,14 +533,88 @@ async function storeTicketExternalRetreats(req, res) {
         }
     });
 }
+//Obtiene todos los tikets de transferincia de sistema
+async function getAllTicketsSystemTransfer(req, res) {
+    let ticketSystem = await TicketSystem.find({
+        $or: [
+            { store_created: req.body.store },
+            { store_asigned: req.body.store }
+        ]
+    }).sort({ timestamp: -1 });
+
+    ticketSystem.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
+    return res.status(200).json({
+        ticketSystem
+    });
+}
 //Obtiene los tikets creados por el usuario que se trasladan a otra tienda
 async function getSystemTransferCreate(req, res) {
     let ticketSystem = await TicketSystem.find({
         status: 'Pendiente',
         $or: [
-            { store_created: req.body.store },
+            //{ store_created: 'Meatpack Web' },
+            { store_created: req.body.store }
         ]
     }).sort({ timestamp: -1 });
+
+    ticketSystem.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
 
     return res.status(200).json({
         ticketSystem
@@ -555,8 +629,83 @@ async function getSystemTransferAssigned(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
+    ticketSystem.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
     return res.status(200).json({
         ticketSystem
+    });
+}
+//Obtiene todos los tikets de transferincia de sistema
+async function getAllTicketsInmediates(req, res) {
+    console.log(req.body.status);
+    let ticketInmediates = await TicketInmediates.find({
+        status: req.body.status,
+        $or: [
+            { store_created: req.body.store },
+            { store_asigned: req.body.store }
+        ]
+    }).sort({ timestamp: -1 });
+
+    ticketInmediates.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
+    return res.status(200).json({
+        ticketInmediates
     });
 }
 //Ontiene los tikets de entrgas inmediatas creados por una tienda
@@ -567,7 +716,37 @@ async function getTicketsInmediatesCreated(req,res) {
             { store_created: req.body.store }
         ]
     }).sort({ timestamp: -1 });
-    console.log(ticketInmediates)
+
+    ticketInmediates.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
     return res.status(200).json({
         ticketInmediates
     });
@@ -580,12 +759,85 @@ async function getTicketsInmediatesAssigned(req,res) {
             { store_asigned: req.body.store }
         ]
     }).sort({ timestamp: -1 });
-    console.log(ticketInmediates)
+
+    ticketInmediates.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
     return res.status(200).json({
         ticketInmediates
     });
 }
-//Obtiene los tikets de retiros de fotografía
+//Obtiene todos los tikets de retiros de fotografía
+async function getAllPhotoRetreats(req, res) {
+    let ticketPhotoRetrats = await TicketPhoto.find({
+        $or: [
+            { store_created: req.body.store },
+            { store_asigned: req.body.store }
+        ]
+    }).sort({ timestamp: -1 });
+
+    ticketPhotoRetrats.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
+    return res.status(200).json({
+        ticketPhotoRetrats
+    });
+}
+//Obtiene los tikets de retiros de fotografía pendientes
 async function getPhotoRetreats(req, res) {
     let ticketPhotoRetrats = await TicketPhoto.find({
         status: 'Pendiente',
@@ -594,25 +846,126 @@ async function getPhotoRetreats(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
+    ticketPhotoRetrats.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
     return res.status(200).json({
         ticketPhotoRetrats
     });
 }
-//Obtiene los tikets de retiros externos
+//Obtiene los tikets de retiros externos pednientes
+async function getAllExernalRetreats(req, res) {
+    let ticketExternal = await TicketExternal.find({
+        store_created: req.body.store
+    }).sort({ timestamp: -1 });
+
+    ticketExternal.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
+    return res.status(200).json({
+        ticketExternal
+    });
+}
+//Obtiene los tikets de retiros externos pednientes
 async function getExernalRetreats(req, res) {
-    await TicketExternal.find({
+    let ticketExternal = await TicketExternal.find({
         store_created: req.body.store,
         status: "Completado"
-    }).exec((error, result) => {
-        if (error) return res.status(500).send({ message: "Error en la busqueda" })
-        return res.status(200).send({ result })
+    }).sort({ timestamp: -1 });
+
+    ticketExternal.map((data,i) => {
+        let array__ = []
+        var iteracion = ""
+        for(var j = 0 ; j <= 3; j++ ){
+            if(j == 0 || j == 2 || j == 3){
+                if(j == 0){
+                    iteracion = ""
+                }else{
+                    iteracion = j
+                }
+                let upc = `upc`+iteracion
+                let alu = `alu`+iteracion
+                let siz = `siz`+iteracion
+                if(data.product.length == 0){
+                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                    }
+                }
+            }
+        }
+        array__.map(d => {
+            let producto = {
+                upc: d.upc,
+                alu: d.alu,
+                siz: d.siz,
+            }
+            data.product.push(producto)
+        })
+    })
+
+    return res.status(200).json({
+        ticketExternal
     });
 }
 //Inactiva los tikets de traslados de sistema
 async function inactivateTicket(req, res) {
     let ticket_id = req.params.id;
 
-    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Inactvio' }, async (err, inactive) => {
+    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if (inactive) {
             console.log(inactive.store_created);
@@ -710,11 +1063,23 @@ async function inactivateTicket(req, res) {
         }
     })
 }
+//Inactiva los tikets de entrega inmediata
+async function inactivateTicketInmediate(req, res) {
+    let ticket_id = req.params.id;
+
+    TicketInmediates.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
+        if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
+        if (inactive) {
+            let params = [inactive]
+            return res.status(200).send({ message: 'Ticket eliminado!', ticekt: inactive })
+        }
+    })
+}
 //Inactiva los tikets de fotos retiradas
 async function inactivatePhotoRetreats(req, res) {
     let ticket_id = req.params.id;
 
-    TicketPhoto.findByIdAndUpdate(ticket_id, { status: 'Inactvio' }, (err, inactive) => {
+    TicketPhoto.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if(inactive){
             email(
@@ -815,7 +1180,7 @@ async function inactivatePhotoRetreats(req, res) {
 async function inactivateExternalRetreats(req, res) {
     let ticket_id = req.params.id;
 
-    TicketExternal.findByIdAndUpdate(ticket_id, { status: 'Inactvio' }, (err, inactive) => {
+    TicketExternal.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if(inactive){
             return res.status(200).send({ message: 'Ticket eliminado!', ticekt: inactive })
@@ -925,6 +1290,18 @@ async function completeTicket(req, res) {
     })
 }
 //Pasar estado de ticket de pendiente a completado
+async function completeTicketInmediate(req, res) {
+    let ticket_id = req.params.id;
+
+    TicketInmediates.findByIdAndUpdate(ticket_id, { status: 'Completado' }, async (err, complete) => {
+        if (err) return res.status(500).send({ message: "Error al completar ticket" });
+        if (complete) {
+            let params = [complete]
+            return res.status(200).send({ message: 'El ticket se a completado!', ticekt: complete })
+        }
+    })
+}
+//Pasar estado de ticket de pendiente a completado
 function completePhotoRetreats(req, res) {
     let ticket_id = req.params.id;
 
@@ -986,7 +1363,7 @@ async function email(data, titulo, template) {
 
 async function getTicketsInmediate(req,res){
     const dataStore = [];
-    let result = await TicketInmediate.find({},{
+    let result = await TicketInmediates.find({},{
     upc: 1,
     alu: 1,
     siz: 1,
@@ -1276,16 +1653,22 @@ module.exports = {
     getTicketsInmediate,
     storeTicketPhotoRetreats,
     storeTicketExternalRetreats,
+    getAllTicketsSystemTransfer,
     getSystemTransferCreate,
     getSystemTransferAssigned,
+    getAllTicketsInmediates,
     getTicketsInmediatesAssigned,
     getTicketsInmediatesCreated,
+    getAllPhotoRetreats,
     getPhotoRetreats,
+    getAllExernalRetreats,
     getExernalRetreats,
     inactivateTicket,
+    inactivateTicketInmediate,
     inactivatePhotoRetreats,
     inactivateExternalRetreats,
     completeTicket,
+    completeTicketInmediate,
     completePhotoRetreats,
     getStore,
 }

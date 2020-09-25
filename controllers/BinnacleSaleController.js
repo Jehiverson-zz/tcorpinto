@@ -279,7 +279,7 @@ async function setBinnacleSalesCreate(req, res) {
     var defaultdate = require("moment-timezone")
     .tz("America/Guatemala")
     .format("YYYY-MM-DD");
-
+    console.log(req.body)
     let params = req.body;
     let sale = new BinnacleSaleByte();
    
