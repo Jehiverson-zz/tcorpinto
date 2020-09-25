@@ -89,7 +89,7 @@ router.post('/tickets/transfer_assigned', ticketController.getSystemTransferAssi
 router.post('/tickets/immediate_deliveries', ticketController.getAllTicketsInmediates);
 router.post('/tickets/immediate_deliveries_assigned', ticketController.getTicketsInmediatesAssigned);
 router.post('/tickets/immediate_deliveries_created', ticketController.getTicketsInmediatesCreated);
-router.post('/tickets/all/photo_retreats', ticketController.getAllExernalRetreats);
+router.post('/tickets/all/photo_retreats', ticketController.getAllPhotoRetreats);
 router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
 router.post('/tickets/all/external_retreats', ticketController.getAllExernalRetreats);
 router.post('/tickets/external_retreats', ticketController.getExernalRetreats);

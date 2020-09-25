@@ -536,6 +536,7 @@ async function storeTicketExternalRetreats(req, res) {
 //Obtiene todos los tikets de transferincia de sistema
 async function getAllTicketsSystemTransfer(req, res) {
     let ticketSystem = await TicketSystem.find({
+        status: req.body.status,
         $or: [
             { store_created: req.body.store },
             { store_asigned: req.body.store }
@@ -797,12 +798,13 @@ async function getTicketsInmediatesAssigned(req,res) {
 //Obtiene todos los tikets de retiros de fotografía
 async function getAllPhotoRetreats(req, res) {
     let ticketPhotoRetrats = await TicketPhoto.find({
+        status: req.body.status,
         $or: [
             { store_created: req.body.store },
             { store_asigned: req.body.store }
         ]
     }).sort({ timestamp: -1 });
-
+    console.log("REATREATS", ticketPhotoRetrats)
     ticketPhotoRetrats.map((data,i) => {
         let array__ = []
         var iteracion = ""
