@@ -38,7 +38,7 @@ routesProtected.use((req, res, next) =>{
     }
 });
 
-router.get('/',routesProtected,userController.getUsers);
+router.get('/',userController.getUsers);
 
 router.post('/login',userController.Login);
 
@@ -83,16 +83,22 @@ router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer)
 router.post('/tickets/add/inmediates', ticketController.storeTicketInmediates);
 router.post('/tickets/add/photo_retreats', ticketController.storeTicketPhotoRetreats);
 router.post('/tickets/add/external_retreats', ticketController.storeTicketExternalRetreats);
+router.post('/tickets/transfer', ticketController.getAllTicketsSystemTransfer);
 router.post('/tickets/transfer_created', ticketController.getSystemTransferCreate);
 router.post('/tickets/transfer_assigned', ticketController.getSystemTransferAssigned);
+router.post('/tickets/immediate_deliveries', ticketController.getAllTicketsInmediates);
 router.post('/tickets/immediate_deliveries_assigned', ticketController.getTicketsInmediatesAssigned);
 router.post('/tickets/immediate_deliveries_created', ticketController.getTicketsInmediatesCreated);
+router.post('/tickets/all/photo_retreats', ticketController.getAllExernalRetreats);
 router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
+router.post('/tickets/all/external_retreats', ticketController.getAllExernalRetreats);
 router.post('/tickets/external_retreats', ticketController.getExernalRetreats);
 router.put('/ticket/inactive/:id', ticketController.inactivateTicket);
+router.put('/ticket/immediate_deliveries/inactive/:id', ticketController.inactivateTicketInmediate);
 router.put('/ticket/photo_retreats/inactive/:id', ticketController.inactivatePhotoRetreats);
-router.put('/ticket/external_retreats/inactive/:id', routesProtected, ticketController.inactivateExternalRetreats);
-router.put('/ticket/complete/:id', routesProtected, ticketController.completeTicket);
+router.put('/ticket/external_retreats/inactive/:id', ticketController.inactivateExternalRetreats);
+router.put('/ticket/complete/:id', ticketController.completeTicket);
+router.put('/ticket/immediate_deliveries/complete/:id', ticketController.completeTicketInmediate);
 router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
 router.get('/tickets/stores', ticketController.getStore);
 
