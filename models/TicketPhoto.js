@@ -216,7 +216,7 @@ const fileSchema = new Schema ({
     status: {type: String},
     caurier:{type: String},
     store_created: {type: String },
-    timestamp:{ type: String },
+    timestamp:{ type: Date, default: Date.now },
     timestampend:{ type: Date }
 
 });

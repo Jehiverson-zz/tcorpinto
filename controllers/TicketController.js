@@ -886,7 +886,10 @@ async function getPhotoRetreats(req, res) {
 //Obtiene los tikets de retiros externos pednientes
 async function getAllExernalRetreats(req, res) {
     let ticketExternal = await TicketExternal.find({
-        store_created: req.body.store
+        status: req.body.status,
+        $or: [
+            { store_created: req.body.store },
+        ]
     }).sort({ timestamp: -1 });
 
     ticketExternal.map((data,i) => {
@@ -1193,8 +1196,9 @@ async function inactivateExternalRetreats(req, res) {
 //Pasar estado de ticket de pendiente a completado
 async function completeTicket(req, res) {
     let ticket_id = req.params.id;
+    let retailn = req.body.retailn;
 
-    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Completado' }, async (err, complete) => {
+    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Completado',retailn: retailn }, async (err, complete) => {
         if (err) return res.status(500).send({ message: "Error al completar ticket" });
         if (complete) {
             let params = [complete]

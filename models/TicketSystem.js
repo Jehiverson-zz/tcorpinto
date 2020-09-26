@@ -218,7 +218,7 @@ const fileSchema = new Schema ({
 
     fact: {type: String },
     status: {type: String},
-    retailn:{type: String},
+    retailn:{type: String, default: ''},
     store_created: {type: String },
     store_asigned: {type: String },
     timestamp:{ type: Date, default: Date.now },
