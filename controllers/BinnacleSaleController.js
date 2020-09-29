@@ -12,10 +12,19 @@ let yyyy = hoy.getFullYear();
 //Obtiene los colaboradores
 async function getBinnacleSale(req, res) {
     const dataStore = [];
-    let salesNew = await BinnacleSaleByte.find({
-        date_created: { $regex: "2020" },
-        store_creat: req.body.store
-    }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
+    var salesNew
+    if(req.body.type === 'admin'){
+         salesNew = await BinnacleSaleByte.find({
+            date_created: { $regex: "2020" }
+        },{ _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 }).limit(200);
+    }else{
+        salesNew = await BinnacleSaleByte.find({
+            date_created: { $regex: "2020" },
+            store_creat: req.body.store
+        }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
+    }
+   
+
     salesNew.map((res) => {
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
@@ -560,15 +569,17 @@ async function creatBinnacleDailies(req, res) {
     daily.store_created= params.store
     daily.date_created= require("moment-timezone")
     .tz("America/Guatemala")
-    let responseData = ""; 
-   await daily.save(async (err, storedTicket) => {
-    if(err){
-        responseData = false
-    }else{
-        responseData = true
-    }    
+    var responseData = ""; 
+   await daily.save(async (err) => {
+        console.log("test")
+        if(err){
+            responseData = false
+            return res.json(responseData);
+        }else{
+            responseData = true
+            return res.json(responseData);
+        }    
     });
-    return res.json(responseData);
 }
 /* Eliminar ejecucion*/
 async function deleteBinnacleDailies(req, res) {
