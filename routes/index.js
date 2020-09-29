@@ -13,6 +13,7 @@ const userController = require('../controllers/UserController');
 const ticketController = require('../controllers/TicketController');
 const collaboratorController = require('../controllers/CollaboratorController');
 const binnacleSaleController = require('../controllers/BinnacleSaleController');
+const DamagedMerchandiseController = require('../controllers/DamagedMerchandiseController');
 
 const routesProtected = express.Router();
 
@@ -77,7 +78,7 @@ router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleRepo
 router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies)
 
 /*-------------------------------------------
------------------ TOCKETS -------------------
+----------------- TICKETS -------------------
 ---------------------------------------------*/
 router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer);
 router.post('/tickets/add/inmediates', ticketController.storeTicketInmediates);
@@ -89,7 +90,7 @@ router.post('/tickets/transfer_assigned', ticketController.getSystemTransferAssi
 router.post('/tickets/immediate_deliveries', ticketController.getAllTicketsInmediates);
 router.post('/tickets/immediate_deliveries_assigned', ticketController.getTicketsInmediatesAssigned);
 router.post('/tickets/immediate_deliveries_created', ticketController.getTicketsInmediatesCreated);
-router.post('/tickets/all/photo_retreats', ticketController.getAllExernalRetreats);
+router.post('/tickets/all/photo_retreats', ticketController.getAllPhotoRetreats);
 router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
 router.post('/tickets/all/external_retreats', ticketController.getAllExernalRetreats);
 router.post('/tickets/external_retreats', ticketController.getExernalRetreats);
@@ -118,6 +119,12 @@ router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate);
 router.post('/sales/delete',binnacleSaleController.deleteDataSale);
 router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
 
+
+/*-----------------------------------------------------
+----------------- MERCADERIA DAÑADA -------------------
+-------------------------------------------------------*/
+router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
+router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
 router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
 
 
