@@ -75,8 +75,9 @@ router.post('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
 //ReporteLourdes
-router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies)
-
+router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies);
+router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
+router.post('/binnacles_dailies/created',binnacleSaleController.creatBinnacleDailies);
 /*-------------------------------------------
 ----------------- TICKETS -------------------
 ---------------------------------------------*/
@@ -125,7 +126,7 @@ router.post('/sales/validationDataSale',binnacleSaleController.validationDataSal
 -------------------------------------------------------*/
 router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
 router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
-router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
+
 
 
 module.exports = router;

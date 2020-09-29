@@ -303,7 +303,6 @@ async function getBinnacleSaleReportTotal(req, res) {
 
 async function setBinnacleSalesCreate(req, res) {
     let params = req.body;
-    console.log(params)
     let sale = new BinnacleSaleByte();
 
     if (params.dateStoreDefault) {
@@ -537,7 +536,6 @@ async function deleteDataSale(req, res) {
     return res.json(deleteaccion);
 }
 
-
 /*
 Modulo de ejecucion
 */
@@ -546,7 +544,32 @@ async function getBinnacleDailies(req, res) {
     binnacleDailies.reverse()
     return res.json({ binnacleDailies });
 }
+/*  Crear ejecucion*/
+async function creatBinnacleDailies(req, res) {
+    let params = req.body;
+    let daily = new BinnacleDailies();
 
+    daily.daily_goal = params.dataBi[0].meta
+    daily.year_before_sale= params.dataBi[0].beforesales
+    daily.hamachi= params.dataBi[0].hamachi
+    daily.tras= params.dataBi[0].recepTrans
+    daily.process_in= params.dataBi[0].processIn
+    daily.process_out= params.dataBi[0].processOut
+    daily.send_received= params.dataBi[0].sendReceived  
+    daily.vendor_number= params.dataBi[0].vendorsCount
+    daily.store_created= params.store
+    daily.date_created= require("moment-timezone")
+    .tz("America/Guatemala")
+    let responseData = ""; 
+   await daily.save(async (err, storedTicket) => {
+    if(err){
+        responseData = false
+    }else{
+        responseData = true
+    }    
+    });
+    return res.json(responseData);
+}
 /* Eliminar ejecucion*/
 async function deleteBinnacleDailies(req, res) {
     
@@ -571,6 +594,7 @@ module.exports = {
     getBinnacleSaleReportTotal,
     validationDataSale,
     setBinnacleSalesCreate,
+    creatBinnacleDailies,
     deleteBinnacleDailies,
     getBinnacleDailies
 }
