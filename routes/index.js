@@ -13,6 +13,7 @@ const userController = require('../controllers/UserController');
 const ticketController = require('../controllers/TicketController');
 const collaboratorController = require('../controllers/CollaboratorController');
 const binnacleSaleController = require('../controllers/BinnacleSaleController');
+const DamagedMerchandiseController = require('../controllers/DamagedMerchandiseController');
 
 const routesProtected = express.Router();
 
@@ -77,7 +78,7 @@ router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleRepo
 router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
 
 /*-------------------------------------------
------------------ TOCKETS -------------------
+----------------- TICKETS -------------------
 ---------------------------------------------*/
 router.post('/tickets/add/transfer', ticketController.storeTicketSystemTransfer);
 router.post('/tickets/add/inmediates', ticketController.storeTicketInmediates);
@@ -117,5 +118,10 @@ router.get('/collaborator/get',collaboratorController.getCollaborator);
 router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate);
 router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
 
+/*-----------------------------------------------------
+----------------- MERCADERIA DAÑADA -------------------
+-------------------------------------------------------*/
+router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
+router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
 
 module.exports = router;
