@@ -45,10 +45,12 @@ router.post('/login',userController.Login);
 
 
 router.post('/login/google', async(req, res) =>{
+    console.log(req.body.user);
     User.findOne({
         email: req.body.user
       })
         .then(user => {
+            console.log(user);
             if(user){
                     const payload = {
                         check:  true,
@@ -59,6 +61,7 @@ router.post('/login/google', async(req, res) =>{
                       })
                     res.send({token, user})
             }else{
+                console.log('Usuario Incorrecto');
                 res.status(400).json({err:'2', message:'Usuario Incorrecto'})
             }
         })
