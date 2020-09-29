@@ -254,11 +254,11 @@ async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
         date_created: { $regex: "2020" }
-    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1 });
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1});
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
         date_created: { $gte: "2015-01-01T19:02:12.501+00:00", $lt: "2020-08-18T19:02:12.501+00:00" },
-    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1 });
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     salesNew.map((res) => {
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
