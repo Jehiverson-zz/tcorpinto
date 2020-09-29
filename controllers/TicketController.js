@@ -1,6 +1,7 @@
 'use strict'
 
 const Store = require('../models/Store');
+const User = require("../models/User");
 const TicketSystem = require("../models/TicketSystem");
 const TicketInmediates = require("../models/TicketInmediates");
 const TicketInmediate = require("../models/TicketInmediate");
@@ -29,12 +30,16 @@ async function storeTicketSystemTransfer(req, res) {
         }
         Ticket.product.push(producto);
     })
-    console.log(Ticket)
-    await Ticket.save(async (err, storedTicket) => {
+
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
+
+    Ticket.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
             let result_email = await email(
                 params,
+                data_store_asigned.email,
+                params[0].email,
                 'Nuevo Ticket De Traslado Sistema Informática',
                 `<table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
                     <tr>
@@ -151,11 +156,15 @@ async function storeTicketInmediates(req, res) {
         Inmediates.product.push(producto);
     })
 
-    await Inmediates.save(async (err, storedTicket) => {
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
+
+    Inmediates.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
             email(
                 params,
+                'lourdes@corpinto.com',
+                data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -292,12 +301,15 @@ async function storeTicketPhotoRetreats(req, res) {
         }
         Ticket.product.push(producto);
     })
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
     //Se guarda el ticket
-    await Ticket.save((err, storedTicket) => {
+    Ticket.save((err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
             email(
                 params,
+                data_store_asigned.email,
+                params[0].email,
                 'Retiro de Mercaderia para fotografía',
                 `<table style="display:none!important;">
                 <tr>
@@ -437,99 +449,9 @@ async function storeTicketExternalRetreats(req, res) {
     })
 
     //Se guarda el ticket
-    await Ticket.save((err, storedTicket) => {
+    Ticket.save((err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if(storedTicket){
-            email(
-                params,
-                'Nuevo Ticket De Retitos Externos',
-                `<!-- pre-header -->
-                <table style="display:none!important;">
-                    <tr>
-                        <td>
-                            <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
-                                Información de Ticket de la plataforma
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-                <!-- pre-header end -->
-                <!-- header -->
-                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
-                    <tr>
-                        <td align="center">
-                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-                                <tr>
-                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-                <!-- end header -->
-                <!-- big image section -->
-                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-                    <tr>
-                        <td align="center">
-                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-                                <tr>
-                                    <td align="center" class="section-img">
-                                        <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://s3.amazonaws.com/iconbros/icons/icon_pngs/000/000/701/original/receipt.png?1513421069" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
-                                        <div style="line-height: 35px">
-                                            <span style="color: #5caad2;"></span>Solicitud de retiro de mercadería</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td align="center">
-                                        <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
-                                            <tr>
-                                                <td height="2" style="font-size: 2px; line-height: 2px;">&nbsp;</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td align="center" style="color:black">
-                                        <table border="0" width="400" align="center" cellpadding="0" cellspacing="0" class="container590">
-                                            <tr>
-                                                <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px;">
-                                                    <div style="line-height: 24px">
-                                                     ${params[0].person_retreats} acaba de solicitar un retiro de mercadería en la tienda ${params[0].store_created}, por favor dar seguimiento dentro de la plataforma. 
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr class="hide">
-                        <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
-                    </tr>
-                </table>
-                <!-- end section -->`
-            )
             return res.status(200).send({ ticket: storedTicket, message: 'Ticket creado exitosamente!' });
         }
     });
@@ -970,14 +892,17 @@ async function getExernalRetreats(req, res) {
 //Inactiva los tikets de traslados de sistema
 async function inactivateTicket(req, res) {
     let ticket_id = req.params.id;
-
     TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
+
+        let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
+
         if (inactive) {
-            console.log(inactive.store_created);
             let params = [inactive]
             await email(
                 params,
+                data_store_asigned.email,
+                req.body.email,
                 'Ticket Traslado De Sistema Cancelado',
                 `<table style="display:none!important;">
                 <tr>
@@ -1077,6 +1002,99 @@ async function inactivateTicketInmediate(req, res) {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if (inactive) {
             let params = [inactive]
+            let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
+            email(
+                params,
+                data_store_asigned.email,
+                req.body.email,
+                'Ticket Envio Inmediato Cancelado',
+                `<!-- pre-header -->
+                <table style="display:none!important;">
+                    <tr>
+                        <td>
+                            <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
+                                Información de Ticket de la plataforma
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <!-- pre-header end -->
+                <!-- header -->
+                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
+                    <tr>
+                        <td align="center">
+                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
+                                <tr>
+                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <!-- end header -->
+                <!-- big image section -->
+                <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
+                    <tr>
+                        <td align="center">
+                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
+                                <tr>
+                                    <td align="center" class="section-img">
+                                        <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/close-circle-red-512.png" style="display: block; width: 190px;" width="190" border="0" alt="" /></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="color: #343434; font-size: 20px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;" class="main-header">
+                                        <div style="line-height: 35px">
+                                            TICKET ENVIO INMEDIATO CANCELADO
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
+                                            <tr>
+                                                <td height="2" style="font-size: 2px; line-height: 2px;">&nbsp;</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" width="600" align="center" cellpadding="0" cellspacing="0" class="container590">
+                                            <tr>
+                                                <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
+                                                    <div style="color:black">
+                                                    La tienda <b>${inactive.store_asigned}</b> ha cancelado el ticket de traslado inmediato que solicito.Por favor notificar al mensajero
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="hide">
+                        <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
+                    </tr>
+                </table>
+                <!-- end section -->`
+            )
             return res.status(200).send({ message: 'Ticket eliminado!', ticekt: inactive })
         }
     })
@@ -1085,11 +1103,14 @@ async function inactivateTicketInmediate(req, res) {
 async function inactivatePhotoRetreats(req, res) {
     let ticket_id = req.params.id;
 
-    TicketPhoto.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, (err, inactive) => {
+    TicketPhoto.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if(inactive){
+            let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
             email(
                 [inactive],
+                data_store_asigned.email,
+                req.body.email,
                 'Cancelar Retiro Fotografía',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -1159,7 +1180,7 @@ async function inactivatePhotoRetreats(req, res) {
                                             <tr>
                                                 <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
                                                     <div style="color:black">
-                                                    La tienda {{store}} ha cancelado el ticket de petición de Retiro de mercadería para fotos
+                                                    La tienda <b>${inactive.store_asigned}</b> ha cancelado el ticket de petición de Retiro de mercadería para fotos
                                                     </div>
                                                 </td>
                                             </tr>
@@ -1196,14 +1217,17 @@ async function inactivateExternalRetreats(req, res) {
 //Pasar estado de ticket de pendiente a completado
 async function completeTicket(req, res) {
     let ticket_id = req.params.id;
-    let retailn = req.body.retailn;
+    let retailn = req.body.retailn.retailn;
 
     TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Completado',retailn: retailn }, async (err, complete) => {
         if (err) return res.status(500).send({ message: "Error al completar ticket" });
         if (complete) {
-            let params = [complete]
+            let params = [complete];
+            let data_store_asigned = await User.findOne({ store: complete.store_asigned});
             await email(
-                 params,
+                params,
+                data_store_asigned.email,
+                req.body.email,
                 'Ticket De Traslado sistema Completado',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -1332,7 +1356,7 @@ function randomNumber() {
     return ramdomNum;
 }
 //Generar Email
-async function email(data, titulo, template) {
+async function email(data, reseptor, emisor,titulo, template) {
     let randsend = randomNumber();
     let Moment = require("moment-timezone");
     let hoy = Moment().tz("America/Guatemala")._d;
@@ -1357,7 +1381,9 @@ async function email(data, titulo, template) {
     // send mail with defined transport object
     let info = await transporter.sendMail({
         from: 'soporte@tickets.corpinto.com', // sender address
-        to: "dlara2017229@gmail.com", // list of receivers
+        to: reseptor, // list of receivers
+        cc: emisor,
+        bcc: 'dlara2017229@gmail.com',
         subject:
             `${titulo} ${data[0].store_created} ${dd}/${mm}/${yyyy} - Ticket ${randsend}`,
         text: "", // plain text body
