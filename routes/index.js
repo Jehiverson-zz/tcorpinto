@@ -78,6 +78,7 @@ router.post('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
 //ReporteLourdes
+router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
 router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies);
 router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
 router.post('/binnacles_dailies/created',binnacleSaleController.creatBinnacleDailies);
