@@ -308,7 +308,7 @@ async function storeTicketPhotoRetreats(req, res) {
         if (storedTicket) {
             email(
                 params,
-                data_store_asigned.email,
+                '',
                 params[0].email,
                 'Retiro de Mercaderia para fotografía',
                 `<table style="display:none!important;">
@@ -435,9 +435,9 @@ async function storeTicketExternalRetreats(req, res) {
     //Se genera en el ticket de la tranferencia
     Ticket.store_created = params[0].store_created;
     Ticket.name = params[0].person_retreats,
-        Ticket.manager = params[0].person_authorizing,
-        Ticket.inv_val = params[0].bill,
-        Ticket.status = "Completado"
+    Ticket.manager = params[0].person_authorizing,
+    Ticket.inv_val = params[0].bill,
+    Ticket.status = "Completado"
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
@@ -854,7 +854,7 @@ async function getExernalRetreats(req, res) {
         store_created: req.body.store,
         status: "Completado"
     }).sort({ timestamp: -1 });
-
+    //console.log(ticketExternal)
     ticketExternal.map((data,i) => {
         let array__ = []
         var iteracion = ""
