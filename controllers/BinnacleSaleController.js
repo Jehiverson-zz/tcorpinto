@@ -16,7 +16,7 @@ async function getBinnacleSale(req, res) {
     if(req.body.type === 'admin'){
          salesNew = await BinnacleSaleByte.find({
             date_created: { $regex: "2020" }
-        },{ _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 }).limit(400);
+        },{ _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     }else{
         salesNew = await BinnacleSaleByte.find({
             date_created: { $regex: "2020" },
