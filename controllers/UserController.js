@@ -40,7 +40,7 @@ async function Login(req, res) {
 
 async function getUsers(req, res) {
     const users = await User.find();
-       //res.json(users);
+       res.json({data: ""});
 }
 
 
