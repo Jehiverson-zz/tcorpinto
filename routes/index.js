@@ -14,6 +14,8 @@ const ticketController = require('../controllers/TicketController');
 const collaboratorController = require('../controllers/CollaboratorController');
 const binnacleSaleController = require('../controllers/BinnacleSaleController');
 const DamagedMerchandiseController = require('../controllers/DamagedMerchandiseController');
+const RetreatsController = require('../controllers/RetreatsController');
+const SettingController = require('../controllers/SettingController');
 
 const routesProtected = express.Router();
 
@@ -131,6 +133,27 @@ router.post('/sales/validationDataSale',binnacleSaleController.validationDataSal
 router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
 router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
 
+/*-----------------------------------------------------
+----------------------- RETREATS ----------------------
+-------------------------------------------------------*/
+
+router.post('/retreatsShow', RetreatsController.showRetreats);
+router.post('/retreatsDebtShowList', RetreatsController.showRetreatsDebtList);
+router.post('/retreatsDebtShowListHistory', RetreatsController.showRetreatsDebtListHistory);
+router.post('/retreatsBinacleList', RetreatsController.showRetreatsBinacleList);
+router.post('/retreatsUpdate', RetreatsController.updateRetreats);
+router.post('/retreatsUpdateRove', RetreatsController.updateRetreatsRemove);
+router.post('/createdUpdate', RetreatsController.createdRetreats);
+
+/*-----------------------------------------------------
+----------------------- SETITNGS ----------------------
+-------------------------------------------------------*/
+router.post('/statusShow', SettingController.showStatus);
+router.post('/statusCreate', SettingController.createStatus);
+
+router.post('/collaboratorShow', SettingController.showCollaborator);
+
+router.post('/userShow', SettingController.showUser);
 
 
 module.exports = router;
