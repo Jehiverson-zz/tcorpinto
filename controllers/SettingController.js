@@ -11,7 +11,6 @@ async function showStatus(req, res) {
 
 async function createStatus(req, res) {
 
-    console.log(req.body);
     const creatStatusInfo = Status({
         name: req.body.name,
         status: req.body.status,
@@ -20,6 +19,18 @@ async function createStatus(req, res) {
       });
     await creatStatusInfo.save();
     return res.status(200).json({ error: 0, message:"Estado Ingresado" });
+}
+
+async function updateStatus(req, res) {
+    var myquery = { _id: req.body.id };
+    const updatetaStusInfo = {
+        name: req.body.name,
+        status: req.body.status,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    await Status.updateOne(myquery, updateStatus);
+    return res.status(200).json({ error: 0, message:"Estado Actualizado" });
 }
 
 async function showUser(req, res) {
