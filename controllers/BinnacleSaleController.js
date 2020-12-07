@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 const BinnacleDailies = require('../models/Binnacle_daily');
+const { auth, db, firestore } = require('../firebase');
 let Moment = require("moment-timezone");
 let momentToday = require("moment");
 let hoy = Moment().tz("America/Guatemala")._d;
@@ -310,6 +311,61 @@ async function getBinnacleSaleReportTotal(req, res) {
     return res.json({ dataStore });
 }
 
+async function getBinnacleSaleReportTotalSendFirebase(req, res) {
+    const dataStore = [];
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: "2020" }
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1});
+
+    let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+        date_created: { $gte: "2015-01-01T19:02:12.501+00:00", $lt: "2020-08-18T19:02:12.501+00:00" },
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
+
+    salesNew.map((res) => {
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tienda": res.store_creat,
+            "ventas": res.sale_daily?res.sale_daily:0,
+            "metas": res.daily_goal?res.daily_goal:0,
+            "venta_año_anterior": res.year_before_sale?res.year_before_sale:0,
+            "total_personas": res.people_totals?res.people_totals:0,
+            "total_vendores": res.sales_totals?res.sales_totals:0,
+            "manager": res.manager,
+            "fact": res.fact?res.fact:0,
+            "diferencia": res.diffy?res.diffy:0
+        })
+    })
+
+    salesBefore_2020.map((res) => {
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tienda": res.store_creat,
+            "ventas": res.sale_daily?res.sale_daily:0,
+            "metas": res.daily_goal?res.daily_goal:0,
+            "venta_año_anterior": res.year_before_sale?res.year_before_sale:0,
+            "total_personas": res.people_totals?res.people_totals:0,
+            "total_vendores": res.sales_totals?res.sales_totals:0,
+            "manager": res.manager,
+            "fact": res.fact?res.fact:0,
+            "diferencia": res.diffy?res.diffy:0
+        })
+    })
+    dataStore.map(async (doc) => {
+        const result = await firestore.collection('BinnacleSale').add(doc);
+        console.log(result);
+    })
+
+    return res.json({ dataStore });
+}
+
 async function setBinnacleSalesCreate(req, res) {
     let params = req.body;
     let sale = new BinnacleSaleByte();
@@ -604,6 +660,7 @@ module.exports = {
     getBinnacleSaleReport,
     getBinnacleSaleReportBefore,
     getBinnacleSaleReportTotal,
+    getBinnacleSaleReportTotalSendFirebase,
     validationDataSale,
     setBinnacleSalesCreate,
     creatBinnacleDailies,
