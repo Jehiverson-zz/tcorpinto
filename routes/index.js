@@ -15,6 +15,8 @@ const collaboratorController = require('../controllers/CollaboratorController');
 const binnacleSaleController = require('../controllers/BinnacleSaleController');
 const DamagedMerchandiseController = require('../controllers/DamagedMerchandiseController');
 const CertificateController = require('../controllers/CertificateController');
+const RetreatsController = require('../controllers/RetreatsController');
+const SettingController = require('../controllers/SettingController');
 
 const routesProtected = express.Router();
 
@@ -141,5 +143,34 @@ router.post('/certificate/create', CertificateController.store_certificate);
 router.post('/certificates/actives', CertificateController.getCertificatesActives);
 router.post('/certificates/exchange', CertificateController.getCertificates);
 router.put('/certificate/exchange', CertificateController.updateCertificate);
+/*-----------------------------------------------------
+----------------------- RETREATS ----------------------
+-------------------------------------------------------*/
 
+router.post('/retreatsShow', RetreatsController.showRetreats);
+router.post('/retreatsDebtShowList', RetreatsController.showRetreatsDebtList);
+router.post('/retreatsDebtShowListHistory', RetreatsController.showRetreatsDebtListHistory);
+router.post('/retreatsBinacleList', RetreatsController.showRetreatsBinacleList);
+router.post('/retreatsUpdate', RetreatsController.updateRetreats);
+router.post('/retreatsUpdateRove', RetreatsController.updateRetreatsRemove);
+router.post('/createdUpdate', RetreatsController.createdRetreats);
+
+/*-----------------------------------------------------
+----------------------- SETITNGS ----------------------
+-------------------------------------------------------*/
+router.post('/statusShow', SettingController.showStatus);
+router.post('/statusCreate', SettingController.createStatus);
+/* COLABORADORES */
+router.post('/collaboratorShow', SettingController.showCollaborator);
+router.post('/collaboratorCreate', SettingController.createCollaborator);
+router.put('/collaboratorUpdate', SettingController.updateCollaborator);
+
+router.post('/userShow', SettingController.showUser);
+/* SUBSIDIARIA */
+router.post('/subsidiariaShow', SettingController.showSubsidiaria);
+router.post('/subsidiariaCreate', SettingController.createSubsidiaria);
+router.put('/subsidiariaUpdate', SettingController.updateSubsidiaria);
+/* TIENDA */
+router.post('/storeCreate', SettingController.createStore);
+router.put('/storeUpdate', SettingController.updateStore);
 module.exports = router;
