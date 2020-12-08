@@ -150,6 +150,7 @@ router.post('/createdUpdate', RetreatsController.createdRetreats);
 -------------------------------------------------------*/
 router.post('/statusShow', SettingController.showStatus);
 router.post('/statusCreate', SettingController.createStatus);
+router.post('/statusUpdate', SettingController.updateStatus);
 
 router.post('/collaboratorShow', SettingController.showCollaborator);
 
