@@ -160,6 +160,8 @@ router.post('/createdUpdate', RetreatsController.createdRetreats);
 -------------------------------------------------------*/
 router.post('/statusShow', SettingController.showStatus);
 router.post('/statusCreate', SettingController.createStatus);
+router.post('/statusUpdate', SettingController.updateStatus);
+
 /* COLABORADORES */
 router.post('/collaboratorShow', SettingController.showCollaborator);
 router.post('/collaboratorCreate', SettingController.createCollaborator);

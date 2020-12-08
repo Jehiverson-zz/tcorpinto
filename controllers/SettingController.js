@@ -12,26 +12,26 @@ async function showStatus(req, res) {
 }
 
 async function createStatus(req, res) {
-
+    console.log(req.body)
     const creatStatusInfo = Status({
         name: req.body.name,
         status: req.body.status,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date()
       });
     await creatStatusInfo.save();
     return res.status(200).json({ error: 0, message:"Estado Ingresado" });
 }
 
 async function updateStatus(req, res) {
+    console.log(req.body)
     var myquery = { _id: req.body.id };
     const updatetaStusInfo = {
         name: req.body.name,
-        status: req.body.status,
-        createdAt: new Date(),
+        status: req.body.status.label ? req.body.status.label : req.body.status,
         updatedAt: new Date(),
       };
-    await Status.updateOne(myquery, updateStatus);
+
+    await Status.updateOne(myquery, updatetaStusInfo);
     return res.status(200).json({ error: 0, message:"Estado Actualizado" });
 }
 
@@ -131,7 +131,8 @@ async function updateStore(req, res) {
 module.exports = {
     showStatus,
     createStatus,
-
+    updateStatus,
+    
     showUser,
 
     showCollaborator,
