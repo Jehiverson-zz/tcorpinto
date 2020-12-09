@@ -15,9 +15,9 @@ async function createStatus(req, res) {
         name: req.body.name,
         status: req.body.status,
         createdAt: new Date()
-      });
+    });
     await creatStatusInfo.save();
-    return res.status(200).json({ error: 0, message:"Estado Ingresado" });
+    return res.status(200).json({ error: 0, message: "Estado Ingresado" });
 }
 
 async function updateStatus(req, res) {
@@ -27,10 +27,10 @@ async function updateStatus(req, res) {
         name: req.body.name,
         status: req.body.status.label ? req.body.status.label : req.body.status,
         updatedAt: new Date(),
-      };
+    };
 
     await Status.updateOne(myquery, updatetaStusInfo);
-    return res.status(200).json({ error: 0, message:"Estado Actualizado" });
+    return res.status(200).json({ error: 0, message: "Estado Actualizado" });
 }
 
 async function showUser(req, res) {
@@ -38,9 +38,27 @@ async function showUser(req, res) {
     return res.json({ showUserInfo });
 }
 
-async function showCollaborator(req, res) {
-    let showCollaboratorInfo = await Collaborator.find({},{name:1,status:1,timestamp:1,store_asigned:1});
-    return res.json({ showCollaboratorInfo });
+async function createUser(req, res) {
+    console.log(req.body)
+    const creatStatusInfo = User({
+        name: req.body.name,
+        status: req.body.status,
+        createdAt: new Date()
+    });
+    await creatStatusInfo.save();
+    return res.status(200).json({ error: 0, message: "Estado Ingresado" });
+}
+
+async function updateUser(req, res) {
+    var myquery = { _id: req.body.id };
+    const updatetaStusInfo = {
+        name: req.body.name,
+        status: req.body.status.label ? req.body.status.label : req.body.status,
+        updatedAt: new Date(),
+    };
+
+    await User.updateOne(myquery, updatetaStusInfo);
+    return res.status(200).json({ error: 0, message: "Estado Actualizado" });
 }
 
 
@@ -48,8 +66,8 @@ module.exports = {
     showStatus,
     createStatus,
     updateStatus,
-    
-    showUser,
 
-    showCollaborator
+    showUser,
+    createUser,
+    updateUser,
 }

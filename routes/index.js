@@ -152,9 +152,8 @@ router.post('/statusShow', SettingController.showStatus);
 router.post('/statusCreate', SettingController.createStatus);
 router.post('/statusUpdate', SettingController.updateStatus);
 
-router.post('/collaboratorShow', SettingController.showCollaborator);
-
 router.post('/userShow', SettingController.showUser);
-
+router.post('/userCreate', SettingController.createUser);
+router.post('/userUpdate', SettingController.updateUser);
 
 module.exports = router;
