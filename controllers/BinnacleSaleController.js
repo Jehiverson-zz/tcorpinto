@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 const BinnacleDailies = require('../models/Binnacle_daily');
+const { auth, db, firestore } = require('../firebase');
 let Moment = require("moment-timezone");
 let momentToday = require("moment");
 let hoy = Moment().tz("America/Guatemala")._d;
@@ -13,17 +14,17 @@ let yyyy = hoy.getFullYear();
 async function getBinnacleSale(req, res) {
     const dataStore = [];
     var salesNew
-    if(req.body.type === 'admin'){
-         salesNew = await BinnacleSaleByte.find({
+    if (req.body.type === 'admin') {
+        salesNew = await BinnacleSaleByte.find({
             date_created: { $regex: "2020" }
-        },{ _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
-    }else{
+        }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
+    } else {
         salesNew = await BinnacleSaleByte.find({
             date_created: { $regex: "2020" },
             store_creat: req.body.store
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     }
-   
+
 
     salesNew.map((res) => {
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
@@ -263,7 +264,7 @@ async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
         date_created: { $regex: "2020" }
-    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1});
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
         date_created: { $gte: "2018-01-01T19:02:12.501+00:00", $lt: "2020-08-18T19:02:12.501+00:00" },
@@ -305,6 +306,61 @@ async function getBinnacleSaleReportTotal(req, res) {
             "fact": res.fact,
             "diferencia": res.diffy
         })
+    })
+
+    return res.json({ dataStore });
+}
+
+async function getBinnacleSaleReportTotalSendFirebase(req, res) {
+    const dataStore = [];
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: "2020" }
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
+
+    let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+        date_created: { $gte: "2015-01-01T19:02:12.501+00:00", $lt: "2020-08-18T19:02:12.501+00:00" },
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
+
+    salesNew.map((res) => {
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tienda": res.store_creat,
+            "ventas": res.sale_daily ? res.sale_daily : 0,
+            "metas": res.daily_goal ? res.daily_goal : 0,
+            "venta_año_anterior": res.year_before_sale ? res.year_before_sale : 0,
+            "total_personas": res.people_totals ? res.people_totals : 0,
+            "total_vendores": res.sales_totals ? res.sales_totals : 0,
+            "manager": res.manager,
+            "fact": res.fact ? res.fact : 0,
+            "diferencia": res.diffy ? res.diffy : 0
+        })
+    })
+
+    salesBefore_2020.map((res) => {
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tienda": res.store_creat,
+            "ventas": res.sale_daily ? res.sale_daily : 0,
+            "metas": res.daily_goal ? res.daily_goal : 0,
+            "venta_año_anterior": res.year_before_sale ? res.year_before_sale : 0,
+            "total_personas": res.people_totals ? res.people_totals : 0,
+            "total_vendores": res.sales_totals ? res.sales_totals : 0,
+            "manager": res.manager,
+            "fact": res.fact ? res.fact : 0,
+            "diferencia": res.diffy ? res.diffy : 0
+        })
+    })
+    dataStore.map(async (doc) => {
+        const result = await firestore.collection('BinnacleSale').add(doc);
+        console.log(result);
     })
 
     return res.json({ dataStore });
@@ -417,9 +473,9 @@ async function setBinnacleSalesCreate(req, res) {
                 }
             });
             // send mail with defined transport object
-            await transporter.sendMail({
+            transporter.sendMail({
                 from: '"Datos de venta" <soporte@tickets.corpinto.com>', // sender address
-                to: "ventas@corpinto.com", // list of receivers
+                to: "jrodriguez@corpinto.com", // list of receivers
                 cc: params.email,
                 bcc: "jrodriguez@corpinto.com",
                 subject:
@@ -498,15 +554,10 @@ async function setBinnacleSalesCreate(req, res) {
 
         }
         emailValid = true
+        console.log("1")
     });
-    setTimeout(function () {
-        if (emailValid === true) {
-            return res.json({ status: true, message: 'Dato de venta creado exitosamente!', color: "green" });
-        } else {
-            return res.json({ status: false, message: 'Oups! Tenemos un error a enviar correo, puedes intentar ingresarlo de nuevo', color: "red" });
-        }
-    }, 2000);
 
+    return res.json({ status: true, message: 'Dato de venta creado exitosamente!', color: "green" });
 }
 /* Valida si existe un dato de venta anterior*/
 async function validationDataSale(req, res) {
@@ -533,15 +584,15 @@ async function validationDataSale(req, res) {
 
 /* Eliminar Dato de venta*/
 async function deleteDataSale(req, res) {
-    
+
     var myquery = { _id: req.body.id };
     var deleteaccion
     const remove = await BinnacleSaleByte.deleteOne(myquery);
-    
+
     if (remove) {
-        deleteaccion = {"response": true}
+        deleteaccion = { "response": true }
     } else {
-        deleteaccion = {"response": false}
+        deleteaccion = { "response": false }
     }
     return res.json(deleteaccion);
 }
@@ -550,7 +601,7 @@ async function deleteDataSale(req, res) {
 Modulo de ejecucion
 */
 async function getBinnacleDailies(req, res) {
-    let binnacleDailies = await BinnacleDailies.find({store_created: req.body.store});
+    let binnacleDailies = await BinnacleDailies.find({ store_created: req.body.store });
     binnacleDailies.reverse()
     return res.json({ binnacleDailies });
 }
@@ -560,41 +611,41 @@ async function creatBinnacleDailies(req, res) {
     let daily = new BinnacleDailies();
 
     daily.daily_goal = params.dataBi[0].meta
-    daily.year_before_sale= params.dataBi[0].beforesales
-    daily.hamachi= params.dataBi[0].hamachi
-    daily.tras= params.dataBi[0].recepTrans
-    daily.process_in= params.dataBi[0].processIn
-    daily.process_out= params.dataBi[0].processOut
-    daily.send_received= params.dataBi[0].sendReceived  
-    daily.vendor_number= params.dataBi[0].vendorsCount
-    daily.store_created= params.store
-    daily.date_created= require("moment-timezone")
-    .tz("America/Guatemala")
-    var responseData = ""; 
-   await daily.save(async (err) => {
+    daily.year_before_sale = params.dataBi[0].beforesales
+    daily.hamachi = params.dataBi[0].hamachi
+    daily.tras = params.dataBi[0].recepTrans
+    daily.process_in = params.dataBi[0].processIn
+    daily.process_out = params.dataBi[0].processOut
+    daily.send_received = params.dataBi[0].sendReceived
+    daily.vendor_number = params.dataBi[0].vendorsCount
+    daily.store_created = params.store
+    daily.date_created = require("moment-timezone")
+        .tz("America/Guatemala")
+    var responseData = "";
+    await daily.save(async (err) => {
         console.log("test")
-        if(err){
+        if (err) {
             responseData = false
             return res.json(responseData);
-        }else{
+        } else {
             responseData = true
             return res.json(responseData);
-        }    
+        }
     });
 }
 /* Eliminar ejecucion*/
 async function deleteBinnacleDailies(req, res) {
-    
+
     var myquery = { _id: req.body.id };
     var deleteaccion
     const remove = await BinnacleDailies.deleteOne(myquery);
-    
+
     if (remove) {
-        deleteaccion = {"response": true}
+        deleteaccion = { "response": true }
     } else {
-        deleteaccion = {"response": false}
+        deleteaccion = { "response": false }
     }
-    
+
     return res.json(deleteaccion);
 }
 
@@ -604,6 +655,7 @@ module.exports = {
     getBinnacleSaleReport,
     getBinnacleSaleReportBefore,
     getBinnacleSaleReportTotal,
+    getBinnacleSaleReportTotalSendFirebase,
     validationDataSale,
     setBinnacleSalesCreate,
     creatBinnacleDailies,

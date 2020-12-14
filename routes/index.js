@@ -14,6 +14,7 @@ const ticketController = require('../controllers/TicketController');
 const collaboratorController = require('../controllers/CollaboratorController');
 const binnacleSaleController = require('../controllers/BinnacleSaleController');
 const DamagedMerchandiseController = require('../controllers/DamagedMerchandiseController');
+const CertificateController = require('../controllers/CertificateController');
 const RetreatsController = require('../controllers/RetreatsController');
 const SettingController = require('../controllers/SettingController');
 
@@ -79,8 +80,10 @@ router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSal
 router.post('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
+router.get('/binnacles/sales_totals_send_firebase', binnacleSaleController.getBinnacleSaleReportTotalSendFirebase)
 //ReporteLourdes
 router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
+router.get('/binnacles/ticketsInmediate_sendFirebase', ticketController.getTicketsInmediateSendFirebase)
 router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies);
 router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
 router.post('/binnacles_dailies/created',binnacleSaleController.creatBinnacleDailies);
@@ -133,6 +136,13 @@ router.post('/sales/validationDataSale',binnacleSaleController.validationDataSal
 router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
 router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
 
+/*------------------------------------------------
+----------------- CERTIFICADOS -------------------
+--------------------------------------------------*/
+router.post('/certificate/create', CertificateController.store_certificate);
+router.post('/certificates/actives', CertificateController.getCertificatesActives);
+router.post('/certificates/exchange', CertificateController.getCertificates);
+router.put('/certificate/exchange', CertificateController.updateCertificate);
 /*-----------------------------------------------------
 ----------------------- RETREATS ----------------------
 -------------------------------------------------------*/
@@ -156,4 +166,17 @@ router.post('/userShow', SettingController.showUser);
 router.post('/userCreate', SettingController.createUser);
 router.post('/userUpdate', SettingController.updateUser);
 
+/* COLABORADORES */
+router.post('/collaboratorShow', SettingController.showCollaborator);
+router.post('/collaboratorCreate', SettingController.createCollaborator);
+router.put('/collaboratorUpdate', SettingController.updateCollaborator);
+
+router.post('/userShow', SettingController.showUser);
+/* SUBSIDIARIA */
+router.post('/subsidiariaShow', SettingController.showSubsidiaria);
+router.post('/subsidiariaCreate', SettingController.createSubsidiaria);
+router.put('/subsidiariaUpdate', SettingController.updateSubsidiaria);
+/* TIENDA */
+router.post('/storeCreate', SettingController.createStore);
+router.put('/storeUpdate', SettingController.updateStore);
 module.exports = router;
