@@ -112,6 +112,8 @@ router.put('/ticket/complete/:id', ticketController.completeTicket);
 router.put('/ticket/immediate_deliveries/complete/:id', ticketController.completeTicketInmediate);
 router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
 router.get('/tickets/stores', ticketController.getStore);
+router.get('/tickets/stores_actives', ticketController.getStoreActive);
+
 
 
 /*-------------------------------------------
@@ -173,6 +175,7 @@ router.put('/collaboratorUpdate', SettingController.updateCollaborator);
 
 router.post('/userShow', SettingController.showUser);
 /* SUBSIDIARIA */
+router.get('/subsidiarias_actives', SettingController.getSubsidiariaActives);
 router.post('/subsidiariaShow', SettingController.showSubsidiaria);
 router.post('/subsidiariaCreate', SettingController.createSubsidiaria);
 router.put('/subsidiariaUpdate', SettingController.updateSubsidiaria);

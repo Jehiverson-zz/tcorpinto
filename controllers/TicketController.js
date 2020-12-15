@@ -1347,6 +1347,14 @@ async function getStore(req, res) {
     let result = await Store.find();
     return res.json({ result })
 }
+
+//Obetener todas las tiendas Activas
+async function getStoreActive(req, res) {
+    await Store.find({status: 'Activo'}, (err, result) => {
+        if(err) {console.log(err); return 'error'}
+        return res.json({ result })
+    });
+}
 //Crea un codigo random para los tickets
 function randomNumber() {
     const possible = 'abcdefghijklmnopqrstuvwxyz1234567890';
@@ -1998,4 +2006,5 @@ module.exports = {
     completeTicketInmediate,
     completePhotoRetreats,
     getStore,
+    getStoreActive
 }
