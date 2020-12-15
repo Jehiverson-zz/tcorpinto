@@ -47,23 +47,45 @@ async function email(data, reseptor, emisor,titulo, template) {
 
 async function showRetreats(req, res) {
     var showRetreatsInfo;
+    let store = await Store.findOne({ name: req.body.store }, (err, result) => {
+        if (err) { console.log(err); return; }
+        return result
+    })
+    
+    console.log();
+
     if(req.body.type === "admin"){
-        showRetreatsInfo = await Retreat.find({
-            status: "Pendiente"
-        });
+    
+        if(req.body.email == 'luis@corpinto.com'){
+            showRetreatsInfo = await Retreat.find({
+              $or:[{sbs:'Alias'},{sbs:'General'}],
+              status: "Pendiente"
+            });
+          }else if(req.body.email == 'ana@corpinto.com'){
+            showRetreatsInfo = await Retreat.find({
+              $or:[{sbs:'Arrital'},{sbs:'Arroba'}],
+              status: "Pendiente"
+            });
+          }else{
+            showRetreatsInfo = await Retreat.find({
+              store: req.body.store,
+              status: "Pendiente"
+            });
+          }
+
     }else{
         showRetreatsInfo = await Retreat.find({
             store: req.body.store,
             status: "Pendiente"
         });
-    }
+    } 
 
 
     return res.json({ showRetreatsInfo });
 }
 
 async function showRetreatsDebtList(req, res) {
-    let showRetreatsInfo = await RetreatDebt.find();
+    let showRetreatsInfo = await RetreatDebt.find({ total_debt: { $gt: 0 } });
     return res.json({ showRetreatsInfo });
 }
 
