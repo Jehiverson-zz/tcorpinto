@@ -62,6 +62,7 @@ async function updateUser(req, res) {
     
     var myquery = { _id: req.body.id };
     var contra;
+    console.log("----------",req.body);
     if(req.body.password === req.body.passwordC){
     var contra = req.body.password;
     const updatetaStusInfo = {
@@ -69,7 +70,7 @@ async function updateUser(req, res) {
         name: req.body.name,
         password: contra,
         status: req.body.status.label ? req.body.status.label : req.body.status,
-        type: req.body.typeUser.label ? req.body.typeUser.label : req.typeUser.status,
+        type: req.body.typeUser.label ? req.body.typeUser.label : req.body.typeUser,
         change_date: req.body.change_date,
         store: req.body.store.label ? req.body.store.label : req.body.store,
         updatedAt: new Date()
@@ -90,13 +91,14 @@ async function updateUser(req, res) {
                 if (err) {
                     return res.status(500).json({ error: 1, message: "Error al actualizar usuario" });
                 }
-    
+                
+                
                 const updatetaStusInfo = {
                     email:req.body.email,
                     name: req.body.name,
                     password: hash,
                     status: req.body.status.label ? req.body.status.label : req.body.status,
-                    type: req.body.typeUser.label ? req.body.typeUser.label : req.typeUser.status,
+                    type: req.body.typeUser.label ? req.body.typeUser.label : req.body.typeUser,
                     change_date: req.body.change_date,
                     store: req.body.store.label ? req.body.store.label : req.body.store,
                     updatedAt: new Date()

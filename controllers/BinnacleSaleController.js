@@ -477,7 +477,7 @@ async function setBinnacleSalesCreate(req, res) {
                 from: '"Datos de venta" <soporte@tickets.corpinto.com>', // sender address
                 to: "jrodriguez@corpinto.com", // list of receivers
                 cc: params.email,
-                bcc: "jrodriguez@corpinto.com",
+                //bcc: "jrodriguez@corpinto.com",
                 subject:
                     `Dato de venta diaria ${dateEmail} de la tienda ${sale.store_creat}`,
                 text: "", // plain text body
