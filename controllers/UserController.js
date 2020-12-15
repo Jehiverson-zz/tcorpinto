@@ -21,9 +21,11 @@ async function Login(req, res) {
                     expiresIn: 1440
                 })
 
-                console.log(token)
-
-                res.send({token, user})
+                if(user.status == "Activo"){
+                    res.send({token, user})
+                }else{
+                    res.status(400).json({ err: '3', message: 'Usuario Inactivo' })
+                }
             } else {
                 res.status(400).json({ err: '1', message: 'Contraseña incorrecta' })
             }

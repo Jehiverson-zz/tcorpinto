@@ -46,10 +46,19 @@ async function email(data, reseptor, emisor,titulo, template) {
 }
 
 async function showRetreats(req, res) {
-    let showRetreatsInfo = await Retreat.find({
-        store: req.body.store,
-        status: "Pendiente"
-    });
+    var showRetreatsInfo;
+    if(req.body.type === "admin"){
+        showRetreatsInfo = await Retreat.find({
+            status: "Pendiente"
+        });
+    }else{
+        showRetreatsInfo = await Retreat.find({
+            store: req.body.store,
+            status: "Pendiente"
+        });
+    }
+
+
     return res.json({ showRetreatsInfo });
 }
 
@@ -59,12 +68,20 @@ async function showRetreatsDebtList(req, res) {
 }
 
 async function showRetreatsDebtListHistory(req, res) {
+    var showRetreatsInfoAccepted;
+    var showRetreatsInfoDeneged;
+    var showRetreatsInfoCancel;
+    if(req.body.type === "admin"){
+        showRetreatsInfoAccepted = await Retreat.find({status:"Aprobado"});
 
-    let showRetreatsInfoAccepted = await Retreat.find({status:"Aprobado"});
-
-    let showRetreatsInfoDeneged = await Retreat.find({status:"Denegado"});
-
-    let showRetreatsInfoCancel = await Retreat.find({status:"Cancelado"});
+        showRetreatsInfoDeneged = await Retreat.find({status:"Denegado"});
+    
+        showRetreatsInfoCancel = await Retreat.find({status:"Cancelado"});
+    }else{
+        showRetreatsInfoAccepted = await Retreat.find({status:"Aprobado", store: req.body.store});
+        showRetreatsInfoDeneged = await Retreat.find({status:"Denegado", store: req.body.store});
+        showRetreatsInfoCancel = await Retreat.find({status:"Cancelado", store: req.body.store});
+    }
 
     return res.json({ "acepted": showRetreatsInfoAccepted, "deneged": showRetreatsInfoDeneged, "cancel": showRetreatsInfoCancel });
 }
@@ -155,6 +172,15 @@ async function createdRetreats(req, res) {
         name: data.store
     });
 
+    var email_re;
+    if(infoStore[0].sbs == 'Alias'){
+        email_re = 'jehivis@gmail.com';
+      }else if(infoStore[0].sbs == 'Arrital'){
+        email_re = 'jehivis@gmail.com';
+      }else{
+        email_re = 'dlara2017229@gmail.com';
+      }
+
     const newRetreats = Retreat({
         name: data.vendor,
         price: data.precio,
@@ -171,7 +197,7 @@ async function createdRetreats(req, res) {
 
       email(
         infoStore,
-        'jehivis@gmail.com',
+        email_re,
         'Jrodriguezt7@miumg.edu.gt',
         'Nuevo retiro de mercaderia',
         `<!-- pre-header -->
@@ -264,14 +290,7 @@ async function createdRetreats(req, res) {
         <!-- end section -->`
     )
 
-    let email_re;
-    if(infoStore[0].sbs == 'Alias'){
-        email_re = 'luis@corpinto.com';
-      }else if(infoStore[0].sbs == 'Arrital'){
-        email_re = 'ana@corpinto.com';
-      }else{
-        email_re = 'luis@corpinto.com';
-      }
+    
 
     const saveRe = await newRetreats.save();
 
