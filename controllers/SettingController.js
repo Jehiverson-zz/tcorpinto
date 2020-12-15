@@ -80,6 +80,13 @@ async function showSubsidiaria(req, res) {
     return res.json({ subsidiarias: showSubsidiariaInfo });
 }
 
+async function getSubsidiariaActives(req, res) {
+  await Subsidiaria.find({ status: 'Activo' }, (err, subsidiarias)=>{
+    if(err) { console.log(err); return }
+    return res.json({ subsidiarias });
+  });
+}
+
 async function createSubsidiaria(req, res) {
 
     const creatSubsidiaria = Subsidiaria({
@@ -139,6 +146,7 @@ module.exports = {
     createCollaborator,
     updateCollaborator,
     showSubsidiaria,
+    getSubsidiariaActives,
     createSubsidiaria,
     updateSubsidiaria,
     createStore,

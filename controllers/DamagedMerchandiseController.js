@@ -35,6 +35,7 @@ async function getDamageMerchandise(req,res) {
     }else{
         message = 'Datos encontrados';
     }
+
     return res.status(200).send({
         damaged : damagedMerchandise
     })
