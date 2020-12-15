@@ -1,8 +1,9 @@
 'use strict'
-
+const bcrypt = require('bcrypt-nodejs');
 const Status = require('../models/Status');
 const User = require('../models/User');
 const Collaborator = require('../models/Collaborator');
+
 const Subsidiaria = require('../models/Subsidiaria');
 const Store = require('../models/Store');
 
@@ -17,9 +18,9 @@ async function createStatus(req, res) {
         name: req.body.name,
         status: req.body.status,
         createdAt: new Date()
-      });
+    });
     await creatStatusInfo.save();
-    return res.status(200).json({ error: 0, message:"Estado Ingresado" });
+    return res.status(200).json({ error: 0, message: "Estado Ingresado" });
 }
 
 async function updateStatus(req, res) {
@@ -29,15 +30,87 @@ async function updateStatus(req, res) {
         name: req.body.name,
         status: req.body.status.label ? req.body.status.label : req.body.status,
         updatedAt: new Date(),
-      };
+    };
 
     await Status.updateOne(myquery, updatetaStusInfo);
-    return res.status(200).json({ error: 0, message:"Estado Actualizado" });
+    return res.status(200).json({ error: 0, message: "Estado Actualizado" });
 }
 
 async function showUser(req, res) {
     let showUserInfo = await User.find();
     return res.json({ showUserInfo });
+}
+
+async function createUser(req, res) {
+    console.log(req.body);
+    const creatStatusInfo = User({
+        email:req.body.email,
+        name: req.body.name,
+        password: req.body.password,
+        status: req.body.status,
+        type: req.body.type,
+        change_date: req.body.change_date,
+        store: req.body.store,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    });
+    await creatStatusInfo.save();
+    return res.status(200).json({ error: 0, message: "Usuario Ingresado" });
+}
+
+async function updateUser(req, res) {
+    
+    var myquery = { _id: req.body.id };
+    var contra;
+    if(req.body.password === req.body.passwordC){
+    var contra = req.body.password;
+    const updatetaStusInfo = {
+        email:req.body.email,
+        name: req.body.name,
+        password: contra,
+        status: req.body.status.label ? req.body.status.label : req.body.status,
+        type: req.body.typeUser.label ? req.body.typeUser.label : req.typeUser.status,
+        change_date: req.body.change_date,
+        store: req.body.store.label ? req.body.store.label : req.body.store,
+        updatedAt: new Date()
+    };
+    console.log(2);
+    console.log(myquery);
+    console.log(updatetaStusInfo);
+
+    await User.updateOne(myquery, updatetaStusInfo);
+        
+    return res.status(200).json({ error: 0, message: "Usuario Actualizado" });
+    }else{
+        bcrypt.genSalt(10, (err, salt) => {
+            if (err) {
+                next(err);
+            }
+            bcrypt.hash(req.body.password, salt, null, async (err, hash) => {
+                if (err) {
+                    return res.status(500).json({ error: 1, message: "Error al actualizar usuario" });
+                }
+    
+                const updatetaStusInfo = {
+                    email:req.body.email,
+                    name: req.body.name,
+                    password: hash,
+                    status: req.body.status.label ? req.body.status.label : req.body.status,
+                    type: req.body.typeUser.label ? req.body.typeUser.label : req.typeUser.status,
+                    change_date: req.body.change_date,
+                    store: req.body.store.label ? req.body.store.label : req.body.store,
+                    updatedAt: new Date()
+                };
+                console.log(1);
+                console.log(myquery);
+                console.log(updatetaStusInfo);
+    
+                await User.updateOne(myquery, updatetaStusInfo);
+                    
+                return res.status(200).json({ error: 0, message: "Usuario Actualizado" });
+            });
+        });
+    }
 }
 
 async function showCollaborator(req, res) {
@@ -132,9 +205,9 @@ module.exports = {
     showStatus,
     createStatus,
     updateStatus,
-    
     showUser,
-
+    createUser,
+    updateUser,
     showCollaborator,
     createCollaborator,
     updateCollaborator,
