@@ -34,7 +34,7 @@ async function email(data, reseptor, emisor,titulo, template) {
         from: 'soporte@tickets.corpinto.com', // sender address
         to: reseptor, // list of receivers
         cc: emisor,
-        bcc: 'dlara2017229@gmail.com',
+        bcc: 'Dlara2017229@gmail.com',
         subject:
             `Retiros de mercaderia - ${dd}/${mm}/${yyyy}`,
         text: "", // plain text body
@@ -52,8 +52,6 @@ async function showRetreats(req, res) {
         return result
     })
     
-    console.log();
-
     if(req.body.type === "admin"){
     
         if(req.body.email == 'luis@corpinto.com'){
@@ -196,11 +194,11 @@ async function createdRetreats(req, res) {
 
     var email_re;
     if(infoStore[0].sbs == 'Alias'){
-        email_re = 'jehivis@gmail.com';
+        email_re = 'luis@gmail.com';
       }else if(infoStore[0].sbs == 'Arrital'){
-        email_re = 'jehivis@gmail.com';
+        email_re = 'ana@gmail.com';
       }else{
-        email_re = 'dlara2017229@gmail.com';
+        email_re = 'luis@corpinto.com';
       }
 
     const newRetreats = Retreat({
@@ -220,7 +218,7 @@ async function createdRetreats(req, res) {
       email(
         infoStore,
         email_re,
-        'Jrodriguezt7@miumg.edu.gt',
+        'jrodriguez@corpinto.com',
         'Nuevo retiro de mercaderia',
         `<!-- pre-header -->
         <table style="display:none!important;">
