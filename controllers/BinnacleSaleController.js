@@ -488,14 +488,14 @@ async function setBinnacleSalesCreate(req, res) {
                 port: 587,
                 secure: false, // true for 465, false for other ports
                 auth: {
-                    user: "soporte@tickets.corpinto.com", // generated ethereal user
+                    user: "mensajeria@tickets.corpinto.com", // generated ethereal user
                     pass: "m1$0n@lc0rp!nt0" // generated ethereal password
                 }
             });
             // send mail with defined transport object
             transporter.sendMail({
-                from: '"Datos de venta" <soporte@tickets.corpinto.com>', // sender address
-                to: "jrodriguez@corpinto.com", // list of receivers
+                from: '"Datos de venta" <mensajeria@tickets.corpinto.com>', // sender address
+                to: "ventas@corpinto.com", // list of receivers
                 cc: params.email,
                 bcc: "jrodriguez@corpinto.com",
                 subject:
