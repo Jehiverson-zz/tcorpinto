@@ -4,6 +4,11 @@ const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 const BinnacleDailies = require('../models/Binnacle_daily');
 const { auth, db, firestore } = require('../firebase');
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var ObjectId = require('mongodb').ObjectID;
+var url = 'mongodb://test-corpinto-1:iVV1eZHmPdbUIbx8KPYAz7JeoVT44kioLC8p9uREg5LbRCN9EN5mVp4NGVbVCQ24dWL9iSKAjhr9EEWAATdUVg==@test-corpinto-1.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@test-corpinto-1@';
+
 let Moment = require("moment-timezone");
 let momentToday = require("moment");
 let hoy = Moment().tz("America/Guatemala")._d;
@@ -359,9 +364,24 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
         })
     })
     dataStore.map(async (doc) => {
-        const result = await firestore.collection('BinnacleSale').add(doc);
-        console.log(result);
-    })
+        await MongoClient.connect(url, function(err, client) {
+            if(err){
+                console.log(err)
+            }else{
+                client.db('testdb').collection('BinnsacleSale').insertOne( doc, function(err, result) {
+                    if(err) console.log("ERROR! at insert");
+                    if(result) console.log("Inserted a document into the families collection.");
+                }, {
+                    socketTimeoutMS: 30000,
+                    keepAlive: true,
+                    reconnectTries: 30000,
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true
+                });
+                client.close();
+            }
+        })
+    });
 
     return res.json({ dataStore });
 }
