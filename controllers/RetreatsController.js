@@ -24,17 +24,17 @@ async function email(data, reseptor, emisor,titulo, template) {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: "soporte@tickets.corpinto.com", // generated ethereal user
+            user: "mensajeria@tickets.corpinto.com", // generated ethereal user
             pass: "m1$0n@lc0rp!nt0" // generated ethereal password
         }
     });
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
-        from: 'soporte@tickets.corpinto.com', // sender address
+        from: 'mensajeria@tickets.corpinto.com', // sender address
         to: reseptor, // list of receivers
         cc: emisor,
-        bcc: 'dlara2017229@gmail.com',
+        bcc: 'Dlara2017229@gmail.com',
         subject:
             `Retiros de mercaderia - ${dd}/${mm}/${yyyy}`,
         text: "", // plain text body
@@ -47,23 +47,43 @@ async function email(data, reseptor, emisor,titulo, template) {
 
 async function showRetreats(req, res) {
     var showRetreatsInfo;
+    let store = await Store.findOne({ name: req.body.store }, (err, result) => {
+        if (err) { console.log(err); return; }
+        return result
+    })
+    
     if(req.body.type === "admin"){
-        showRetreatsInfo = await Retreat.find({
-            status: "Pendiente"
-        });
+    
+        if(req.body.email == 'luis@corpinto.com'){
+            showRetreatsInfo = await Retreat.find({
+              $or:[{sbs:'Alias'},{sbs:'General'}],
+              status: "Pendiente"
+            });
+          }else if(req.body.email == 'ana@corpinto.com'){
+            showRetreatsInfo = await Retreat.find({
+              $or:[{sbs:'Arrital'},{sbs:'Arroba'}],
+              status: "Pendiente"
+            });
+          }else{
+            showRetreatsInfo = await Retreat.find({
+              store: req.body.store,
+              status: "Pendiente"
+            });
+          }
+
     }else{
         showRetreatsInfo = await Retreat.find({
             store: req.body.store,
             status: "Pendiente"
         });
-    }
+    } 
 
 
     return res.json({ showRetreatsInfo });
 }
 
 async function showRetreatsDebtList(req, res) {
-    let showRetreatsInfo = await RetreatDebt.find();
+    let showRetreatsInfo = await RetreatDebt.find({ total_debt: { $gt: 0 } });
     return res.json({ showRetreatsInfo });
 }
 
@@ -174,11 +194,11 @@ async function createdRetreats(req, res) {
 
     var email_re;
     if(infoStore[0].sbs == 'Alias'){
-        email_re = 'jehivis@gmail.com';
+        email_re = 'luis@gmail.com';
       }else if(infoStore[0].sbs == 'Arrital'){
-        email_re = 'jehivis@gmail.com';
+        email_re = 'ana@gmail.com';
       }else{
-        email_re = 'dlara2017229@gmail.com';
+        email_re = 'luis@corpinto.com';
       }
 
     const newRetreats = Retreat({
@@ -198,7 +218,7 @@ async function createdRetreats(req, res) {
       email(
         infoStore,
         email_re,
-        'Jrodriguezt7@miumg.edu.gt',
+        'jrodriguez@corpinto.com',
         'Nuevo retiro de mercaderia',
         `<!-- pre-header -->
         <table style="display:none!important;">
