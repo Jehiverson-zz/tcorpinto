@@ -16,11 +16,11 @@ async function getBinnacleSale(req, res) {
     var salesNew
     if (req.body.type === 'admin') {
         salesNew = await BinnacleSaleByte.find({
-            date_created: { $regex: "2020" }
+            date_created: {$in: [ /^2020/i, /^2021/ ] }
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     } else {
         salesNew = await BinnacleSaleByte.find({
-            date_created: { $regex: "2020" },
+            date_created: {$in: [ /^2020/i, /^2021/ ] },
             store_creat: req.body.store
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     }
@@ -263,7 +263,8 @@ async function getBinnacleSaleReportBefore(req, res) {
 async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
-        date_created: { $regex: "2020" }
+        //date_created: { $regex: "2020" }
+        date_created: {$in: [ /^2020/i, /^2021/ ] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -314,7 +315,7 @@ async function getBinnacleSaleReportTotal(req, res) {
 async function getBinnacleSaleReportTotalSendFirebase(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
-        date_created: { $regex: "2020" }
+        date_created: {$in: [ /^2020/i, /^2021/ ] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -479,7 +480,7 @@ async function setBinnacleSalesCreate(req, res) {
                 cc: params.email,
                 bcc: "jrodriguez@corpinto.com",
                 subject:
-                    `Dato de venta diaria ${dateEmail} de la tienda ${sale.store_creat}`,
+                    `Dato de venta diaria ${dateEmail}`,
                 text: "", // plain text body
                 html: `<table border="0" align="left" width="590" cellpadding="0" cellspacing="0" class="container590">
                    
