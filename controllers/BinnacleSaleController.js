@@ -359,10 +359,15 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
             "diferencia": res.diffy ? res.diffy : 0
         })
     })
+
     dataStore.map(async (doc) => {
-        const result = await firestore.collection('BinnacleSale').add(doc);
-        console.log(result);
-    })
+        try {
+            await firestore.collection('BinnacleSale').add(doc);
+            console.log('Insert new document in BinnacleSale');
+        } catch (error) {
+            console.log(error)
+        }
+    });
 
     return res.json({ dataStore });
 }

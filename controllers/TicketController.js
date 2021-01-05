@@ -507,7 +507,8 @@ async function getSystemTransferCreate(req, res) {
         status: 'Pendiente',
         $or: [
             //{ store_created: 'Meatpack Web' },
-            { store_created: req.body.store }
+            { store_created: req.body.store },
+            //{ sbs: req.body.subs }
         ]
     }).sort({ timestamp: -1 });
 
@@ -550,7 +551,8 @@ async function getSystemTransferAssigned(req, res) {
     let ticketSystem = await TicketSystem.find({
         status: 'Pendiente',
         $or: [
-            { store_asigned: req.body.store }
+            { store_asigned: req.body.store },
+            //{ sbs: req.body.subs }
         ]
     }).sort({ timestamp: -1 });
 
@@ -638,7 +640,7 @@ async function getTicketsInmediatesCreated(req,res) {
     let ticketInmediates = await TicketInmediates.find({
         status: 'Pendiente',
         $or: [
-            { store_created: req.body.store }
+            { store_created: req.body.store },
         ]
     }).sort({ timestamp: -1 });
 
@@ -1355,6 +1357,14 @@ async function getStoreActive(req, res) {
         return res.json({ result })
     });
 }
+//Obetener todas las tiendas Activas
+async function getOneStoreActive(req, res) {
+    console.log(req.body)
+    await Store.find({status: 'Activo', name: req.body.store}, (err, result) => {
+        if(err) {console.log(err); return 'error'}
+        return res.json({ result })
+    });
+}
 //Crea un codigo random para los tickets
 function randomNumber() {
     const possible = 'abcdefghijklmnopqrstuvwxyz1234567890';
@@ -1973,10 +1983,311 @@ async function getTicketsInmediateSendFirebase(req,res){
     })
 
     dataStore.map(async (doc) => {
-        let result = await firestore.collection('TicketsInmediates').add(doc);
-        console.log(result);
-    })
+        try {
+            await firestore.collection('TicketsInmediates').add(doc);
+            console.log('Insert new document in TicketsInmediates');
+        } catch (error) {
+            console.log(error)
+        }
+    });
 
+    return res.json({ dataStore })
+}
+
+async function getTicketsInmediate2(req,res){
+    const dataStore = [];
+    let result = await TicketInmediates.find({
+       timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
+    },{
+    product:1,
+    upc: 1,
+    alu: 1,
+    siz: 1,
+
+    upc1: 1,
+    alu1: 1,
+    siz1: 1,
+
+    upc2: 1,
+    alu2: 1,
+    siz2: 1,
+
+    upc3: 1,
+    alu3: 1,
+    siz3: 1,
+
+    upc4: 1,
+    alu4: 1,
+    siz4: 1,
+
+    upc5: 1,
+    alu5: 1,
+    siz5: 1,
+
+    upc6: 1,
+    alu6: 1,
+    siz6: 1,
+
+    upc7: 1,
+    alu7: 1,
+    siz7: 1,
+
+    upc8: 1,
+    alu8: 1,
+    siz8: 1,
+
+    upc9: 1,
+    alu9: 1,
+    siz9: 1,
+
+    upc10: 1,
+    alu10: 1,
+    siz10: 1,
+
+    upc11: 1,
+    alu11: 1,
+    siz11: 1,
+
+    upc12: 1,
+    alu12: 1,
+    siz12: 1,
+
+    upc13: 1,
+    alu13: 1,
+    siz13: 1,
+
+    upc14: 1,
+    alu14: 1,
+    siz14: 1,
+
+    upc15: 1,
+    alu15: 1,
+    siz15: 1,
+
+    upc16: 1,
+    alu16: 1,
+    siz16: 1,
+
+    upc17: 1,
+    alu17: 1,
+    siz17: 1,
+
+    upc18: 1,
+    alu18: 1,
+    siz18: 1,
+
+    upc19: 1,
+    alu19: 1,
+    siz19: 1,
+
+    upc20: 1,
+    alu20: 1,
+    siz20: 1,
+
+    upc21: 1,
+    alu21: 1,
+    siz21: 1,
+
+    upc22: 1,
+    alu22: 1,
+    siz22: 1,
+
+    upc23: 1,
+    alu23: 1,
+    siz23: 1,
+
+    upc24: 1,
+    alu24: 1,
+    siz24: 1,
+
+    upc25: 1,
+    alu25: 1,
+    siz25: 1,
+
+    upc26: 1,
+    alu26: 1,
+    siz26: 1,
+
+    upc27: 1,
+    alu27: 1,
+    siz27: 1,
+
+    upc28: 1,
+    alu28: 1,
+    siz28: 1,
+
+    upc29: 1,
+    alu29: 1,
+    siz29: 1,
+
+    upc30: 1,
+    alu30: 1,
+    siz30: 1,
+
+    upc31: 1,
+    alu31: 1,
+    siz31: 1,
+
+    upc32: 1,
+    alu32: 1,
+    siz32: 1,
+
+    upc33: 1,
+    alu33: 1,
+    siz33: 1,
+
+    upc34: 1,
+    alu34: 1,
+    siz34: 1,
+
+    upc35: 1,
+    alu35: 1,
+    siz35: 1,
+
+    upc36: 1,
+    alu36: 1,
+    siz36: 1,
+
+    upc37: 1,
+    alu37: 1,
+    siz37: 1,
+
+    upc38: 1,
+    alu38: 1,
+    siz38: 1,
+
+    upc39: 1,
+    alu39: 1,
+    siz39: 1,
+
+    upc40: 1,
+    alu40: 1,
+    siz40: 1,
+
+    upc41: 1,
+    alu41: 1,
+    siz41: 1,
+
+    upc42: 1,
+    alu42: 1,
+    siz42: 1,
+
+    upc43: 1,
+    alu43: 1,
+    siz43: 1,
+
+    upc44: 1,
+    alu44: 1,
+    siz44: 1,
+
+    upc45: 1,
+    alu45: 1,
+    siz45: 1,
+    
+    upc46: 1,
+    alu46: 1,
+    siz46: 1,
+
+    upc47: 1,
+    alu47: 1,
+    siz47: 1,
+
+    upc48: 1,
+    alu48: 1,
+    siz48: 1,
+
+    upc49: 1,
+    alu49: 1,
+    siz49: 1,
+
+    upc50: 1,
+    alu50: 1,
+    siz50: 1,
+    fact: 1,
+    fact_img:1,
+    desc:1,
+    store_asigned:1,
+    status: 1,
+    store_created: 1,
+    email_asigned: 1,
+    timestamp:1,
+    timestampend:1 
+    }).sort( { timestamp: -1 } );
+
+    result.map((res) =>{
+        let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
+        if(res.product && res.product.length > 0){
+            var listProduct = "";
+            console.log(res)
+            res.product.map((data,i) => {
+                listProduct +=  `Producto${i}: Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}`;
+            })
+            dataStore.push({
+                "fechaCreacion": fecha,
+                "Dia":Moment(fecha).format('DD'),
+                "Mes":Moment(fecha).format('MM'),
+                "Año":Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created?res.store_created:null,
+                "tiendaAsignacion": res.store_asigned?res.store_asigned:null,
+                "estado":res.status?res.status:null,
+                "destino": res.desc?res.desc:null,
+                "product": listProduct
+            });
+
+        }else{
+            let cont = 0;
+            if(cont < 1){
+                console.log(res)
+                cont++;
+            }
+            let listProduct = "";
+            if(res.upc && res.alu && res.siz){
+                listProduct +=  `Producto: Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}`;
+            }
+            if(res.upc1 && res.alu1 && res.siz1){
+                listProduct +=  `Producto: Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}`;
+            }
+            if(res.upc2 && res.alu2 && res.siz2){
+                listProduct +=  `Producto: Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}`;
+            }
+            if(res.upc3 && res.alu3 && res.siz3){
+                listProduct +=  `Producto: Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}`;
+            }
+            if(res.upc4 && res.alu4 && res.siz4){
+                listProduct +=  `Producto: Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}`;
+            }
+            if(res.upc5 && res.alu5 && res.siz5){
+                listProduct +=  `Producto: Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}`;
+            }
+            if(res.upc6 && res.alu6 && res.siz6){
+                listProduct +=  `Producto: Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}`;
+            }
+            if(res.upc7 && res.alu7 && res.siz7){
+                listProduct +=  `Producto: Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}`;
+            }
+            if(res.upc8 && res.alu8 && res.siz8){
+                listProduct +=  `Producto: Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}`;
+            }
+            if(res.upc9 && res.alu9 && res.siz9){
+                listProduct +=  `Producto: Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}`;
+            }
+            if(res.upc10 && res.alu10 && res.siz10){
+                listProduct +=  `Producto: Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}`;
+            }
+            dataStore.push({
+                "fechaCreacion": fecha,
+                "Dia":Moment(fecha).format('DD'),
+                "Mes":Moment(fecha).format('MM'),
+                "Año":Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created?res.store_created:null,
+                "tiendaAsignacion": res.store_asigned?res.store_asigned:null,
+                "estado":res.status?res.status:null,
+                "destino": res.desc?res.desc:null,
+                "product": listProduct,
+
+            })
+        }
+    })
 
     return res.json({ dataStore })
 }
@@ -1985,6 +2296,7 @@ module.exports = {
     storeTicketSystemTransfer,
     storeTicketInmediates,
     getTicketsInmediate,
+    getTicketsInmediate2,
     getTicketsInmediateSendFirebase,
     storeTicketPhotoRetreats,
     storeTicketExternalRetreats,
@@ -2006,5 +2318,6 @@ module.exports = {
     completeTicketInmediate,
     completePhotoRetreats,
     getStore,
-    getStoreActive
+    getStoreActive,
+    getOneStoreActive
 }

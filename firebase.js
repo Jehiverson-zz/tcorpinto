@@ -4,13 +4,13 @@ require('firebase/database');
 require('firebase/firestore');
 
 firebase.initializeApp({
-    apiKey: "NjM0ZDQxODgtN2RmOS00ZDFlLWJiYWEtZWE4YTRlNzRiZjNm",
-    authDomain: "prueba-corpinto.firebaseapp.com",
-    databaseURL: "https://prueba-corpinto.firebaseio.com",
-    projectId: "prueba-corpinto",
-    storageBucket: "prueba-corpinto.appspot.com",
-    messagingSenderId: "134805903893",
-    appId: "1:134805903893:web:67711a76a2fc04f2040c1c",
+    apiKey: "OGI5NzY1MDItZmU5Ni00OTE5LWIzMGEtN2ViMTMyOGFiNzlh",
+    authDomain: "reporteria-ed1f4.firebaseapp.com",
+    databaseURL: "https://reporteria-ed1f4.firebaseio.com",
+    projectId: "reporteria-ed1f4",
+    storageBucket: "reporteria-ed1f4.appspot.com",
+    messagingSenderId: "17663230382",
+    appId: "1:17663230382:web:0f956c08af25906b26883f",
     //measurementId: "G-0JSCMHXRV0"
 });
 

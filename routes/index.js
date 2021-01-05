@@ -83,6 +83,7 @@ router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleRepo
 router.get('/binnacles/sales_totals_send_firebase', binnacleSaleController.getBinnacleSaleReportTotalSendFirebase)
 //ReporteLourdes
 router.get('/binnacles/ticketsInmediate', ticketController.getTicketsInmediate)
+router.get('/binnacles/ticketsInmediate2', ticketController.getTicketsInmediate2)
 router.get('/binnacles/ticketsInmediate_sendFirebase', ticketController.getTicketsInmediateSendFirebase)
 router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies);
 router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
@@ -113,6 +114,7 @@ router.put('/ticket/immediate_deliveries/complete/:id', ticketController.complet
 router.put('/ticket/photo_retreats/complete/:id', ticketController.completePhotoRetreats);
 router.get('/tickets/stores', ticketController.getStore);
 router.get('/tickets/stores_actives', ticketController.getStoreActive);
+router.post('/user/store', ticketController.getOneStoreActive);
 
 
 
