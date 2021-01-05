@@ -359,7 +359,7 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
         })
     })
 
-    await dataStore.map(async (doc) => {
+    dataStore.map(async (doc) => {
         try {
             await firestore.collection('BinnacleSale').add(doc);
             console.log('Insert new document in BinnacleSale');

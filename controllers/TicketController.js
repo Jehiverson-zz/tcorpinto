@@ -508,7 +508,7 @@ async function getSystemTransferCreate(req, res) {
         $or: [
             //{ store_created: 'Meatpack Web' },
             { store_created: req.body.store },
-            { sbs: req.body.subs }
+            //{ sbs: req.body.subs }
         ]
     }).sort({ timestamp: -1 });
 
@@ -552,7 +552,7 @@ async function getSystemTransferAssigned(req, res) {
         status: 'Pendiente',
         $or: [
             { store_asigned: req.body.store },
-            { sbs: req.body.subs }
+            //{ sbs: req.body.subs }
         ]
     }).sort({ timestamp: -1 });
 
@@ -1982,7 +1982,7 @@ async function getTicketsInmediateSendFirebase(req,res){
                 })
     })
 
-    await dataStore.map(async (doc) => {
+    dataStore.map(async (doc) => {
         try {
             await firestore.collection('TicketsInmediates').add(doc);
             console.log('Insert new document in TicketsInmediates');
