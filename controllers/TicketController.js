@@ -156,7 +156,7 @@ async function storeTicketInmediates(req, res) {
         }
         Inmediates.product.push(producto);
     })
-
+    console.log(address_send)
     let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
 
     Inmediates.save(async (err, storedTicket) => {
@@ -164,7 +164,7 @@ async function storeTicketInmediates(req, res) {
         if (storedTicket) {
             email(
                 params,
-                'lourdes@corpinto.com',
+                'carlosdaniellarsol@gmail.com',
                 data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
                 `<!-- pre-header -->
@@ -235,30 +235,31 @@ async function storeTicketInmediates(req, res) {
                                             <tr>
                                                 <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
                                                     <div style="color:black">
-                                                        <b> Se solicito un envió inmediato de mercadería por la tienda ${params[0].store_created}. El traslado saldrá de la tienda ${params[0].store_asigned} y será a ${params[0].desc}</b>
-                                                        <br>
-                                                    </b>
-                                                    <p>listado de articulos solicitados:</p>
-                                                 <table class="table">
-                                                    <thead>
-                                                        <th scope="col" width: 20px>UPC</th>
-                                                        <th scope="col" width: 20px>ALU</th>
-                                                        <th scope="col" width: 20px>TALLA</th>
-                                                    </thead>
-                                                    <tbody>
-                                                    ${
-                                                        params.map(x => {
-                                                            return (
-                                                                `<tr>
-                                                                     <td>${x.upc}</td>
-                                                                     <td>${x.alu}</td>
-                                                                     <td>${x.size}</td>
-                                                                </tr>`
-                                                            )
-                                                        })
-                                                    }
-                                                    </tbody>
-                                                    </table>
+                                                        <b>
+                                                            Se solicito un envió inmediato de mercadería por la tienda ${params[0].store_created}. El traslado saldrá de la tienda ${params[0].store_asigned}.<br>
+                                                            detalles de traslado: ${address_send}</b><br>
+                                                        </b>
+                                                        <p>listado de articulos solicitados:</p>
+                                                        <table class="table">
+                                                            <thead>
+                                                                <th scope="col" width: 20px>UPC</th>
+                                                                <th scope="col" width: 20px>ALU</th>
+                                                                <th scope="col" width: 20px>TALLA</th>
+                                                            </thead>
+                                                            <tbody>
+                                                            ${
+                                                                params.map(x => {
+                                                                    return (
+                                                                        `<tr>
+                                                                            <td>${x.upc}</td>
+                                                                            <td>${x.alu}</td>
+                                                                            <td>${x.size}</td>
+                                                                        </tr>`
+                                                                    )
+                                                                })
+                                                            }
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </td>
                                             </tr>
