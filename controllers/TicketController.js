@@ -156,7 +156,7 @@ async function storeTicketInmediates(req, res) {
         }
         Inmediates.product.push(producto);
     })
-
+    console.log(address_send)
     let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
 
     Inmediates.save(async (err, storedTicket) => {
@@ -235,30 +235,31 @@ async function storeTicketInmediates(req, res) {
                                             <tr>
                                                 <td align="center" style="font-size: 15px; font-family: "Work Sans", Calibri, sans-serif; line-height: 24px; color:black">
                                                     <div style="color:black">
-                                                        <b> Se solicito un envió inmediato de mercadería por la tienda ${params[0].store_created}. El traslado saldrá de la tienda ${params[0].store_asigned} y será a ${params[0].desc}</b>
-                                                        <br>
-                                                    </b>
-                                                    <p>listado de articulos solicitados:</p>
-                                                 <table class="table">
-                                                    <thead>
-                                                        <th scope="col" width: 20px>UPC</th>
-                                                        <th scope="col" width: 20px>ALU</th>
-                                                        <th scope="col" width: 20px>TALLA</th>
-                                                    </thead>
-                                                    <tbody>
-                                                    ${
-                                                        params.map(x => {
-                                                            return (
-                                                                `<tr>
-                                                                     <td>${x.upc}</td>
-                                                                     <td>${x.alu}</td>
-                                                                     <td>${x.size}</td>
-                                                                </tr>`
-                                                            )
-                                                        })
-                                                    }
-                                                    </tbody>
-                                                    </table>
+                                                        <b>
+                                                            Se solicito un envió inmediato de mercadería por la tienda ${params[0].store_created}. El traslado saldrá de la tienda ${params[0].store_asigned}.<br>
+                                                            detalles de traslado: ${address_send}</b><br>
+                                                        </b>
+                                                        <p>listado de articulos solicitados:</p>
+                                                        <table class="table">
+                                                            <thead>
+                                                                <th scope="col" width: 20px>UPC</th>
+                                                                <th scope="col" width: 20px>ALU</th>
+                                                                <th scope="col" width: 20px>TALLA</th>
+                                                            </thead>
+                                                            <tbody>
+                                                            ${
+                                                                params.map(x => {
+                                                                    return (
+                                                                        `<tr>
+                                                                            <td>${x.upc}</td>
+                                                                            <td>${x.alu}</td>
+                                                                            <td>${x.size}</td>
+                                                                        </tr>`
+                                                                    )
+                                                                })
+                                                            }
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -1997,7 +1998,7 @@ async function getTicketsInmediateSendFirebase(req,res){
 async function getTicketsInmediate2(req,res){
     const dataStore = [];
     let result = await TicketInmediates.find({
-       timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
+       //timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
     },{
     product:1,
     upc: 1,
@@ -2214,15 +2215,15 @@ async function getTicketsInmediate2(req,res){
     timestampend:1 
     }).sort( { timestamp: -1 } );
 
-    result.map((res) =>{
+    result.map((res, numInt) =>{
         let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
         if(res.product && res.product.length > 0){
             var listProduct = "";
-            console.log(res)
             res.product.map((data,i) => {
                 listProduct +=  `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
             })
             dataStore.push({
+                "id":numInt,
                 "fechaCreacion": fecha,
                 "Dia":Moment(fecha).format('DD'),
                 "Mes":Moment(fecha).format('MM'),
@@ -2235,11 +2236,6 @@ async function getTicketsInmediate2(req,res){
             });
 
         }else{
-            let cont = 0;
-            if(cont < 1){
-                console.log(res)
-                cont++;
-            }
             let listProduct = "";
             if(res.upc && res.alu && res.siz){
                 listProduct +=  `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
@@ -2275,6 +2271,7 @@ async function getTicketsInmediate2(req,res){
                 listProduct +=  `*Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}/`;
             }
             dataStore.push({
+                "id":numInt,
                 "fechaCreacion": fecha,
                 "Dia":Moment(fecha).format('DD'),
                 "Mes":Moment(fecha).format('MM'),
@@ -2284,7 +2281,6 @@ async function getTicketsInmediate2(req,res){
                 "estado":res.status?res.status:null,
                 "destino": res.desc?res.desc:null,
                 "product": listProduct,
-
             })
         }
     })
