@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 const BinnacleDailies = require('../models/Binnacle_daily');
+var currencyFormatter = require('currency-formatter');
 const { auth, db, firestore } = require('../firebase');
 let Moment = require("moment-timezone");
 let momentToday = require("moment");
@@ -375,7 +376,13 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
 async function setBinnacleSalesCreate(req, res) {
     let params = req.body;
     let sale = new BinnacleSaleByte();
-
+    let currency_format = {
+        symbol: 'Q.',//simbolo
+        decimal: '.',//punto de los decimales
+        thousand: ',', //separador entre miles
+        precision: 2, // número de decimales
+        format: '%s %v' // %s es el simbolo %v es el valor
+    };
     if (params.dateStoreDefault) {
         sale.date_created = Moment(params.dateStoreDefault).format('YYYY-MM-DD');
         var dateEmail = Moment(params.dateStoreDefault).format('DD/MM/YYYY')
@@ -481,7 +488,8 @@ async function setBinnacleSalesCreate(req, res) {
             // send mail with defined transport object
             transporter.sendMail({
                 from: '"Datos de venta" <mensajeria@tickets.corpinto.com>', // sender address
-                to: "ventas@corpinto.com", // list of receivers
+                //to: "ventas@corpinto.com", // list of receivers
+                to: "dlara2017229@gmail.com",
                 cc: params.email,
                 bcc: "jrodriguez@corpinto.com",
                 subject:
@@ -500,7 +508,7 @@ async function setBinnacleSalesCreate(req, res) {
 
                         <div style="line-height: 35px">
 
-                            <span style="color: #5caad2;">${sale.store_creat}</span> Venta Q. ${sale.sale_daily}
+                            <span style="color: #5caad2;">${sale.store_creat}</span> Venta ${currencyFormatter.format(sale.sale_daily, currency_format)}
 
                         </div>
                     </td>
@@ -512,8 +520,8 @@ async function setBinnacleSalesCreate(req, res) {
                             <tr>
                                 <td align="left" style="color:black">
 
-                                    <b style="color:black">Meta:</b><p>${sale.daily_goal}</p><br>
-                                    <b style="color:black">Venta Año Anterior:</b><p>${sale.year_before_sale}</p><br>
+                                    <b style="color:black">Meta:</b><p>${currencyFormatter.format(sale.daily_goal, currency_format)}</p><br>
+                                    <b style="color:black">Venta Año Anterior:</b><p>${currencyFormatter.format(sale.year_before_sale, currency_format)}</p><br>
                                     <b style="color:black">Encargado:</b><p>${sale.manager}</p><br>
                                     <b style="color:black">Clíentes:</b><p>${sale.people_totals}</p><br>
                                     <b style="color:black">Ventas:</b><p>${sale.sales_totals}</p><br>
@@ -526,7 +534,7 @@ async function setBinnacleSalesCreate(req, res) {
                                                             ${x.name} 
                                                     <b style="color:black">
                                                         Venta:</b> 
-                                                            ${x.sale}
+                                                            ${currencyFormatter.format(x.sale, currency_format)}
                                                 </p>`
                     )
                 })
