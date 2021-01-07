@@ -1,18 +1,22 @@
 'use strict'
 
 const DamagedMerchandise = require('../models/DamagedMerchandise');
+const cloudinary = require('../cloudinary.config');
 
-function storeDamagedMerchandise(req,res) {
-    let params = req.body[0];
+async function storeDamagedMerchandise(req,res) {
+    let params = JSON.parse(req.body.data);
+    let file = req.file;
     let damagedMerchandise = new DamagedMerchandise();
-    console.log(params)
-    if(params.upc != "" && params.alu != "" && params.size != "" && params.price != "" && params.damaged != ""){
+    if(params.upc != "" && params.alu != "" && params.size != "" && params.price != "" && params.damaged != "" && file){
+        let result = await cloudinary.uploader.upload(file.path);
+        console.log(result)
         damagedMerchandise.upc = params.upc;
         damagedMerchandise.alu = params.alu;
         damagedMerchandise.siz = params.size;
         damagedMerchandise.price = params.price;
         damagedMerchandise.damage = params.damaged;
         damagedMerchandise.store_created = params.store_created;
+        damagedMerchandise.image = result.public_id;
 
         damagedMerchandise.save((err, sotredDamaged)=>{
             if(err) return res.status(500).send({ message: 'No se pudo guardar la mercaderia dañada' })

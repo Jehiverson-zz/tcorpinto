@@ -8,6 +8,7 @@ const fileSchema = new Schema ({
     price: { type: String,default:0 },
     damage:{ type:String,default:0 },
     store_created: { type: String },
+    image: { type: String },
     timestamp:{ type: Date, default: Date.now },
 });
 
