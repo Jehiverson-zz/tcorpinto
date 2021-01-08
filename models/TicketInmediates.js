@@ -224,7 +224,7 @@ const fileSchema = new Schema ({
     status: {type: String},
     store_created: {type: String },
     email_asigned: {type: String },
-    timestamp:{ type: Date, default: Date.now },
+    timestamp:{ type: Date },
     timestampend:{ type: Date }
 
 });
