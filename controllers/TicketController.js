@@ -7,7 +7,7 @@ const TicketInmediates = require("../models/TicketInmediates");
 const TicketInmediate = require("../models/TicketInmediate");
 const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
-const { auth, db, firestore } = require('../firebase');
+const { firestore } = require('../firebase');
 const nodemailer = require('nodemailer');
 const cloudinary = require('../cloudinary.config');
 const Moment = require('moment');
@@ -32,7 +32,7 @@ async function storeTicketSystemTransfer(req, res) {
         Ticket.product.push(producto);
     })
 
-    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned });
 
     Ticket.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
@@ -98,17 +98,16 @@ async function storeTicketSystemTransfer(req, res) {
                                                             </tr>
                                                         </thead>
                                                         <tbody align="center">
-                                                        ${
-                                                            params.map(x => {
-                                                                return (
-                                                                    `<tr>
+                                                        ${params.map(x => {
+                    return (
+                        `<tr>
                                                                         <td>${x.upc}</td>
                                                                         <td>${x.alu}</td>
                                                                         <td>${x.size}</td>
                                                                     </tr>`
-                                                                )
-                                                            })
-                                                        }
+                    )
+                })
+                }
                                                         </tbody>
                                                     </table>
                                                 </td>
@@ -139,6 +138,9 @@ async function storeTicketInmediates(req, res) {
     let file = req.file;
     let result = await cloudinary.uploader.upload(file.path);
     let address_send = `Nombre: ${params[0].client}, Dirreccion: ${params[0].address}, Celular 1: ${params[0].phone1}, Celular 2: ${params[0].phone2}, Horarios: ${params[0].hours}, Total a cobrar: ${params[0].total};`
+    let date = new Date();
+    let fecha = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
+    date = Moment(new Date(fecha)).format('YYYY-MM-DDT08:00:00.80Z');
 
     Inmediates.store_created = params[0].store_created;
     Inmediates.store_asigned = params[0].store_asigned;
@@ -147,6 +149,7 @@ async function storeTicketInmediates(req, res) {
     Inmediates.fact = params[0].bill;
     Inmediates.fact_img = result.public_id;
     Inmediates.desc = address_send;
+    Inmediates.timestamp = date;
 
     params.map(data => {
         let producto = {
@@ -156,15 +159,15 @@ async function storeTicketInmediates(req, res) {
         }
         Inmediates.product.push(producto);
     })
-    console.log(address_send)
-    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned });
 
     Inmediates.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
             email(
                 params,
-                'lourdes@corpinto.com',
+                //'lourdes@corpinto.com',
+                'dlara2017229@gmail.com',
                 data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
                 `<!-- pre-header -->
@@ -281,7 +284,7 @@ async function storeTicketInmediates(req, res) {
             return res.status(200).send({ message: 'Ticket creado exitosamente!', ticekt: storedTicket })
         }
     });
-    console.log(Inmediates, result,file);
+    console.log(Inmediates);
 }
 //Crea los tickets de retiros de fotografias
 async function storeTicketPhotoRetreats(req, res) {
@@ -303,7 +306,7 @@ async function storeTicketPhotoRetreats(req, res) {
         }
         Ticket.product.push(producto);
     })
-    let data_store_asigned = await User.findOne({ store: params[0].store_asigned});
+    let data_store_asigned = await User.findOne({ store: params[0].store_asigned });
     //Se guarda el ticket
     Ticket.save((err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
@@ -394,17 +397,16 @@ async function storeTicketPhotoRetreats(req, res) {
                                              </tr>
                                          </thead>
                                          <tbody align="center">
-                                            ${
-                                            params.map(x => {
-                                                return (
-                                                    `<tr>
+                                            ${params.map(x => {
+                    return (
+                        `<tr>
                                                          <td>${x.upc}</td>
                                                          <td>${x.alu}</td>
                                                          <td>${x.size}</td>
                                                      </tr>`
-                                                    )
-                                                })
-                                            }
+                    )
+                })
+                }
                                          </tbody>
                                         </table>
                                                 </div>
@@ -437,9 +439,9 @@ async function storeTicketExternalRetreats(req, res) {
     //Se genera en el ticket de la tranferencia
     Ticket.store_created = params[0].store_created;
     Ticket.name = params[0].person_retreats,
-    Ticket.manager = params[0].person_authorizing,
-    Ticket.inv_val = params[0].bill,
-    Ticket.status = "Completado"
+        Ticket.manager = params[0].person_authorizing,
+        Ticket.inv_val = params[0].bill,
+        Ticket.status = "Completado"
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
@@ -453,7 +455,7 @@ async function storeTicketExternalRetreats(req, res) {
     //Se guarda el ticket
     Ticket.save((err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
-        if(storedTicket){
+        if (storedTicket) {
             return res.status(200).send({ ticket: storedTicket, message: 'Ticket creado exitosamente!' });
         }
     });
@@ -468,22 +470,22 @@ async function getAllTicketsSystemTransfer(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketSystem.map((data,i) => {
+    ticketSystem.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -513,22 +515,22 @@ async function getSystemTransferCreate(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketSystem.map((data,i) => {
+    ticketSystem.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -557,22 +559,22 @@ async function getSystemTransferAssigned(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketSystem.map((data,i) => {
+    ticketSystem.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -602,22 +604,22 @@ async function getAllTicketsInmediates(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketInmediates.map((data,i) => {
+    ticketInmediates.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -637,7 +639,7 @@ async function getAllTicketsInmediates(req, res) {
     });
 }
 //Ontiene los tikets de entrgas inmediatas creados por una tienda
-async function getTicketsInmediatesCreated(req,res) {
+async function getTicketsInmediatesCreated(req, res) {
     let ticketInmediates = await TicketInmediates.find({
         status: 'Pendiente',
         $or: [
@@ -645,22 +647,22 @@ async function getTicketsInmediatesCreated(req,res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketInmediates.map((data,i) => {
+    ticketInmediates.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -680,7 +682,7 @@ async function getTicketsInmediatesCreated(req,res) {
     });
 }
 //Ontiene los tikets de entrgas inmediatas asignamdos a una tienda
-async function getTicketsInmediatesAssigned(req,res) {
+async function getTicketsInmediatesAssigned(req, res) {
     let ticketInmediates = await TicketInmediates.find({
         status: 'Pendiente',
         $or: [
@@ -688,22 +690,22 @@ async function getTicketsInmediatesAssigned(req,res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketInmediates.map((data,i) => {
+    ticketInmediates.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -732,22 +734,22 @@ async function getAllPhotoRetreats(req, res) {
         ]
     }).sort({ timestamp: -1 });
     console.log("REATREATS", ticketPhotoRetrats)
-    ticketPhotoRetrats.map((data,i) => {
+    ticketPhotoRetrats.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -775,22 +777,22 @@ async function getPhotoRetreats(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketPhotoRetrats.map((data,i) => {
+    ticketPhotoRetrats.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -818,22 +820,22 @@ async function getAllExernalRetreats(req, res) {
         ]
     }).sort({ timestamp: -1 });
 
-    ticketExternal.map((data,i) => {
+    ticketExternal.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -859,22 +861,22 @@ async function getExernalRetreats(req, res) {
         status: "Completado"
     }).sort({ timestamp: -1 });
     //console.log(ticketExternal)
-    ticketExternal.map((data,i) => {
+    ticketExternal.map((data, i) => {
         let array__ = []
         var iteracion = ""
-        for(var j = 0 ; j <= 3; j++ ){
-            if(j == 0 || j == 2 || j == 3){
-                if(j == 0){
+        for (var j = 0; j <= 3; j++) {
+            if (j == 0 || j == 2 || j == 3) {
+                if (j == 0) {
                     iteracion = ""
-                }else{
+                } else {
                     iteracion = j
                 }
-                let upc = `upc`+iteracion
-                let alu = `alu`+iteracion
-                let siz = `siz`+iteracion
-                if(data.product.length == 0){
-                    if(data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
-                        array__.push({ upc : data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
+                let upc = `upc` + iteracion
+                let alu = `alu` + iteracion
+                let siz = `siz` + iteracion
+                if (data.product.length == 0) {
+                    if (data[`${upc}`] != undefined && data[`${alu}`] != undefined && data[`${siz}`] != undefined) {
+                        array__.push({ upc: data[`${upc}`], alu: data[`${alu}`], siz: data[`${siz}`] });
                     }
                 }
             }
@@ -899,7 +901,7 @@ async function inactivateTicket(req, res) {
     TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
 
-        let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
+        let data_store_asigned = await User.findOne({ store: inactive.store_asigned });
 
         if (inactive) {
             let params = [inactive]
@@ -1006,7 +1008,7 @@ async function inactivateTicketInmediate(req, res) {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
         if (inactive) {
             let params = [inactive]
-            let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
+            let data_store_asigned = await User.findOne({ store: inactive.store_asigned });
             email(
                 params,
                 data_store_asigned.email,
@@ -1109,8 +1111,8 @@ async function inactivatePhotoRetreats(req, res) {
 
     TicketPhoto.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
-        if(inactive){
-            let data_store_asigned = await User.findOne({ store: inactive.store_asigned});
+        if (inactive) {
+            let data_store_asigned = await User.findOne({ store: inactive.store_asigned });
             email(
                 [inactive],
                 data_store_asigned.email,
@@ -1213,7 +1215,7 @@ async function inactivateExternalRetreats(req, res) {
 
     TicketExternal.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
-        if(inactive){
+        if (inactive) {
             return res.status(200).send({ message: 'Ticket eliminado!', ticekt: inactive })
         }
     })
@@ -1223,11 +1225,11 @@ async function completeTicket(req, res) {
     let ticket_id = req.params.id;
     let retailn = req.body.retailn.retailn;
 
-    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Completado',retailn: retailn }, async (err, complete) => {
+    TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Completado', retailn: retailn }, async (err, complete) => {
         if (err) return res.status(500).send({ message: "Error al completar ticket" });
         if (complete) {
             let params = [complete];
-            let data_store_asigned = await User.findOne({ store: complete.store_asigned});
+            let data_store_asigned = await User.findOne({ store: complete.store_asigned });
             await email(
                 params,
                 data_store_asigned.email,
@@ -1350,19 +1352,18 @@ async function getStore(req, res) {
     let result = await Store.find();
     return res.json({ result })
 }
-
 //Obetener todas las tiendas Activas
 async function getStoreActive(req, res) {
-    await Store.find({status: 'Activo'}, (err, result) => {
-        if(err) {console.log(err); return 'error'}
+    await Store.find({ status: 'Activo' }, (err, result) => {
+        if (err) { console.log(err); return 'error' }
         return res.json({ result })
     });
 }
 //Obetener todas las tiendas Activas
 async function getOneStoreActive(req, res) {
     console.log(req.body)
-    await Store.find({status: 'Activo', name: req.body.store}, (err, result) => {
-        if(err) {console.log(err); return 'error'}
+    await Store.find({ status: 'Activo', name: req.body.store }, (err, result) => {
+        if (err) { console.log(err); return 'error' }
         return res.json({ result })
     });
 }
@@ -1376,7 +1377,7 @@ function randomNumber() {
     return ramdomNum;
 }
 //Generar Email
-async function email(data, reseptor, emisor,titulo, template) {
+async function email(data, reseptor, emisor, titulo, template) {
     let randsend = randomNumber();
     let Moment = require("moment-timezone");
     let hoy = Moment().tz("America/Guatemala")._d;
@@ -1409,877 +1410,889 @@ async function email(data, reseptor, emisor,titulo, template) {
         text: "", // plain text body
         html: template, // html body
     }, async function (err, json) {
-        if(err) console.log(`ERROR EN EL ENVÍO: ${err}`);
-        if(json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
+        if (err) console.log(`ERROR EN EL ENVÍO: ${err}`);
+        if (json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
     });
 }
 
-async function getTicketsInmediate(req,res){
+async function getTicketsInmediate(req, res) {
     const dataStore = [];
-    let result = await TicketInmediates.find({},{
-    upc: 1,
-    alu: 1,
-    siz: 1,
+    let result = await TicketInmediates.find({}, {
+        upc: 1,
+        alu: 1,
+        siz: 1,
 
-    upc1: 1,
-    alu1: 1,
-    siz1: 1,
+        upc1: 1,
+        alu1: 1,
+        siz1: 1,
 
-    upc2: 1,
-    alu2: 1,
-    siz2: 1,
+        upc2: 1,
+        alu2: 1,
+        siz2: 1,
 
-    upc3: 1,
-    alu3: 1,
-    siz3: 1,
+        upc3: 1,
+        alu3: 1,
+        siz3: 1,
 
-    upc4: 1,
-    alu4: 1,
-    siz4: 1,
+        upc4: 1,
+        alu4: 1,
+        siz4: 1,
 
-    upc5: 1,
-    alu5: 1,
-    siz5: 1,
+        upc5: 1,
+        alu5: 1,
+        siz5: 1,
 
-    upc6: 1,
-    alu6: 1,
-    siz6: 1,
+        upc6: 1,
+        alu6: 1,
+        siz6: 1,
 
-    upc7: 1,
-    alu7: 1,
-    siz7: 1,
+        upc7: 1,
+        alu7: 1,
+        siz7: 1,
 
-    upc8: 1,
-    alu8: 1,
-    siz8: 1,
+        upc8: 1,
+        alu8: 1,
+        siz8: 1,
 
-    upc9: 1,
-    alu9: 1,
-    siz9: 1,
+        upc9: 1,
+        alu9: 1,
+        siz9: 1,
 
-    upc10: 1,
-    alu10: 1,
-    siz10: 1,
+        upc10: 1,
+        alu10: 1,
+        siz10: 1,
 
-    upc11: 1,
-    alu11: 1,
-    siz11: 1,
+        upc11: 1,
+        alu11: 1,
+        siz11: 1,
 
-    upc12: 1,
-    alu12: 1,
-    siz12: 1,
+        upc12: 1,
+        alu12: 1,
+        siz12: 1,
 
-    upc13: 1,
-    alu13: 1,
-    siz13: 1,
+        upc13: 1,
+        alu13: 1,
+        siz13: 1,
 
-    upc14: 1,
-    alu14: 1,
-    siz14: 1,
+        upc14: 1,
+        alu14: 1,
+        siz14: 1,
 
-    upc15: 1,
-    alu15: 1,
-    siz15: 1,
+        upc15: 1,
+        alu15: 1,
+        siz15: 1,
 
-    upc16: 1,
-    alu16: 1,
-    siz16: 1,
+        upc16: 1,
+        alu16: 1,
+        siz16: 1,
 
-    upc17: 1,
-    alu17: 1,
-    siz17: 1,
+        upc17: 1,
+        alu17: 1,
+        siz17: 1,
 
-    upc18: 1,
-    alu18: 1,
-    siz18: 1,
+        upc18: 1,
+        alu18: 1,
+        siz18: 1,
 
-    upc19: 1,
-    alu19: 1,
-    siz19: 1,
+        upc19: 1,
+        alu19: 1,
+        siz19: 1,
 
-    upc20: 1,
-    alu20: 1,
-    siz20: 1,
+        upc20: 1,
+        alu20: 1,
+        siz20: 1,
 
-    upc21: 1,
-    alu21: 1,
-    siz21: 1,
+        upc21: 1,
+        alu21: 1,
+        siz21: 1,
 
-    upc22: 1,
-    alu22: 1,
-    siz22: 1,
+        upc22: 1,
+        alu22: 1,
+        siz22: 1,
 
-    upc23: 1,
-    alu23: 1,
-    siz23: 1,
+        upc23: 1,
+        alu23: 1,
+        siz23: 1,
 
-    upc24: 1,
-    alu24: 1,
-    siz24: 1,
+        upc24: 1,
+        alu24: 1,
+        siz24: 1,
 
-    upc25: 1,
-    alu25: 1,
-    siz25: 1,
+        upc25: 1,
+        alu25: 1,
+        siz25: 1,
 
-    upc26: 1,
-    alu26: 1,
-    siz26: 1,
+        upc26: 1,
+        alu26: 1,
+        siz26: 1,
 
-    upc27: 1,
-    alu27: 1,
-    siz27: 1,
+        upc27: 1,
+        alu27: 1,
+        siz27: 1,
 
-    upc28: 1,
-    alu28: 1,
-    siz28: 1,
+        upc28: 1,
+        alu28: 1,
+        siz28: 1,
 
-    upc29: 1,
-    alu29: 1,
-    siz29: 1,
+        upc29: 1,
+        alu29: 1,
+        siz29: 1,
 
-    upc30: 1,
-    alu30: 1,
-    siz30: 1,
+        upc30: 1,
+        alu30: 1,
+        siz30: 1,
 
-    upc31: 1,
-    alu31: 1,
-    siz31: 1,
+        upc31: 1,
+        alu31: 1,
+        siz31: 1,
 
-    upc32: 1,
-    alu32: 1,
-    siz32: 1,
+        upc32: 1,
+        alu32: 1,
+        siz32: 1,
 
-    upc33: 1,
-    alu33: 1,
-    siz33: 1,
+        upc33: 1,
+        alu33: 1,
+        siz33: 1,
 
-    upc34: 1,
-    alu34: 1,
-    siz34: 1,
+        upc34: 1,
+        alu34: 1,
+        siz34: 1,
 
-    upc35: 1,
-    alu35: 1,
-    siz35: 1,
+        upc35: 1,
+        alu35: 1,
+        siz35: 1,
 
-    upc36: 1,
-    alu36: 1,
-    siz36: 1,
+        upc36: 1,
+        alu36: 1,
+        siz36: 1,
 
-    upc37: 1,
-    alu37: 1,
-    siz37: 1,
+        upc37: 1,
+        alu37: 1,
+        siz37: 1,
 
-    upc38: 1,
-    alu38: 1,
-    siz38: 1,
+        upc38: 1,
+        alu38: 1,
+        siz38: 1,
 
-    upc39: 1,
-    alu39: 1,
-    siz39: 1,
+        upc39: 1,
+        alu39: 1,
+        siz39: 1,
 
-    upc40: 1,
-    alu40: 1,
-    siz40: 1,
+        upc40: 1,
+        alu40: 1,
+        siz40: 1,
 
-    upc41: 1,
-    alu41: 1,
-    siz41: 1,
+        upc41: 1,
+        alu41: 1,
+        siz41: 1,
 
-    upc42: 1,
-    alu42: 1,
-    siz42: 1,
+        upc42: 1,
+        alu42: 1,
+        siz42: 1,
 
-    upc43: 1,
-    alu43: 1,
-    siz43: 1,
+        upc43: 1,
+        alu43: 1,
+        siz43: 1,
 
-    upc44: 1,
-    alu44: 1,
-    siz44: 1,
+        upc44: 1,
+        alu44: 1,
+        siz44: 1,
 
-    upc45: 1,
-    alu45: 1,
-    siz45: 1,
-    
-    upc46: 1,
-    alu46: 1,
-    siz46: 1,
+        upc45: 1,
+        alu45: 1,
+        siz45: 1,
 
-    upc47: 1,
-    alu47: 1,
-    siz47: 1,
+        upc46: 1,
+        alu46: 1,
+        siz46: 1,
 
-    upc48: 1,
-    alu48: 1,
-    siz48: 1,
+        upc47: 1,
+        alu47: 1,
+        siz47: 1,
 
-    upc49: 1,
-    alu49: 1,
-    siz49: 1,
+        upc48: 1,
+        alu48: 1,
+        siz48: 1,
 
-    upc50: 1,
-    alu50: 1,
-    siz50: 1,
-    fact: 1,
-    fact_img:1,
-    desc:1,
-    store_asigned:1,
-    status: 1,
-    store_created: 1,
-    email_asigned: 1,
-    timestamp:1,
-    timestampend:1 
-    }).sort( { timestamp: -1 } );
+        upc49: 1,
+        alu49: 1,
+        siz49: 1,
 
-    result.map((res) =>{
+        upc50: 1,
+        alu50: 1,
+        siz50: 1,
+        fact: 1,
+        fact_img: 1,
+        desc: 1,
+        store_asigned: 1,
+        status: 1,
+        store_created: 1,
+        email_asigned: 1,
+        timestamp: 1,
+        timestampend: 1
+    }).sort({ timestamp: -1 });
+
+    result.map((res) => {
         let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
-                        "fechaCreacion": fecha,
-                        "Dia":Moment(fecha).format('DD'),
-                        "Mes":Moment(fecha).format('MM'),
-                        "Año":Moment(fecha).format('YYYY'),
-                        "tiendaCreacion": res.store_created,
-                        "tiendaAsignacion": res.store_asigned,
-                        "estado":res.status,
-                        "destino": res.desc,
-                        "upc": res.upc,
-                        "alu": res.alu,
-                        "siz": res.siz,
-                        
-                        "upc1": res.upc1,
-                        "alu1": res.alu1,
-                        "siz1": res.siz1,
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tiendaCreacion": res.store_created,
+            "tiendaAsignacion": res.store_asigned,
+            "estado": res.status,
+            "destino": res.desc,
+            "upc": res.upc,
+            "alu": res.alu,
+            "siz": res.siz,
 
-                        "upc2": res.upc2,
-                        "alu2": res.alu2,
-                        "siz2": res.siz2,
+            "upc1": res.upc1,
+            "alu1": res.alu1,
+            "siz1": res.siz1,
 
-                        "upc3": res.upc3,
-                        "alu3": res.alu3,
-                        "siz3": res.siz3,
+            "upc2": res.upc2,
+            "alu2": res.alu2,
+            "siz2": res.siz2,
 
-                        "upc4": res.upc4,
-                        "alu4": res.alu4,
-                        "siz4": res.siz4,
+            "upc3": res.upc3,
+            "alu3": res.alu3,
+            "siz3": res.siz3,
 
-                        "upc4": res.upc4,
-                        "alu4": res.alu4,
-                        "siz4": res.siz4,
+            "upc4": res.upc4,
+            "alu4": res.alu4,
+            "siz4": res.siz4,
 
-                        "upc4": res.upc4,
-                        "alu4": res.alu4,
-                        "siz4": res.siz4,
+            "upc4": res.upc4,
+            "alu4": res.alu4,
+            "siz4": res.siz4,
 
-                        "upc5": res.upc5,
-                        "alu5": res.alu5,
-                        "siz5": res.siz5,
+            "upc4": res.upc4,
+            "alu4": res.alu4,
+            "siz4": res.siz4,
 
-                        "upc6": res.upc6,
-                        "alu6": res.alu6,
-                        "siz6": res.siz6,
+            "upc5": res.upc5,
+            "alu5": res.alu5,
+            "siz5": res.siz5,
 
-                        "upc7": res.upc7,
-                        "alu7": res.alu7,
-                        "siz7": res.siz7,
+            "upc6": res.upc6,
+            "alu6": res.alu6,
+            "siz6": res.siz6,
 
-                        "upc8": res.upc8,
-                        "alu8": res.alu8,
-                        "siz8": res.siz8,
+            "upc7": res.upc7,
+            "alu7": res.alu7,
+            "siz7": res.siz7,
 
-                        "upc9": res.upc9,
-                        "alu9": res.alu9,
-                        "siz9": res.siz9,
+            "upc8": res.upc8,
+            "alu8": res.alu8,
+            "siz8": res.siz8,
 
-                        "upc10": res.upc10,
-                        "alu10": res.alu10,
-                        "siz10": res.siz10,
+            "upc9": res.upc9,
+            "alu9": res.alu9,
+            "siz9": res.siz9,
 
-                })
+            "upc10": res.upc10,
+            "alu10": res.alu10,
+            "siz10": res.siz10,
+
+        })
     })
 
     return res.json({ dataStore })
 }
 
-async function getTicketsInmediateSendFirebase(req,res){
-    const dataStore = [];
-    let result = await TicketInmediates.find({},{
-    upc: 1,
-    alu: 1,
-    siz: 1,
-
-    upc1: 1,
-    alu1: 1,
-    siz1: 1,
-
-    upc2: 1,
-    alu2: 1,
-    siz2: 1,
-
-    upc3: 1,
-    alu3: 1,
-    siz3: 1,
-
-    upc4: 1,
-    alu4: 1,
-    siz4: 1,
-
-    upc5: 1,
-    alu5: 1,
-    siz5: 1,
-
-    upc6: 1,
-    alu6: 1,
-    siz6: 1,
-
-    upc7: 1,
-    alu7: 1,
-    siz7: 1,
-
-    upc8: 1,
-    alu8: 1,
-    siz8: 1,
-
-    upc9: 1,
-    alu9: 1,
-    siz9: 1,
-
-    upc10: 1,
-    alu10: 1,
-    siz10: 1,
-
-    upc11: 1,
-    alu11: 1,
-    siz11: 1,
-
-    upc12: 1,
-    alu12: 1,
-    siz12: 1,
-
-    upc13: 1,
-    alu13: 1,
-    siz13: 1,
-
-    upc14: 1,
-    alu14: 1,
-    siz14: 1,
-
-    upc15: 1,
-    alu15: 1,
-    siz15: 1,
-
-    upc16: 1,
-    alu16: 1,
-    siz16: 1,
-
-    upc17: 1,
-    alu17: 1,
-    siz17: 1,
-
-    upc18: 1,
-    alu18: 1,
-    siz18: 1,
-
-    upc19: 1,
-    alu19: 1,
-    siz19: 1,
-
-    upc20: 1,
-    alu20: 1,
-    siz20: 1,
-
-    upc21: 1,
-    alu21: 1,
-    siz21: 1,
-
-    upc22: 1,
-    alu22: 1,
-    siz22: 1,
-
-    upc23: 1,
-    alu23: 1,
-    siz23: 1,
-
-    upc24: 1,
-    alu24: 1,
-    siz24: 1,
-
-    upc25: 1,
-    alu25: 1,
-    siz25: 1,
-
-    upc26: 1,
-    alu26: 1,
-    siz26: 1,
-
-    upc27: 1,
-    alu27: 1,
-    siz27: 1,
-
-    upc28: 1,
-    alu28: 1,
-    siz28: 1,
-
-    upc29: 1,
-    alu29: 1,
-    siz29: 1,
-
-    upc30: 1,
-    alu30: 1,
-    siz30: 1,
-
-    upc31: 1,
-    alu31: 1,
-    siz31: 1,
-
-    upc32: 1,
-    alu32: 1,
-    siz32: 1,
-
-    upc33: 1,
-    alu33: 1,
-    siz33: 1,
-
-    upc34: 1,
-    alu34: 1,
-    siz34: 1,
-
-    upc35: 1,
-    alu35: 1,
-    siz35: 1,
-
-    upc36: 1,
-    alu36: 1,
-    siz36: 1,
-
-    upc37: 1,
-    alu37: 1,
-    siz37: 1,
-
-    upc38: 1,
-    alu38: 1,
-    siz38: 1,
-
-    upc39: 1,
-    alu39: 1,
-    siz39: 1,
-
-    upc40: 1,
-    alu40: 1,
-    siz40: 1,
-
-    upc41: 1,
-    alu41: 1,
-    siz41: 1,
-
-    upc42: 1,
-    alu42: 1,
-    siz42: 1,
-
-    upc43: 1,
-    alu43: 1,
-    siz43: 1,
-
-    upc44: 1,
-    alu44: 1,
-    siz44: 1,
-
-    upc45: 1,
-    alu45: 1,
-    siz45: 1,
-    
-    upc46: 1,
-    alu46: 1,
-    siz46: 1,
-
-    upc47: 1,
-    alu47: 1,
-    siz47: 1,
-
-    upc48: 1,
-    alu48: 1,
-    siz48: 1,
-
-    upc49: 1,
-    alu49: 1,
-    siz49: 1,
-
-    upc50: 1,
-    alu50: 1,
-    siz50: 1,
-    fact: 1,
-    fact_img:1,
-    desc:1,
-    store_asigned:1,
-    status: 1,
-    store_created: 1,
-    email_asigned: 1,
-    timestamp:1,
-    timestampend:1 
-    }).sort( { timestamp: -1 } );
-
-    result.map((res) =>{
-        let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
-        dataStore.push({
-                        "fechaCreacion": fecha,
-                        "Dia":Moment(fecha).format('DD'),
-                        "Mes":Moment(fecha).format('MM'),
-                        "Año":Moment(fecha).format('YYYY'),
-                        "tiendaCreacion": res.store_created?res.store_created:null,
-                        "tiendaAsignacion": res.store_asigned?res.store_asigned:null,
-                        "estado":res.status?res.status:null,
-                        "destino": res.desc?res.desc:null,
-                        "upc": res.upc?res.upc:0,
-                        "alu": res.alu?res.alu:0,
-                        "siz": res.siz?res.siz:0,
-
-                        "upc1": res.upc1?res.upc1:0,
-                        "alu1": res.alu1?res.alu1:0,
-                        "siz1": res.siz1?res.siz1:0,
-
-                        "upc2": res.upc2?res.upc2:0,
-                        "alu2": res.alu2?res.alu2:0,
-                        "siz2": res.siz2?res.siz2:0,
-
-                        "upc3": res.upc3?res.upc:0,
-                        "alu3": res.alu3?res.alu:0,
-                        "siz3": res.siz3?res.siz:0,
-
-                        "upc4": res.upc4?res.upc4:0,
-                        "alu4": res.alu4?res.alu4:0,
-                        "siz4": res.siz4?res.siz4:0,
-
-                        "upc4": res.upc4?res.upc4:0,
-                        "alu4": res.alu4?res.alu4:0,
-                        "siz4": res.siz4?res.siz4:0,
-
-                        "upc4": res.upc4?res.upc4:0,
-                        "alu4": res.alu4?res.alu4:0,
-                        "siz4": res.siz4?res.siz4:0,
-
-                        "upc5": res.upc5?res.upc5:0,
-                        "alu5": res.alu5?res.alu5:0,
-                        "siz5": res.siz5?res.siz5:0,
-
-                        "upc6": res.upc6?res.upc6:0,
-                        "alu6": res.alu6?res.alu6:0,
-                        "siz6": res.siz6?res.siz6:0,
-
-                        "upc7": res.upc7?res.upc7:0,
-                        "alu7": res.alu7?res.alu7:0,
-                        "siz7": res.siz7?res.siz7:0,
-
-                        "upc8": res.upc8?res.upc8:0,
-                        "alu8": res.alu8?res.alu8:0,
-                        "siz8": res.siz8?res.siz8:0,
-
-                        "upc9": res.upc9?res.upc9:0,
-                        "alu9": res.alu9?res.alu9:0,
-                        "siz9": res.siz9?res.siz9:0,
-
-                        "upc10": res.upc10?res.upc10:0,
-                        "alu10": res.alu10?res.alu10:0,
-                        "siz10": res.siz10?res.siz10:0,
-
-                })
-    })
-
-    dataStore.map(async (doc) => {
-        try {
-            await firestore.collection('TicketsInmediates').add(doc);
-            console.log('Insert new document in TicketsInmediates');
-        } catch (error) {
-            console.log(error)
-        }
-    });
-
-    return res.json({ dataStore })
-}
-
-async function getTicketsInmediate2(req,res){
+async function getTicketsInmediateSendFirebase(req, res) {
     const dataStore = [];
     let result = await TicketInmediates.find({
-       //timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
-    },{
-    product:1,
-    upc: 1,
-    alu: 1,
-    siz: 1,
+        //timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
+    }, {
+        product: 1,
+        upc: 1,
+        alu: 1,
+        siz: 1,
 
-    upc1: 1,
-    alu1: 1,
-    siz1: 1,
+        upc1: 1,
+        alu1: 1,
+        siz1: 1,
 
-    upc2: 1,
-    alu2: 1,
-    siz2: 1,
+        upc2: 1,
+        alu2: 1,
+        siz2: 1,
 
-    upc3: 1,
-    alu3: 1,
-    siz3: 1,
+        upc3: 1,
+        alu3: 1,
+        siz3: 1,
 
-    upc4: 1,
-    alu4: 1,
-    siz4: 1,
+        upc4: 1,
+        alu4: 1,
+        siz4: 1,
 
-    upc5: 1,
-    alu5: 1,
-    siz5: 1,
+        upc5: 1,
+        alu5: 1,
+        siz5: 1,
 
-    upc6: 1,
-    alu6: 1,
-    siz6: 1,
+        upc6: 1,
+        alu6: 1,
+        siz6: 1,
 
-    upc7: 1,
-    alu7: 1,
-    siz7: 1,
+        upc7: 1,
+        alu7: 1,
+        siz7: 1,
 
-    upc8: 1,
-    alu8: 1,
-    siz8: 1,
+        upc8: 1,
+        alu8: 1,
+        siz8: 1,
 
-    upc9: 1,
-    alu9: 1,
-    siz9: 1,
+        upc9: 1,
+        alu9: 1,
+        siz9: 1,
 
-    upc10: 1,
-    alu10: 1,
-    siz10: 1,
+        upc10: 1,
+        alu10: 1,
+        siz10: 1,
 
-    upc11: 1,
-    alu11: 1,
-    siz11: 1,
+        upc11: 1,
+        alu11: 1,
+        siz11: 1,
 
-    upc12: 1,
-    alu12: 1,
-    siz12: 1,
+        upc12: 1,
+        alu12: 1,
+        siz12: 1,
 
-    upc13: 1,
-    alu13: 1,
-    siz13: 1,
+        upc13: 1,
+        alu13: 1,
+        siz13: 1,
 
-    upc14: 1,
-    alu14: 1,
-    siz14: 1,
+        upc14: 1,
+        alu14: 1,
+        siz14: 1,
 
-    upc15: 1,
-    alu15: 1,
-    siz15: 1,
+        upc15: 1,
+        alu15: 1,
+        siz15: 1,
 
-    upc16: 1,
-    alu16: 1,
-    siz16: 1,
+        upc16: 1,
+        alu16: 1,
+        siz16: 1,
 
-    upc17: 1,
-    alu17: 1,
-    siz17: 1,
+        upc17: 1,
+        alu17: 1,
+        siz17: 1,
 
-    upc18: 1,
-    alu18: 1,
-    siz18: 1,
+        upc18: 1,
+        alu18: 1,
+        siz18: 1,
 
-    upc19: 1,
-    alu19: 1,
-    siz19: 1,
+        upc19: 1,
+        alu19: 1,
+        siz19: 1,
 
-    upc20: 1,
-    alu20: 1,
-    siz20: 1,
+        upc20: 1,
+        alu20: 1,
+        siz20: 1,
 
-    upc21: 1,
-    alu21: 1,
-    siz21: 1,
+        upc21: 1,
+        alu21: 1,
+        siz21: 1,
 
-    upc22: 1,
-    alu22: 1,
-    siz22: 1,
+        upc22: 1,
+        alu22: 1,
+        siz22: 1,
 
-    upc23: 1,
-    alu23: 1,
-    siz23: 1,
+        upc23: 1,
+        alu23: 1,
+        siz23: 1,
 
-    upc24: 1,
-    alu24: 1,
-    siz24: 1,
+        upc24: 1,
+        alu24: 1,
+        siz24: 1,
 
-    upc25: 1,
-    alu25: 1,
-    siz25: 1,
+        upc25: 1,
+        alu25: 1,
+        siz25: 1,
 
-    upc26: 1,
-    alu26: 1,
-    siz26: 1,
+        upc26: 1,
+        alu26: 1,
+        siz26: 1,
 
-    upc27: 1,
-    alu27: 1,
-    siz27: 1,
+        upc27: 1,
+        alu27: 1,
+        siz27: 1,
 
-    upc28: 1,
-    alu28: 1,
-    siz28: 1,
+        upc28: 1,
+        alu28: 1,
+        siz28: 1,
 
-    upc29: 1,
-    alu29: 1,
-    siz29: 1,
+        upc29: 1,
+        alu29: 1,
+        siz29: 1,
 
-    upc30: 1,
-    alu30: 1,
-    siz30: 1,
+        upc30: 1,
+        alu30: 1,
+        siz30: 1,
 
-    upc31: 1,
-    alu31: 1,
-    siz31: 1,
+        upc31: 1,
+        alu31: 1,
+        siz31: 1,
 
-    upc32: 1,
-    alu32: 1,
-    siz32: 1,
+        upc32: 1,
+        alu32: 1,
+        siz32: 1,
 
-    upc33: 1,
-    alu33: 1,
-    siz33: 1,
+        upc33: 1,
+        alu33: 1,
+        siz33: 1,
 
-    upc34: 1,
-    alu34: 1,
-    siz34: 1,
+        upc34: 1,
+        alu34: 1,
+        siz34: 1,
 
-    upc35: 1,
-    alu35: 1,
-    siz35: 1,
+        upc35: 1,
+        alu35: 1,
+        siz35: 1,
 
-    upc36: 1,
-    alu36: 1,
-    siz36: 1,
+        upc36: 1,
+        alu36: 1,
+        siz36: 1,
 
-    upc37: 1,
-    alu37: 1,
-    siz37: 1,
+        upc37: 1,
+        alu37: 1,
+        siz37: 1,
 
-    upc38: 1,
-    alu38: 1,
-    siz38: 1,
+        upc38: 1,
+        alu38: 1,
+        siz38: 1,
 
-    upc39: 1,
-    alu39: 1,
-    siz39: 1,
+        upc39: 1,
+        alu39: 1,
+        siz39: 1,
 
-    upc40: 1,
-    alu40: 1,
-    siz40: 1,
+        upc40: 1,
+        alu40: 1,
+        siz40: 1,
 
-    upc41: 1,
-    alu41: 1,
-    siz41: 1,
+        upc41: 1,
+        alu41: 1,
+        siz41: 1,
 
-    upc42: 1,
-    alu42: 1,
-    siz42: 1,
+        upc42: 1,
+        alu42: 1,
+        siz42: 1,
 
-    upc43: 1,
-    alu43: 1,
-    siz43: 1,
+        upc43: 1,
+        alu43: 1,
+        siz43: 1,
 
-    upc44: 1,
-    alu44: 1,
-    siz44: 1,
+        upc44: 1,
+        alu44: 1,
+        siz44: 1,
 
-    upc45: 1,
-    alu45: 1,
-    siz45: 1,
-    
-    upc46: 1,
-    alu46: 1,
-    siz46: 1,
+        upc45: 1,
+        alu45: 1,
+        siz45: 1,
 
-    upc47: 1,
-    alu47: 1,
-    siz47: 1,
+        upc46: 1,
+        alu46: 1,
+        siz46: 1,
 
-    upc48: 1,
-    alu48: 1,
-    siz48: 1,
+        upc47: 1,
+        alu47: 1,
+        siz47: 1,
 
-    upc49: 1,
-    alu49: 1,
-    siz49: 1,
+        upc48: 1,
+        alu48: 1,
+        siz48: 1,
 
-    upc50: 1,
-    alu50: 1,
-    siz50: 1,
-    fact: 1,
-    fact_img:1,
-    desc:1,
-    store_asigned:1,
-    status: 1,
-    store_created: 1,
-    email_asigned: 1,
-    timestamp:1,
-    timestampend:1 
-    }).sort( { timestamp: -1 } );
+        upc49: 1,
+        alu49: 1,
+        siz49: 1,
 
-    result.map((res, numInt) =>{
+        upc50: 1,
+        alu50: 1,
+        siz50: 1,
+        fact: 1,
+        fact_img: 1,
+        desc: 1,
+        store_asigned: 1,
+        status: 1,
+        store_created: 1,
+        email_asigned: 1,
+        timestamp: 1,
+        timestampend: 1
+    }).sort({ timestamp: -1 });
+
+    result.map((res, numInt) => {
         let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
-        if(res.product && res.product.length > 0){
+        if (res.product && res.product.length > 0) {
             var listProduct = "";
-            res.product.map((data,i) => {
-                listProduct +=  `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
+            res.product.map((data, i) => {
+                listProduct += `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
             })
             dataStore.push({
-                "id":numInt,
+                "id": numInt,
                 "fechaCreacion": fecha,
-                "Dia":Moment(fecha).format('DD'),
-                "Mes":Moment(fecha).format('MM'),
-                "Año":Moment(fecha).format('YYYY'),
-                "tiendaCreacion": res.store_created?res.store_created:null,
-                "tiendaAsignacion": res.store_asigned?res.store_asigned:null,
-                "estado":res.status?res.status:null,
-                "destino": res.desc?res.desc:null,
+                "Dia": Moment(fecha).format('DD'),
+                "Mes": Moment(fecha).format('MM'),
+                "Año": Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created ? res.store_created : null,
+                "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
+                "estado": res.status ? res.status : null,
+                "destino": res.desc ? res.desc : null,
                 "product": listProduct
             });
 
-        }else{
+        } else {
             let listProduct = "";
-            if(res.upc && res.alu && res.siz){
-                listProduct +=  `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
+            if (res.upc && res.alu && res.siz) {
+                listProduct += `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
             }
-            if(res.upc1 && res.alu1 && res.siz1){
-                listProduct +=  `*Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}/`;
+            if (res.upc1 && res.alu1 && res.siz1) {
+                listProduct += `*Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}/`;
             }
-            if(res.upc2 && res.alu2 && res.siz2){
-                listProduct +=  `*Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}/`;
+            if (res.upc2 && res.alu2 && res.siz2) {
+                listProduct += `*Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}/`;
             }
-            if(res.upc3 && res.alu3 && res.siz3){
-                listProduct +=  `*Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}/`;
+            if (res.upc3 && res.alu3 && res.siz3) {
+                listProduct += `*Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}/`;
             }
-            if(res.upc4 && res.alu4 && res.siz4){
-                listProduct +=  `*Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}/`;
+            if (res.upc4 && res.alu4 && res.siz4) {
+                listProduct += `*Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}/`;
             }
-            if(res.upc5 && res.alu5 && res.siz5){
-                listProduct +=  `*Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}/`;
+            if (res.upc5 && res.alu5 && res.siz5) {
+                listProduct += `*Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}/`;
             }
-            if(res.upc6 && res.alu6 && res.siz6){
-                listProduct +=  `*Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}/`;
+            if (res.upc6 && res.alu6 && res.siz6) {
+                listProduct += `*Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}/`;
             }
-            if(res.upc7 && res.alu7 && res.siz7){
-                listProduct +=  `*Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}/`;
+            if (res.upc7 && res.alu7 && res.siz7) {
+                listProduct += `*Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}/`;
             }
-            if(res.upc8 && res.alu8 && res.siz8){
-                listProduct +=  `*Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}/`;
+            if (res.upc8 && res.alu8 && res.siz8) {
+                listProduct += `*Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}/`;
             }
-            if(res.upc9 && res.alu9 && res.siz9){
-                listProduct +=  `*Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}/`;
+            if (res.upc9 && res.alu9 && res.siz9) {
+                listProduct += `*Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}/`;
             }
-            if(res.upc10 && res.alu10 && res.siz10){
-                listProduct +=  `*Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}/`;
+            if (res.upc10 && res.alu10 && res.siz10) {
+                listProduct += `*Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}/`;
             }
             dataStore.push({
-                "id":numInt,
+                "id": numInt,
                 "fechaCreacion": fecha,
-                "Dia":Moment(fecha).format('DD'),
-                "Mes":Moment(fecha).format('MM'),
-                "Año":Moment(fecha).format('YYYY'),
-                "tiendaCreacion": res.store_created?res.store_created:null,
-                "tiendaAsignacion": res.store_asigned?res.store_asigned:null,
-                "estado":res.status?res.status:null,
-                "destino": res.desc?res.desc:null,
+                "Dia": Moment(fecha).format('DD'),
+                "Mes": Moment(fecha).format('MM'),
+                "Año": Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created ? res.store_created : null,
+                "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
+                "estado": res.status ? res.status : null,
+                "destino": res.desc ? res.desc : null,
+                "product": listProduct,
+            })
+        }
+    })
+
+    // dataStore.map(async (doc) => {
+    //     try {
+    //         await firestore.collection('TicketsInmediate').add(doc);
+    //         console.log('Insert new document in TicketsInmediates');
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // });
+
+
+    return res.json({ dataStore })
+}
+
+async function getTicketsInmediate2(req, res) {
+    const dataStore = [];
+    let result = await TicketInmediates.find({
+        timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
+    }, {
+        product: 1,
+        upc: 1,
+        alu: 1,
+        siz: 1,
+
+        upc1: 1,
+        alu1: 1,
+        siz1: 1,
+
+        upc2: 1,
+        alu2: 1,
+        siz2: 1,
+
+        upc3: 1,
+        alu3: 1,
+        siz3: 1,
+
+        upc4: 1,
+        alu4: 1,
+        siz4: 1,
+
+        upc5: 1,
+        alu5: 1,
+        siz5: 1,
+
+        upc6: 1,
+        alu6: 1,
+        siz6: 1,
+
+        upc7: 1,
+        alu7: 1,
+        siz7: 1,
+
+        upc8: 1,
+        alu8: 1,
+        siz8: 1,
+
+        upc9: 1,
+        alu9: 1,
+        siz9: 1,
+
+        upc10: 1,
+        alu10: 1,
+        siz10: 1,
+
+        upc11: 1,
+        alu11: 1,
+        siz11: 1,
+
+        upc12: 1,
+        alu12: 1,
+        siz12: 1,
+
+        upc13: 1,
+        alu13: 1,
+        siz13: 1,
+
+        upc14: 1,
+        alu14: 1,
+        siz14: 1,
+
+        upc15: 1,
+        alu15: 1,
+        siz15: 1,
+
+        upc16: 1,
+        alu16: 1,
+        siz16: 1,
+
+        upc17: 1,
+        alu17: 1,
+        siz17: 1,
+
+        upc18: 1,
+        alu18: 1,
+        siz18: 1,
+
+        upc19: 1,
+        alu19: 1,
+        siz19: 1,
+
+        upc20: 1,
+        alu20: 1,
+        siz20: 1,
+
+        upc21: 1,
+        alu21: 1,
+        siz21: 1,
+
+        upc22: 1,
+        alu22: 1,
+        siz22: 1,
+
+        upc23: 1,
+        alu23: 1,
+        siz23: 1,
+
+        upc24: 1,
+        alu24: 1,
+        siz24: 1,
+
+        upc25: 1,
+        alu25: 1,
+        siz25: 1,
+
+        upc26: 1,
+        alu26: 1,
+        siz26: 1,
+
+        upc27: 1,
+        alu27: 1,
+        siz27: 1,
+
+        upc28: 1,
+        alu28: 1,
+        siz28: 1,
+
+        upc29: 1,
+        alu29: 1,
+        siz29: 1,
+
+        upc30: 1,
+        alu30: 1,
+        siz30: 1,
+
+        upc31: 1,
+        alu31: 1,
+        siz31: 1,
+
+        upc32: 1,
+        alu32: 1,
+        siz32: 1,
+
+        upc33: 1,
+        alu33: 1,
+        siz33: 1,
+
+        upc34: 1,
+        alu34: 1,
+        siz34: 1,
+
+        upc35: 1,
+        alu35: 1,
+        siz35: 1,
+
+        upc36: 1,
+        alu36: 1,
+        siz36: 1,
+
+        upc37: 1,
+        alu37: 1,
+        siz37: 1,
+
+        upc38: 1,
+        alu38: 1,
+        siz38: 1,
+
+        upc39: 1,
+        alu39: 1,
+        siz39: 1,
+
+        upc40: 1,
+        alu40: 1,
+        siz40: 1,
+
+        upc41: 1,
+        alu41: 1,
+        siz41: 1,
+
+        upc42: 1,
+        alu42: 1,
+        siz42: 1,
+
+        upc43: 1,
+        alu43: 1,
+        siz43: 1,
+
+        upc44: 1,
+        alu44: 1,
+        siz44: 1,
+
+        upc45: 1,
+        alu45: 1,
+        siz45: 1,
+
+        upc46: 1,
+        alu46: 1,
+        siz46: 1,
+
+        upc47: 1,
+        alu47: 1,
+        siz47: 1,
+
+        upc48: 1,
+        alu48: 1,
+        siz48: 1,
+
+        upc49: 1,
+        alu49: 1,
+        siz49: 1,
+
+        upc50: 1,
+        alu50: 1,
+        siz50: 1,
+        fact: 1,
+        fact_img: 1,
+        desc: 1,
+        store_asigned: 1,
+        status: 1,
+        store_created: 1,
+        email_asigned: 1,
+        timestamp: 1,
+        timestampend: 1
+    }).sort({ timestamp: -1 });
+
+    // let result2 = await firestore.collection('TicketsInmediate').get();
+
+    // result2.docs.map(x => console.log(x.data()))
+
+    result.map((res, numInt) => {
+        let fecha = Moment(res.timestamp).format('YYYY-MM-DDT08:00:00.80Z')
+        if (res.product && res.product.length > 0) {
+            var listProduct = "";
+            res.product.map((data, i) => {
+                listProduct += `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
+            })
+            dataStore.push({
+                "id": numInt,
+                "fechaCreacion": fecha,
+                "Dia": Moment(fecha).format('MM'),
+                "Mes": Moment(fecha).format('DD'),
+                "Año": Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created ? res.store_created : null,
+                "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
+                "estado": res.status ? res.status : null,
+                "destino": res.desc ? res.desc : null,
+                "product": listProduct
+            });
+
+        } else {
+            let listProduct = "";
+            if (res.upc && res.alu && res.siz) {
+                listProduct += `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
+            }
+            if (res.upc1 && res.alu1 && res.siz1) {
+                listProduct += `*Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}/`;
+            }
+            if (res.upc2 && res.alu2 && res.siz2) {
+                listProduct += `*Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}/`;
+            }
+            if (res.upc3 && res.alu3 && res.siz3) {
+                listProduct += `*Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}/`;
+            }
+            if (res.upc4 && res.alu4 && res.siz4) {
+                listProduct += `*Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}/`;
+            }
+            if (res.upc5 && res.alu5 && res.siz5) {
+                listProduct += `*Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}/`;
+            }
+            if (res.upc6 && res.alu6 && res.siz6) {
+                listProduct += `*Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}/`;
+            }
+            if (res.upc7 && res.alu7 && res.siz7) {
+                listProduct += `*Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}/`;
+            }
+            if (res.upc8 && res.alu8 && res.siz8) {
+                listProduct += `*Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}/`;
+            }
+            if (res.upc9 && res.alu9 && res.siz9) {
+                listProduct += `*Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}/`;
+            }
+            if (res.upc10 && res.alu10 && res.siz10) {
+                listProduct += `*Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}/`;
+            }
+            dataStore.push({
+                "id": numInt,
+                "fechaCreacion": fecha,
+                "Dia": Moment(fecha).format('DD'),
+                "Mes": Moment(fecha).format('MM'),
+                "Año": Moment(fecha).format('YYYY'),
+                "tiendaCreacion": res.store_created ? res.store_created : null,
+                "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
+                "estado": res.status ? res.status : null,
+                "destino": res.desc ? res.desc : null,
                 "product": listProduct,
             })
         }
@@ -2287,6 +2300,7 @@ async function getTicketsInmediate2(req,res){
 
     return res.json({ dataStore })
 }
+
 
 module.exports = {
     storeTicketSystemTransfer,
