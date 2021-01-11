@@ -8,10 +8,10 @@ const TicketInmediate = require("../models/TicketInmediate");
 const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
 const { firestore } = require('../firebase');
+const axios = require('axios');
 const nodemailer = require('nodemailer');
-const cloudinary = require('../cloudinary.config');
 const Moment = require('moment');
-
+const cloudinary = require('../cloudinary.config');
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {
     let params = req.body;
@@ -138,9 +138,9 @@ async function storeTicketInmediates(req, res) {
     let file = req.file;
     let result = await cloudinary.uploader.upload(file.path);
     let address_send = `Nombre: ${params[0].client}, Dirreccion: ${params[0].address}, Celular 1: ${params[0].phone1}, Celular 2: ${params[0].phone2}, Horarios: ${params[0].hours}, Total a cobrar: ${params[0].total};`
-    let date = new Date();
-    let fecha = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
-    date = Moment(new Date(fecha)).format('YYYY-MM-DDT08:00:00.80Z');
+    let fecha = await axios.get('https://us-central1-pruebas-241e9.cloudfunctions.net/app/get-date')
+    .then(res => res.data)
+    .catch(err => console.log(err));
 
     Inmediates.store_created = params[0].store_created;
     Inmediates.store_asigned = params[0].store_asigned;
@@ -149,7 +149,7 @@ async function storeTicketInmediates(req, res) {
     Inmediates.fact = params[0].bill;
     Inmediates.fact_img = result.public_id;
     Inmediates.desc = address_send;
-    Inmediates.timestamp = date;
+    Inmediates.timestamp = fecha;
 
     params.map(data => {
         let producto = {
@@ -166,8 +166,8 @@ async function storeTicketInmediates(req, res) {
         if (storedTicket) {
             email(
                 params,
-                //'lourdes@corpinto.com',
-                'dlara2017229@gmail.com',
+                'lourdes@corpinto.com',
+                //'dlara2017229@gmail.com',
                 data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
                 `<!-- pre-header -->
@@ -2233,6 +2233,7 @@ async function getTicketsInmediate2(req, res) {
         if (res.product && res.product.length > 0) {
             var listProduct = "";
             res.product.map((data, i) => {
+                if(data.alu == "VN0A3WLNQTF") console.log(res)
                 listProduct += `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
             })
             dataStore.push({
