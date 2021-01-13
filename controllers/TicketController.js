@@ -2236,7 +2236,7 @@ async function getTicketsInmediate2(req, res) {
                 if(data.alu == "VN0A3WLNQTF") console.log(res)
                 listProduct += `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
             })
-            let destino = res.desc.replace(",",";").replace(",",";").replace(",",";").replace(",",";").replace(",",";");
+            let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
             dataStore.push({
                 "id": numInt,
                 "fechaCreacion": fecha,
@@ -2252,6 +2252,7 @@ async function getTicketsInmediate2(req, res) {
 
         } else {
             let listProduct = "";
+            let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
             if (res.upc && res.alu && res.siz) {
                 listProduct += `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
             }
@@ -2294,7 +2295,7 @@ async function getTicketsInmediate2(req, res) {
                 "tiendaCreacion": res.store_created ? res.store_created : null,
                 "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
                 "estado": res.status ? res.status : null,
-                "destino": res.desc ? res.desc : null,
+                "destino": res.desc ? destino : null,
                 "product": listProduct,
             })
         }
