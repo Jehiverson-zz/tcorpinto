@@ -2234,7 +2234,7 @@ async function getTicketsInmediate2(req, res) {
             var listProduct = "";
             res.product.map((data, i) => {
                 if(data.alu == "VN0A3WLNQTF") console.log(res)
-                listProduct += `*Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}/`;
+                listProduct += `Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}`;
             })
             let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
             dataStore.push({
@@ -2254,37 +2254,37 @@ async function getTicketsInmediate2(req, res) {
             let listProduct = "";
             let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
             if (res.upc && res.alu && res.siz) {
-                listProduct += `*Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}/`;
+                listProduct += `Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}`;
             }
             if (res.upc1 && res.alu1 && res.siz1) {
-                listProduct += `*Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}/`;
+                listProduct += `Alu:${res.alu1} UPC:${res.upc1} Talla:${res.siz1}`;
             }
             if (res.upc2 && res.alu2 && res.siz2) {
-                listProduct += `*Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}/`;
+                listProduct += `Alu:${res.alu2} UPC:${res.upc2} Talla:${res.siz2}`;
             }
             if (res.upc3 && res.alu3 && res.siz3) {
-                listProduct += `*Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}/`;
+                listProduct += `Alu:${res.alu3} UPC:${res.upc3} Talla:${res.siz3}`;
             }
             if (res.upc4 && res.alu4 && res.siz4) {
-                listProduct += `*Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}/`;
+                listProduct += `Alu:${res.alu4} UPC:${res.upc4} Talla:${res.siz4}`;
             }
             if (res.upc5 && res.alu5 && res.siz5) {
-                listProduct += `*Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}/`;
+                listProduct += `Alu:${res.alu5} UPC:${res.upc5} Talla:${res.siz5}`;
             }
             if (res.upc6 && res.alu6 && res.siz6) {
-                listProduct += `*Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}/`;
+                listProduct += `Alu:${res.alu6} UPC:${res.upc6} Talla:${res.siz6}`;
             }
             if (res.upc7 && res.alu7 && res.siz7) {
-                listProduct += `*Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}/`;
+                listProduct += `Alu:${res.alu7} UPC:${res.upc7} Talla:${res.siz7}`;
             }
             if (res.upc8 && res.alu8 && res.siz8) {
-                listProduct += `*Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}/`;
+                listProduct += `Alu:${res.alu8} UPC:${res.upc8} Talla:${res.siz8}`;
             }
             if (res.upc9 && res.alu9 && res.siz9) {
-                listProduct += `*Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}/`;
+                listProduct += `Alu:${res.alu9} UPC:${res.upc9} Talla:${res.siz9}`;
             }
             if (res.upc10 && res.alu10 && res.siz10) {
-                listProduct += `*Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}/`;
+                listProduct += `Alu:${res.alu10} UPC:${res.upc10} Talla:${res.siz10}`;
             }
             dataStore.push({
                 "id": numInt,
