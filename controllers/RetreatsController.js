@@ -20,18 +20,18 @@ async function email(data, reseptor, emisor,titulo, template) {
 
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        host: "smtp.dreamhost.com",
+        host: "smtp.gmail.com",
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: "mensajeria@tickets.corpinto.com", // generated ethereal user
+            user: "noreply@corpinto.com", // generated ethereal user
             pass: "m1$0n@lc0rp!nt0" // generated ethereal password
         }
     });
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
-        from: 'mensajeria@tickets.corpinto.com', // sender address
+        from: 'noreply@corpinto.com', // sender address
         to: reseptor, // list of receivers
         cc: emisor,
         bcc: 'Dlara2017229@gmail.com',
