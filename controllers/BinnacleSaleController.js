@@ -488,7 +488,7 @@ async function setBinnacleSalesCreate(req, res) {
             // send mail with defined transport object
             transporter.sendMail({
                 from: '"Datos de venta" <noreply@corpinto.com>', // sender address
-                to: "jehivis@gmail.com", // list of receivers
+                to: "ventas@corpinto.com", // list of receivers
                 //to: "dlara2017229@gmail.com",
                 cc: params.email,
                 bcc: "jrodriguez@corpinto.com",
