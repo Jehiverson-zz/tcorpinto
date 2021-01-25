@@ -2247,7 +2247,8 @@ async function getTicketsInmediate2(req, res) {
                 "tiendaAsignacion": res.store_asigned ? res.store_asigned : null,
                 "estado": res.status ? res.status : null,
                 "destino": res.desc ? destino : null,
-                "product": listProduct
+                "product": listProduct,
+                "factura": res.fact? res.fact:0
             });
 
         } else {
@@ -2297,6 +2298,7 @@ async function getTicketsInmediate2(req, res) {
                 "estado": res.status ? res.status : null,
                 "destino": res.desc ? destino : null,
                 "product": listProduct,
+                "factura": res.fact? res.fact:0
             })
         }
     })
