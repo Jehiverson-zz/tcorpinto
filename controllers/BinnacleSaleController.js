@@ -477,17 +477,17 @@ async function setBinnacleSalesCreate(req, res) {
         if (err) return res.status(500).send({ valid: false });
         if (sale) {
             let transporter = nodemailer.createTransport({
-                host: "smtp.dreamhost.com",
+                host: "smtp.gmail.com",
                 port: 587,
                 secure: false, // true for 465, false for other ports
                 auth: {
-                    user: "mensajeria@tickets.corpinto.com", // generated ethereal user
+                    user: "noreply@corpinto.com", // generated ethereal user
                     pass: "m1$0n@lc0rp!nt0" // generated ethereal password
                 }
             });
             // send mail with defined transport object
             transporter.sendMail({
-                from: '"Datos de venta" <mensajeria@tickets.corpinto.com>', // sender address
+                from: '"Datos de venta" <noreply@corpinto.com>', // sender address
                 to: "ventas@corpinto.com", // list of receivers
                 //to: "dlara2017229@gmail.com",
                 cc: params.email,
