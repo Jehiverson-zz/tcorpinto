@@ -88,6 +88,7 @@ router.get('/binnacles/ticketsInmediate_sendFirebase', ticketController.getTicke
 router.post('/binnacles_dailies/show', binnacleSaleController.getBinnacleDailies);
 router.post('/binnacles_dailies/delete',binnacleSaleController.deleteBinnacleDailies);
 router.post('/binnacles_dailies/created',binnacleSaleController.creatBinnacleDailies);
+router.post('/binnacles_dailies/report/:date_start/:date_end',binnacleSaleController.getDataReportDailies);
 /*-------------------------------------------
 ----------------- TICKETS -------------------
 ---------------------------------------------*/
@@ -105,6 +106,7 @@ router.post('/tickets/all/photo_retreats', ticketController.getAllPhotoRetreats)
 router.post('/tickets/photo_retreats', ticketController.getPhotoRetreats);
 router.post('/tickets/all/external_retreats', ticketController.getAllExernalRetreats);
 router.post('/tickets/external_retreats', ticketController.getExernalRetreats);
+router.post('/tickets/report/:date_start/:date_end', ticketController.getDataReport);
 router.put('/ticket/inactive/:id', ticketController.inactivateTicket);
 router.put('/ticket/immediate_deliveries/inactive/:id', ticketController.inactivateTicketInmediate);
 router.put('/ticket/photo_retreats/inactive/:id', ticketController.inactivatePhotoRetreats);
@@ -132,6 +134,7 @@ router.get('/collaborator/get',collaboratorController.getCollaborator);
 router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate);
 router.post('/sales/delete',binnacleSaleController.deleteDataSale);
 router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
+router.post('/sales/report/:date_start/:date_end',binnacleSaleController.getDataReport);
 
 
 /*-----------------------------------------------------
@@ -139,6 +142,7 @@ router.post('/sales/validationDataSale',binnacleSaleController.validationDataSal
 -------------------------------------------------------*/
 router.post('/damaged_merchandise/create', DamagedMerchandiseController.storeDamagedMerchandise);
 router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMerchandise);
+router.post('/damaged_merchandise/report/:date_start/:date_end', DamagedMerchandiseController.getDataReport);
 
 /*------------------------------------------------
 ----------------- CERTIFICADOS -------------------
@@ -146,6 +150,7 @@ router.post('/damaged_merchandise', DamagedMerchandiseController.getDamageMercha
 router.post('/certificate/create', CertificateController.store_certificate);
 router.post('/certificates/actives', CertificateController.getCertificatesActives);
 router.post('/certificates/exchange', CertificateController.getCertificates);
+router.post('/certificates/report/:date_start/:date_end', CertificateController.getDataReport);
 router.put('/certificate/exchange', CertificateController.updateCertificate);
 /*-----------------------------------------------------
 ----------------------- RETREATS ----------------------

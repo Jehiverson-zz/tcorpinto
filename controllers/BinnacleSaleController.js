@@ -663,6 +663,92 @@ async function deleteBinnacleDailies(req, res) {
     return res.json(deleteaccion);
 }
 
+async function getDataReport(req, res) {
+    let query;
+    if(req.body.role == "admin"){
+        if(req.body.store){
+            query = {
+                date_created:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                },
+                store_creat: req.body.store
+            }
+        }else{
+            query = {
+                date_created:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                }
+            }
+        }
+    }else{
+        query = {
+            date_created:{
+                $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            },
+            store_creat: req.body.store
+        }
+    }
+    let dataStore = [];
+    let salesNew = await BinnacleSaleByte.find(query, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
+    salesNew.map((res) => {
+        let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+        dataStore.push({
+            "id": res._id,
+            "fechaCreacion": fecha,
+            "Dia": Moment(fecha).format('DD'),
+            "Mes": Moment(fecha).format('MM'),
+            "Año": Moment(fecha).format('YYYY'),
+            "tienda": res.store_creat,
+            "ventas": res.sale_daily,
+            "metas": res.daily_goal,
+            "venta_año_anterior": res.year_before_sale,
+            "manager": res.manager,
+            "fact": res.fact,
+            "diferencia": res.diff,
+        })
+    })
+    dataStore.reverse()
+    return res.json({ data: dataStore });
+}
+
+async function getDataReportDailies(req, res) {
+    let query;
+    if(req.body.role == "admin"){
+        if(req.body.store){
+            query = {
+                date_created:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                },
+                store_created: req.body.store
+            }
+        }else{
+            query = {
+                date_created:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                }
+            }
+        }
+    }else{
+        query = {
+            date_created:{
+                $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            },
+            store_created: req.body.store
+        }
+    }
+    await BinnacleDailies.find(query).exec((err, result) => {
+        if(err) return res.status(500).send('Algo salío mal')
+        if(!result) return res.status(404).send({ message: 'No existen datos en el rango de fechas especificado' })
+        return res.status(200).send({data: result});
+    });
+}
+
 module.exports = {
     deleteDataSale,
     getBinnacleSale,
@@ -674,5 +760,7 @@ module.exports = {
     setBinnacleSalesCreate,
     creatBinnacleDailies,
     deleteBinnacleDailies,
-    getBinnacleDailies
+    getBinnacleDailies,
+    getDataReport,
+    getDataReportDailies
 }
