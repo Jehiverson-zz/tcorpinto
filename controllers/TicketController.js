@@ -139,8 +139,8 @@ async function storeTicketInmediates(req, res) {
     let result = await cloudinary.uploader.upload(file.path);
     let address_send = `Nombre: ${params[0].client}, Dirreccion: ${params[0].address}, Celular 1: ${params[0].phone1}, Celular 2: ${params[0].phone2}, Horarios: ${params[0].hours}, Total a cobrar: ${params[0].total};`
     let fecha = await axios.get('https://us-central1-pruebas-241e9.cloudfunctions.net/app/get-date')
-    .then(res => res.data)
-    .catch(err => console.log(err));
+        .then(res => res.data)
+        .catch(err => console.log(err));
 
     Inmediates.store_created = params[0].store_created;
     Inmediates.store_asigned = params[0].store_asigned;
@@ -161,12 +161,18 @@ async function storeTicketInmediates(req, res) {
     })
     let data_store_asigned = await User.findOne({ store: params[0].store_asigned });
 
+    var emailsDefault = [];
+    let showUser = await Email_template.find({ template: 'Tickets Inmediatos', status: "Activo" });
+    showUser.map((elementos) => {
+        return emailsDefault.push(elementos.email)
+    });
+
     Inmediates.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
             email(
                 params,
-                'lourdes@corpinto.com',
+                emailsDefault,
                 //'dlara2017229@gmail.com',
                 data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
@@ -250,17 +256,16 @@ async function storeTicketInmediates(req, res) {
                                                                 <th scope="col" width: 20px>TALLA</th>
                                                             </thead>
                                                             <tbody>
-                                                            ${
-                                                                params.map(x => {
-                                                                    return (
-                                                                        `<tr>
+                                                            ${params.map(x => {
+                    return (
+                        `<tr>
                                                                             <td>${x.upc}</td>
                                                                             <td>${x.alu}</td>
                                                                             <td>${x.size}</td>
                                                                         </tr>`
-                                                                    )
-                                                                })
-                                                            }
+                    )
+                })
+                }
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -2007,7 +2012,7 @@ async function getTicketsInmediateSendFirebase(req, res) {
 async function getTicketsInmediate2(req, res) {
     const dataStore = [];
     let result = await TicketInmediates.find({
-        timestamp : {"$gte": new Date("2021-01-01T00:00:00.000Z")}
+        timestamp: { "$gte": new Date("2021-01-01T00:00:00.000Z") }
     }, {
         product: 1,
         upc: 1,
@@ -2233,10 +2238,10 @@ async function getTicketsInmediate2(req, res) {
         if (res.product && res.product.length > 0) {
             var listProduct = "";
             res.product.map((data, i) => {
-                if(data.alu == "VN0A3WLNQTF") console.log(res)
+                if (data.alu == "VN0A3WLNQTF") console.log(res)
                 listProduct += `Alu:${data.alu} UPC:${data.upc} Talla:${data.siz}`;
             })
-            let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
+            let destino = res.desc.replace(",", " ").replace(",", " ").replace(",", " ").replace(",", " ").replace(",", " ");
             dataStore.push({
                 "id": numInt,
                 "fechaCreacion": fecha,
@@ -2248,12 +2253,12 @@ async function getTicketsInmediate2(req, res) {
                 "estado": res.status ? res.status : null,
                 "destino": res.desc ? destino : null,
                 "product": listProduct,
-                "factura": res.fact? res.fact:0
+                "factura": res.fact ? res.fact : 0
             });
 
         } else {
             let listProduct = "";
-            let destino = res.desc.replace(","," ").replace(","," ").replace(","," ").replace(","," ").replace(","," ");
+            let destino = res.desc.replace(",", " ").replace(",", " ").replace(",", " ").replace(",", " ").replace(",", " ");
             if (res.upc && res.alu && res.siz) {
                 listProduct += `Alu:${res.alu} UPC:${res.upc} Talla:${res.siz}`;
             }
@@ -2298,7 +2303,7 @@ async function getTicketsInmediate2(req, res) {
                 "estado": res.status ? res.status : null,
                 "destino": res.desc ? destino : null,
                 "product": listProduct,
-                "factura": res.fact? res.fact:0
+                "factura": res.fact ? res.fact : 0
             })
         }
     })
