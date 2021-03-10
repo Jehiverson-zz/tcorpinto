@@ -32,13 +32,11 @@ async function store_certificate(req, res) {
 }
 
 async function getCertificatesActives(req, res) {
-    console.log("STORE:", req.body.store)
     let store = await Store.findOne({ name: req.body.store }, (err, result) => {
         if (err) { console.log(err); return; }
         return result
     })
     let subsidiaria = store.sbs;
-    console.log("SBS:", subsidiaria)
     //muestra los ticket de cada tienda
     let result;
     switch (subsidiaria) {
@@ -77,20 +75,17 @@ async function getCertificates(req, res) {
     let subsidiaria = store.sbs; //Subsidaria por tienda
     let certificados_activos; //Contiene todo los certificados por aprovar de una subsidiaria
     let certificados_canjeados; //Contiene todo los certificados aprovados de una subsidiaria
-console.log(subsidiaria)
+
     switch (subsidiaria) {
         case 'Meatpack':
-            console.log(1)
             certificados_activos = await Certificate.find({ meatpack: 'Verificado', status: 'Activo' });
             certificados_canjeados = await Certificate.find({ meatpack: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         case 'Sperry':
-            console.log(2)
             certificados_activos = await Certificate.find({ sperry: 'Verificado', status: 'Activo' });
             certificados_canjeados = await Certificate.find({ sperry: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         case 'Quiksilver':
-            console.log(3)
             certificados_activos = await Certificate.find({ quiksilver: 'Verificado', status: 'Activo' });
             certificados_canjeados = await Certificate.find({ quiksilver: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
@@ -99,27 +94,23 @@ console.log(subsidiaria)
             certificados_canjeados = await Certificate.find({ guess: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         case 'Arrital':
-            console.log(4)
             certificados_activos = await Certificate.find({ colehaan: 'Verificado', status: 'Activo' });
             certificados_canjeados = await Certificate.find({ colehaan: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         case 'Diesel':
-            console.log(5)
             certificados_activos = await Certificate.find({ diesel: 'Verificado', status: 'Activo' });
             certificados_canjeados = await Certificate.find({ diesel: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         case 'Oficina':
-            console.log(6)
             certificados_activos = await Certificate.find({ diesel: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             certificados_canjeados = await Certificate.find({ diesel: 'Canjeado', status: 'Inactivo', store_change: req.body.store });
             break;
         default:
-            console.log(7)
             certificados_activos = await Certificate.find({ status: 'Activo' });
             certificados_canjeados = await Certificate.find({ status: 'Inactivo' });
             break;
     }
-    console.log({ activos: certificados_activos, canjeados: certificados_canjeados })
+
     return res.status(200).send({ activos: certificados_activos, canjeados: certificados_canjeados });
 }
 
@@ -216,9 +207,33 @@ await Certificate.updateOne({ _id: req.body.id }, dataUpdate, (err, result) => {
     });
 }
 
+async function getDataReport(req, res) {
+    console.log(req.params);
+    let query;
+    query = {
+        $or:[
+        {date_start_cer:{
+            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+        }},
+        {date_end_cer:{
+            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+        }}]
+    }
+    await Certificate.find(query).exec((err, result) => {
+        console.log("ERROR", err)
+        console.log("RESULT", result)
+        if(err) return res.status(500).send('Algo salío mal')
+        if(!result) return res.status(404).send({ message: 'No existen datos en el rango de fechas especificado' })
+        return res.status(200).send({data: result});
+    });
+}
+
 module.exports = {
     store_certificate,
     getCertificates,
     getCertificatesActives,
     updateCertificate,
+    getDataReport
 }

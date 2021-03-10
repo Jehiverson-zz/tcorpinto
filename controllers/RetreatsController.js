@@ -6,7 +6,7 @@ const Store = require('../models/Store');
 const RetreatDebt = require('../models/Retreat_debt');
 const RetreatsBinacle = require('../models/Binnacle_retreats');
 const Email_template = require('../models/Email_template');
-const { now } = require('moment-timezone');
+const Moment = require('moment');
 
 //Generar Email
 async function email(data, reseptor, emisor, titulo, template) {
@@ -330,6 +330,59 @@ async function createdRetreats(req, res) {
     return res.json({ data: newRetreats });
 }
 
+async function getDataReport(req,res) {
+    console.log(req.params)
+    console.log(req.body)
+    let query = null,
+    retiro = null,
+    retiro_debito = null;
+    if(req.body.role == "admin"){
+        if(req.body.name && req.body.name!== 'Todos'){
+            query = {
+                date_created:{
+                    $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                },
+                name: req.body.name
+            }
+        }else{
+            query = {
+                date_created:{
+                    $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                }
+            }
+        }
+    }else{
+        query = {
+            date_created:{
+                $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            },
+            name: req.body.name
+        }
+    }
+
+    switch (req.body.type) {
+        case 'retiros':
+            retiro = await Retreat.find(query);
+            break;
+        case 'debitos':
+            retiro_debito = await RetreatDebt.find(query);
+            break;
+        default:
+            retiro = await Retreat.find(query);
+            retiro_debito = await RetreatDebt.find(query);
+            break;
+    }
+
+    return res.status(200).json({ data: {
+        retiro: retiro != null ? retiro:null,
+        retiro_debito: retiro_debito != null ? retiro_debito:null,
+        type: req.body.type
+    } })
+}
+
 module.exports = {
     showRetreats,
     showRetreatsDebtList,
@@ -337,5 +390,6 @@ module.exports = {
     showRetreatsBinacleList,
     createdRetreats,
     updateRetreats,
-    updateRetreatsRemove
+    updateRetreatsRemove,
+    getDataReport
 }

@@ -15,7 +15,6 @@ async function showStatus(req, res) {
 }
 
 async function createStatus(req, res) {
-    console.log(req.body)
     const creatStatusInfo = Status({
         name: req.body.name,
         status: req.body.status,
@@ -26,7 +25,6 @@ async function createStatus(req, res) {
 }
 
 async function updateStatus(req, res) {
-    console.log(req.body)
     var myquery = { _id: req.body.id };
     const updatetaStusInfo = {
         name: req.body.name,
@@ -44,7 +42,7 @@ async function showUser(req, res) {
 }
 
 async function createUser(req, res) {
-    console.log(req.body);
+    
     const creatStatusInfo = User({
         email: req.body.email,
         name: req.body.name,
@@ -64,7 +62,6 @@ async function updateUser(req, res) {
 
     var myquery = { _id: req.body.id };
     var contra;
-    console.log("----------", req.body);
     if (req.body.password === req.body.passwordC) {
         var contra = req.body.password;
         const updatetaStusInfo = {
@@ -77,9 +74,7 @@ async function updateUser(req, res) {
             store: req.body.store.label ? req.body.store.label : req.body.store,
             updatedAt: new Date()
         };
-        console.log(2);
-        console.log(myquery);
-        console.log(updatetaStusInfo);
+
 
         await User.updateOne(myquery, updatetaStusInfo);
 
@@ -105,9 +100,6 @@ async function updateUser(req, res) {
                     store: req.body.store.label ? req.body.store.label : req.body.store,
                     updatedAt: new Date()
                 };
-                console.log(1);
-                console.log(myquery);
-                console.log(updatetaStusInfo);
 
                 await User.updateOne(myquery, updatetaStusInfo);
 
@@ -218,7 +210,6 @@ async function showEmailtemplate(req, res) {
 }
 
 async function createEmailtemplate(req, res) {
-    console.log(req.body);
     const creatEmailtemplateInfo = Email_template({
         email: req.body.email,
         template: req.body.template.value ? req.body.template.value : req.body.template,
@@ -231,14 +222,12 @@ async function createEmailtemplate(req, res) {
 }
 
 async function updateEmailtemplate(req, res) {
-    console.log(req.body);
     await Email_template.findByIdAndUpdate(req.body.id, {
         email: req.body.email,
         template: req.body.template.value ? req.body.template.value : req.body.template,
         status: req.body.status.value ? req.body.status.value : req.body.status,
         date_update: new Date()
     }, (error, response) => {
-        console.log("---***-*-*", error, response);
         if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
         return res.status(200).json({ error: 0, message: "Email Actualizada", data: response });
     });
@@ -251,7 +240,6 @@ async function showTemplateAsignedEmail(req, res) {
 }
 
 async function createTemplateAsignedEmail(req, res) {
-    console.log(req.body);
     const createTemplateAsignationEmail = TemplateAsignationEmail({
         name: req.body.name,
         status: req.body.status.value ? req.body.status.value : req.body.status,
@@ -263,13 +251,12 @@ async function createTemplateAsignedEmail(req, res) {
 }
 
 async function updateTemplateAsignedEmail(req, res) {
-    console.log(req.body);
+
     await TemplateAsignationEmail.findByIdAndUpdate(req.body.id, {
         name: req.body.name,
         status: req.body.status.value ? req.body.status.value : req.body.status,
         date_update: new Date()
     }, (error, response) => {
-        console.log("---***-*-*", error, response);
         if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
         return res.status(200).json({ error: 0, message: "Template Actualizada", data: response });
     });

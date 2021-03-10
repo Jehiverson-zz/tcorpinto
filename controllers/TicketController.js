@@ -403,15 +403,15 @@ async function storeTicketPhotoRetreats(req, res) {
                                          </thead>
                                          <tbody align="center">
                                             ${params.map(x => {
-                    return (
-                        `<tr>
-                                                         <td>${x.upc}</td>
-                                                         <td>${x.alu}</td>
-                                                         <td>${x.size}</td>
-                                                     </tr>`
-                    )
-                })
-                }
+                                                return (
+                                                    `<tr>
+                                                        <td>${x.upc}</td>
+                                                        <td>${x.alu}</td>
+                                                        <td>${x.size}</td>
+                                                    </tr>`
+                                                )
+                                            })
+                                            }
                                          </tbody>
                                         </table>
                                                 </div>
@@ -444,9 +444,9 @@ async function storeTicketExternalRetreats(req, res) {
     //Se genera en el ticket de la tranferencia
     Ticket.store_created = params[0].store_created;
     Ticket.name = params[0].person_retreats,
-        Ticket.manager = params[0].person_authorizing,
-        Ticket.inv_val = params[0].bill,
-        Ticket.status = "Completado"
+    Ticket.manager = params[0].person_authorizing,
+    Ticket.inv_val = params[0].bill,
+    Ticket.status = "Completado"
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
@@ -738,7 +738,6 @@ async function getAllPhotoRetreats(req, res) {
             { store_asigned: req.body.store }
         ]
     }).sort({ timestamp: -1 });
-    console.log("REATREATS", ticketPhotoRetrats)
     ticketPhotoRetrats.map((data, i) => {
         let array__ = []
         var iteracion = ""
@@ -1418,6 +1417,70 @@ async function email(data, reseptor, emisor, titulo, template) {
         if (err) console.log(`ERROR EN EL ENVÍO: ${err}`);
         if (json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
     });
+}
+
+async function getDataReport(req,res) {
+    let query = null,
+    traslado_sistema = null,
+    entrega_inmediata = null,
+    retiro_externo = null,
+    tickets_fotografia = null;
+
+    if(req.body.role == "admin"){
+        if(req.body.store){
+            query = {
+                timestamp:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                },
+                store_created: req.body.store
+            }
+        }else{
+            query = {
+                timestamp:{
+                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                }
+            }
+        }
+    }else{
+        query = {
+            timestamp:{
+                $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            },
+            store_created: req.body.store
+        }
+    }
+
+    switch (req.body.type) {
+        case 'traslado_sistema':
+            traslado_sistema = await TicketSystem.find(query);
+            break;
+        case 'entregas_inmediatas':
+            entrega_inmediata = await TicketInmediates.find(query);
+            break;
+        case 'retiros_externos':
+            retiro_externo = await TicketExternal.find(query);
+            break;
+        case 'tickets_fotografia':
+            tickets_fotografia = await TicketPhoto.find(query);
+            break;
+        default:
+            traslado_sistema = await TicketSystem.find(query);
+            entrega_inmediata = await TicketInmediates.find(query);
+            retiro_externo = await TicketExternal.find(query);
+            tickets_fotografia = await TicketPhoto.find(query);
+            break;
+        }
+
+    return res.status(200).json({ data: {
+        traslado_sistema: traslado_sistema != null ? traslado_sistema:null,
+        entrega_inmediata: entrega_inmediata != null ? entrega_inmediata:null,
+        retiro_externo: retiro_externo != null ? retiro_externo: null,
+        tickets_fotografia: tickets_fotografia != null ? tickets_fotografia: null,
+        type: req.body.type
+    } })
 }
 
 async function getTicketsInmediate(req, res) {
@@ -2339,5 +2402,6 @@ module.exports = {
     completePhotoRetreats,
     getStore,
     getStoreActive,
-    getOneStoreActive
+    getOneStoreActive,
+    getDataReport
 }
