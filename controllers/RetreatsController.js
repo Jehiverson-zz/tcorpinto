@@ -5,10 +5,11 @@ const Retreat = require('../models/Retreat');
 const Store = require('../models/Store');
 const RetreatDebt = require('../models/Retreat_debt');
 const RetreatsBinacle = require('../models/Binnacle_retreats');
-const { now } = require('moment-timezone');
+const Email_template = require('../models/Email_template');
+const Moment = require('moment');
 
 //Generar Email
-async function email(data, reseptor, emisor,titulo, template) {
+async function email(data, reseptor, emisor, titulo, template) {
     let Moment = require("moment-timezone");
     let hoy = Moment().tz("America/Guatemala")._d;
     let dd = hoy.getDate();
@@ -34,14 +35,12 @@ async function email(data, reseptor, emisor,titulo, template) {
         from: 'noreply@corpinto.com', // sender address
         to: reseptor, // list of receivers
         cc: emisor,
-        bcc: 'Dlara2017229@gmail.com',
-        subject:
-            `Retiros de mercaderia - ${dd}/${mm}/${yyyy}`,
+        subject: `Retiros de mercaderia - ${dd}/${mm}/${yyyy}`,
         text: "", // plain text body
         html: template, // html body
     }, async function (err, json) {
-        if(err) console.log(`ERROR EN EL ENVÍO: ${err}`);
-        if(json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
+        if (err) console.log(`ERROR EN EL ENVÍO: ${err}`);
+        if (json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
     });
 }
 
@@ -51,32 +50,33 @@ async function showRetreats(req, res) {
         if (err) { console.log(err); return; }
         return result
     })
-    
-    if(req.body.type === "admin"){
-    
-        if(req.body.email == 'luis@corpinto.com'){
-            showRetreatsInfo = await Retreat.find({
-              $or:[{sbs:'Alias'},{sbs:'General'}],
-              status: "Pendiente"
-            });
-          }else if(req.body.email == 'ana@corpinto.com'){
-            showRetreatsInfo = await Retreat.find({
-              $or:[{sbs:'Arrital'},{sbs:'Arroba'}],
-              status: "Pendiente"
-            });
-          }else{
-            showRetreatsInfo = await Retreat.find({
-              store: req.body.store,
-              status: "Pendiente"
-            });
-          }
 
-    }else{
+
+    if (req.body.type === "admin") {
+
+        if (req.body.email == 'luis@corpinto.com') {
+            showRetreatsInfo = await Retreat.find({
+                $or: [{ sbs: 'Alias' }, { sbs: 'General' }],
+                status: "Pendiente"
+            });
+        } else if (req.body.email == 'ana@corpinto.com') {
+            showRetreatsInfo = await Retreat.find({
+                $or: [{ sbs: 'Arrital' }, { sbs: 'Arroba' }],
+                status: "Pendiente"
+            });
+        } else {
+            showRetreatsInfo = await Retreat.find({
+                store: req.body.store,
+                status: "Pendiente"
+            });
+        }
+
+    } else {
         showRetreatsInfo = await Retreat.find({
             store: req.body.store,
             status: "Pendiente"
         });
-    } 
+    }
 
 
     return res.json({ showRetreatsInfo });
@@ -91,16 +91,16 @@ async function showRetreatsDebtListHistory(req, res) {
     var showRetreatsInfoAccepted;
     var showRetreatsInfoDeneged;
     var showRetreatsInfoCancel;
-    if(req.body.type === "admin"){
-        showRetreatsInfoAccepted = await Retreat.find({status:"Aprobado"});
+    if (req.body.type === "admin") {
+        showRetreatsInfoAccepted = await Retreat.find({ status: "Aprobado" });
 
-        showRetreatsInfoDeneged = await Retreat.find({status:"Denegado"});
-    
-        showRetreatsInfoCancel = await Retreat.find({status:"Cancelado"});
-    }else{
-        showRetreatsInfoAccepted = await Retreat.find({status:"Aprobado", store: req.body.store});
-        showRetreatsInfoDeneged = await Retreat.find({status:"Denegado", store: req.body.store});
-        showRetreatsInfoCancel = await Retreat.find({status:"Cancelado", store: req.body.store});
+        showRetreatsInfoDeneged = await Retreat.find({ status: "Denegado" });
+
+        showRetreatsInfoCancel = await Retreat.find({ status: "Cancelado" });
+    } else {
+        showRetreatsInfoAccepted = await Retreat.find({ status: "Aprobado", store: req.body.store });
+        showRetreatsInfoDeneged = await Retreat.find({ status: "Denegado", store: req.body.store });
+        showRetreatsInfoCancel = await Retreat.find({ status: "Cancelado", store: req.body.store });
     }
 
     return res.json({ "acepted": showRetreatsInfoAccepted, "deneged": showRetreatsInfoDeneged, "cancel": showRetreatsInfoCancel });
@@ -117,71 +117,71 @@ async function showRetreatsBinacleList(req, res) {
     });
 
     console.log(showRetreatsInfo, showRetreatsInfo);
-    return res.json({ "binnacle":showRetreatsInfo, "history": showRetreatsInfoHistory });
+    return res.json({ "binnacle": showRetreatsInfo, "history": showRetreatsInfoHistory });
 }
 
 
 async function updateRetreats(req, res) {
-    const {id , action} = req.body;
+    const { id, action } = req.body;
 
     let showRetreatsInfo = await Retreat.find({
-       _id: id
+        _id: id
     });
 
-    if(action == 'Aprobado'){
+    if (action == 'Aprobado') {
 
         const newRetreatsBinacle = RetreatsBinacle({
             name: showRetreatsInfo[0].name,
-            debt:  "+" + showRetreatsInfo[0].price_f,
+            debt: "+" + showRetreatsInfo[0].price_f,
             type: showRetreatsInfo[0].description,
             date_created: Date.now()
         });
-        
+
         var insertBinnacle = await newRetreatsBinacle.save();
 
         let showDebt = await RetreatDebt.find({
             name: showRetreatsInfo[0].name
-         });
- 
-        var total = (showDebt.length !== 0 ? parseFloat(showDebt[0].total_debt) : 0 )+ showRetreatsInfo[0].price_f;
+        });
+
+        var total = (showDebt.length !== 0 ? parseFloat(showDebt[0].total_debt) : 0) + showRetreatsInfo[0].price_f;
 
         var updateRetreatsDebt = "";
-        if(showDebt.length !== 0){
-            updateRetreatsDebt = await RetreatDebt.update({name: showRetreatsInfo[0].name}, {total_debt: total ,update_created: Date.now()});
+        if (showDebt.length !== 0) {
+            updateRetreatsDebt = await RetreatDebt.update({ name: showRetreatsInfo[0].name }, { total_debt: total, update_created: Date.now() });
             //updateRetreatsDebt = await RetreatDebt.updateOne({_id: 'ObjectId("5fc085355246872868245e7d")' }, {total_debt: total ,update_created: Date.now()});
         } else {
-        const newRetreatsDebt = RetreatDebt({
-            name: showRetreatsInfo[0].name,
-            total_debt: total,
-            date_created: Date.now(),
-            update_created: Date.now(),
-            status: "Activo"
+            const newRetreatsDebt = RetreatDebt({
+                name: showRetreatsInfo[0].name,
+                total_debt: total,
+                date_created: Date.now(),
+                update_created: Date.now(),
+                status: "Activo"
             });
-            
+
             updateRetreatsDebt = await newRetreatsDebt.save();
         }
     }
 
-    let updateRetreatsInfo = await Retreat.updateOne({_id: id }, {status: action})
+    let updateRetreatsInfo = await Retreat.updateOne({ _id: id }, { status: action })
 
     return res.json({ updateRetreatsInfo });
 }
 
 async function updateRetreatsRemove(req, res) {
 
-    const {vendedor, deuda, descuento} = req.body.datos;
-    
+    const { vendedor, deuda, descuento } = req.body.datos;
+
     //bitacora
     const updateRetreatsBinacleData = RetreatsBinacle({
         name: vendedor,
-        debt:  "-" + descuento.toString(),
+        debt: "-" + descuento.toString(),
         type: 'Descuento',
         date_created: Date.now()
     });
     const resultUpdateRetreats = updateRetreatsBinacleData.save();
-    const updateRetreatsDebt = await RetreatDebt.updateOne({name: vendedor }, {total_debt: deuda ,update_created: Date.now()});
-    console.log({update: updateRetreatsDebt, created: resultUpdateRetreats});
-    return res.json({message:"Descuento Realizado", type:"success", tittle: "Completado"});
+    const updateRetreatsDebt = await RetreatDebt.updateOne({ name: vendedor }, { total_debt: deuda, update_created: Date.now() });
+    console.log({ update: updateRetreatsDebt, created: resultUpdateRetreats });
+    return res.json({ message: "Descuento Realizado", type: "success", tittle: "Completado" });
 }
 
 async function createdRetreats(req, res) {
@@ -192,14 +192,20 @@ async function createdRetreats(req, res) {
         name: data.store
     });
 
-    var email_re;
-    if(infoStore[0].sbs == 'Alias'){
-        email_re = 'luis@gmail.com';
-      }else if(infoStore[0].sbs == 'Arrital'){
-        email_re = 'ana@gmail.com';
-      }else{
-        email_re = 'luis@corpinto.com';
-      }
+    var emailsDefault = [];
+    var templateEmail;
+    if (infoStore[0].sbs == 'Alias') {
+        templateEmail = 'Retiros Autorizacion Alias';
+    } else if (infoStore[0].sbs == 'Arrital') {
+        templateEmail = 'Retiros Autorizacion Arrital';
+    } else {
+        templateEmail = 'Retiros Autorizacion Alias';
+    }
+
+    let showUser = await Email_template.find({ template: templateEmail, status: "Activo" });
+    showUser.map((elementos) => {
+        return emailsDefault.push(elementos.email)
+    });
 
     const newRetreats = Retreat({
         name: data.vendor,
@@ -213,12 +219,19 @@ async function createdRetreats(req, res) {
         filename: result.url,
         store: data.store,
         sbs: infoStore.sbs
-      });
+    });
 
-      email(
+    //Trae los emails para el correo
+    var emails = [];
+    let showUserInfo = await Email_template.find({ template: "Venta Diaria", status: "Activo" });
+    showUserInfo.map((elementos) => {
+        return emails.push(elementos.email)
+    })
+
+    email(
         infoStore,
-        email_re,
-        'jrodriguez@corpinto.com',
+        emailsDefault,
+        emails,
         'Nuevo retiro de mercaderia',
         `<!-- pre-header -->
         <table style="display:none!important;">
@@ -310,11 +323,64 @@ async function createdRetreats(req, res) {
         <!-- end section -->`
     )
 
-    
+
 
     const saveRe = await newRetreats.save();
 
     return res.json({ data: newRetreats });
+}
+
+async function getDataReport(req,res) {
+    console.log(req.params)
+    console.log(req.body)
+    let query = null,
+    retiro = null,
+    retiro_debito = null;
+    if(req.body.role == "admin"){
+        if(req.body.name && req.body.name!== 'Todos'){
+            query = {
+                date_created:{
+                    $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                },
+                name: req.body.name
+            }
+        }else{
+            query = {
+                date_created:{
+                    $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                }
+            }
+        }
+    }else{
+        query = {
+            date_created:{
+                $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            },
+            name: req.body.name
+        }
+    }
+
+    switch (req.body.type) {
+        case 'retiros':
+            retiro = await Retreat.find(query);
+            break;
+        case 'debitos':
+            retiro_debito = await RetreatDebt.find(query);
+            break;
+        default:
+            retiro = await Retreat.find(query);
+            retiro_debito = await RetreatDebt.find(query);
+            break;
+    }
+
+    return res.status(200).json({ data: {
+        retiro: retiro != null ? retiro:null,
+        retiro_debito: retiro_debito != null ? retiro_debito:null,
+        type: req.body.type
+    } })
 }
 
 module.exports = {
@@ -324,5 +390,6 @@ module.exports = {
     showRetreatsBinacleList,
     createdRetreats,
     updateRetreats,
-    updateRetreatsRemove
+    updateRetreatsRemove,
+    getDataReport
 }

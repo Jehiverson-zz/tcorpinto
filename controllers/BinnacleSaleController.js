@@ -4,6 +4,7 @@ const BinnacleSaleByte = require('../models/BinnacleSaleByte');
 const BinnacleSaleByteBefore = require('../models/BinnacleSaleByteBefore');
 const BinnacleDailies = require('../models/Binnacle_daily');
 var currencyFormatter = require('currency-formatter');
+const Email_template = require('../models/Email_template');
 const { auth, db, firestore } = require('../firebase');
 let Moment = require("moment-timezone");
 let momentToday = require("moment");
@@ -17,11 +18,11 @@ async function getBinnacleSale(req, res) {
     var salesNew
     if (req.body.type === 'admin') {
         salesNew = await BinnacleSaleByte.find({
-            date_created: {$in: [ /^2020/i, /^2021/ ] }
+            date_created: { $in: [/^2020/i, /^2021/] }
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     } else {
         salesNew = await BinnacleSaleByte.find({
-            date_created: {$in: [ /^2020/i, /^2021/ ] },
+            date_created: { $in: [/^2020/i, /^2021/] },
             store_creat: req.body.store
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     }
@@ -46,6 +47,16 @@ async function getBinnacleSale(req, res) {
     })
     dataStore.reverse()
     return res.json({ dataStore });
+}
+
+//Obtiene los datos de venta por el id
+async function getBinnacleSaleById(req, res) {
+
+    const salesNew = await BinnacleSaleByte.find({
+        _id: req.body._id
+    });
+
+    return res.json({ salesNew });
 }
 //Obtiene los colaboradores date_created: { $regex: dateSales },
 async function getBinnacleSaleReport(req, res) {
@@ -265,7 +276,7 @@ async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
         //date_created: { $regex: "2020" }
-        date_created: {$in: [ /^2020/i, /^2021/ ] }
+        date_created: { $in: [/^2020/i, /^2021/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -316,7 +327,7 @@ async function getBinnacleSaleReportTotal(req, res) {
 async function getBinnacleSaleReportTotalSendFirebase(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
-        date_created: {$in: [ /^2020/i, /^2021/ ] }
+        date_created: { $in: [/^2020/i, /^2021/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -472,6 +483,18 @@ async function setBinnacleSalesCreate(req, res) {
     })
 
     var emailValid = false
+    //Trae los emails para el correo
+    var emails = [];
+    let showUserInfo = await Email_template.find({ template: "Venta Diaria", status: "Activo" });
+    showUserInfo.map((elementos) => {
+        return emails.push(elementos.email)
+    });
+
+    var emailsDefault = [];
+    let showUser = await Email_template.find({ template: "Venta Diaria Default", status: "Activo" });
+    showUser.map((elementos) => {
+        return emailsDefault.push(elementos.email)
+    });
 
     await sale.save(async (err, sale) => {
         if (err) return res.status(500).send({ valid: false });
@@ -488,12 +511,9 @@ async function setBinnacleSalesCreate(req, res) {
             // send mail with defined transport object
             transporter.sendMail({
                 from: '"Datos de venta" <noreply@corpinto.com>', // sender address
-                to: "ventas@corpinto.com", // list of receivers
-                //to: "dlara2017229@gmail.com",
-                cc: params.email,
-                bcc: "jrodriguez@corpinto.com",
-                subject:
-                    `Dato de venta diaria ${dateEmail}`,
+                to: emailsDefault,
+                cc: emails,
+                subject: `Dato de venta diaria ${dateEmail}`,
                 text: "", // plain text body
                 html: `<table border="0" align="left" width="590" cellpadding="0" cellspacing="0" class="container590">
                    
@@ -573,6 +593,114 @@ async function setBinnacleSalesCreate(req, res) {
 
     return res.json({ status: true, message: 'Dato de venta creado exitosamente!', color: "green" });
 }
+
+/*Actualiza el dato de venta*/
+async function setBinnacleSalesUpdate(req, res) {
+    console.log("Entro Al upadate");
+    let params = req.body;
+    var fecha;
+    console.log("Esta fecha llego", params.dateStoreDefault);
+    if (params.dateStoreDefault) {
+        fecha = Moment(params.dateStoreDefault).format('YYYY-MM-DD');
+    } else {
+        fecha = require("moment-timezone")
+            .tz("America/Guatemala")
+            .format("YYYY-MM-DD");
+    }
+
+    var vendorsArray = [];
+
+    params.vendors.map(res => {
+        let vendors = {
+            name: res.nombre,
+            sale: res.venta
+        }
+        return vendorsArray.push(vendors);
+    })
+
+    var vendorsDescountArray = [];
+
+    params.vendorsDescount.map(res => {
+        let vendorsDescount = {
+            name: res.nombre,
+            sale: res.venta
+        }
+        return vendorsDescountArray.push(vendorsDescount);
+    })
+
+
+    const dataSale = {
+        store_creat: params.storeDefault,
+        sale_daily: params.sales[0].venta_diaria,
+        daily_goal: params.sales[0].meta,
+        year_before_sale: params.sales[0].venta_anterior,
+        manager: params.sales[0].encargado,
+        fact: params.sales[0].factoresDeVenta,
+        //compilance_manager : params.sales[0].,
+        people_totals: params.sales[0].no_personas,
+        sales_totals: params.sales[0].no_ventas,
+        diff: params.sales[0].faltante,
+        //System
+        fac_sis_from: params.sales[0].facturas_sis_desde,
+        fac_sis_to: params.sales[0].facturas_sis_hasta,
+        total_sis: params.sales[0].facturas_sis_total,
+        //manual
+        fac_man_from: params.sales[0].facturas_man_desde,
+        fac_man_to: params.sales[0].facturas_man_hasta,
+        total_man: params.sales[0].facturas_man_total,
+        //COD
+        fact_send_CE_from: params.sales[0].facturas_cod_desde,
+        fact_send_CE_to: params.sales[0].facturas_cod_hasta,
+        fact_send_CEV: params.sales[0].facturas_cod_total,
+        //note credito
+        fact_nt_c_f: params.sales[0].facturas_nota_desde,
+        fact_nt_c_to: params.sales[0].facturas_nota_hasta,
+        fact_nt_c: params.sales[0].facturas_nota_total,
+        //Method
+        cash_quetzales: params.sales[0].efectivoQuetzales,
+        cash_dolares: params.sales[0].efectivoQuetzalesDolares,
+        credomatic: params.sales[0].credomatic,
+        visa: params.sales[0].visa,
+        visaOnline: params.sales[0].visaOnline,
+        visaDolares: params.sales[0].visaDolares,
+        masterCard: params.sales[0].masterCard,
+        credicuotas: params.sales[0].crediCuotas,
+        visaCuotas: params.sales[0].visaCuotas,
+        numb_send_cash_value: params.sales[0].valorEnvioEfectivo,
+        lifeMilesNum: params.sales[0].lifeMilesNumber,
+        lifeMilesVa: params.sales[0].lifeMilesValor,
+        extIva: params.sales[0].exencionIva,
+        loyalty: params.sales[0].loyalty,
+        Authorized_Expenditure_v: params.sales[0].gastosAutorizados,
+        retreats: params.sales[0].retirosMercaderia,
+        total_on: params.sales[0].ventaEnLinea,
+        note_credit: params.sales[0].notaDeCredito,
+        missing: params.sales[0].faltante,
+        box_square: params.sales[0].cuadreDeCaja,
+        diference: params.sales[0].diferencia,
+        cashBackVa: params.sales[0].cashback,
+        giftcard: params.sales[0].giftcard,
+        obs_method: params.sales[0].observaciones,
+        ticket_quetzales: "",
+        date_ticket_cash_quetzales: Date.now(),
+        date_ticket_cash_dollars: Date.now(),
+        ticket_dollars: "",
+        ticket_quetzales: "",
+        date_update_conta: Date.now(),
+        date_created: fecha,
+        vendors: vendorsArray,
+        vendorsDescount: vendorsDescountArray
+    }
+
+    BinnacleSaleByte.findByIdAndUpdate(req.body.sales[0].id, dataSale, (err, result) => {
+        //console.log(req.body.sales[0].id, dataSale, datosUpdate);
+        if (err) console.log("ERROR", err);
+        console.log("RESULT", result)
+        return res.json({ status: true, message: 'Dato de venta actualizado exitosamente!', color: "green" });
+    });
+}
+
+
 /* Valida si existe un dato de venta anterior*/
 async function validationDataSale(req, res) {
     console.log(req.body)
@@ -693,6 +821,7 @@ async function getDataReport(req, res) {
     }
     let dataStore = [];
     let salesNew = await BinnacleSaleByte.find(query, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
+
     salesNew.map((res) => {
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
@@ -752,12 +881,14 @@ async function getDataReportDailies(req, res) {
 module.exports = {
     deleteDataSale,
     getBinnacleSale,
+    getBinnacleSaleById,
     getBinnacleSaleReport,
     getBinnacleSaleReportBefore,
     getBinnacleSaleReportTotal,
     getBinnacleSaleReportTotalSendFirebase,
     validationDataSale,
     setBinnacleSalesCreate,
+    setBinnacleSalesUpdate,
     creatBinnacleDailies,
     deleteBinnacleDailies,
     getBinnacleDailies,

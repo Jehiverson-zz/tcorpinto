@@ -37,7 +37,6 @@ async function getCertificatesActives(req, res) {
         return result
     })
     let subsidiaria = store.sbs;
-    console.log("SBS:", subsidiaria)
     //muestra los ticket de cada tienda
     let result;
     switch (subsidiaria) {
@@ -209,20 +208,18 @@ await Certificate.updateOne({ _id: req.body.id }, dataUpdate, (err, result) => {
 }
 
 async function getDataReport(req, res) {
+    console.log(req.params);
     let query;
     query = {
-        timestamp:{
-            $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-            $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-        },
-        date_start_cer:{
-            $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-            $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-        },
-        date_end_cer:{
-            $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-            $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-        },
+        $or:[
+        {date_start_cer:{
+            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+        }},
+        {date_end_cer:{
+            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+        }}]
     }
     await Certificate.find(query).exec((err, result) => {
         console.log("ERROR", err)

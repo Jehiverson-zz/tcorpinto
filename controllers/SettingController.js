@@ -6,6 +6,8 @@ const Collaborator = require('../models/Collaborator');
 
 const Subsidiaria = require('../models/Subsidiaria');
 const Store = require('../models/Store');
+const Email_template = require('../models/Email_template');
+const TemplateAsignationEmail = require('../models/TemplateAsignationEmail');
 
 async function showStatus(req, res) {
     let showStatusInfo = await Status.find();
@@ -13,7 +15,6 @@ async function showStatus(req, res) {
 }
 
 async function createStatus(req, res) {
-    console.log(req.body)
     const creatStatusInfo = Status({
         name: req.body.name,
         status: req.body.status,
@@ -24,7 +25,6 @@ async function createStatus(req, res) {
 }
 
 async function updateStatus(req, res) {
-    console.log(req.body)
     var myquery = { _id: req.body.id };
     const updatetaStusInfo = {
         name: req.body.name,
@@ -42,9 +42,9 @@ async function showUser(req, res) {
 }
 
 async function createUser(req, res) {
-    console.log(req.body);
+    
     const creatStatusInfo = User({
-        email:req.body.email,
+        email: req.body.email,
         name: req.body.name,
         password: req.body.password,
         status: req.body.status,
@@ -59,30 +59,27 @@ async function createUser(req, res) {
 }
 
 async function updateUser(req, res) {
-    
+
     var myquery = { _id: req.body.id };
     var contra;
-    console.log("----------",req.body);
-    if(req.body.password === req.body.passwordC){
-    var contra = req.body.password;
-    const updatetaStusInfo = {
-        email:req.body.email,
-        name: req.body.name,
-        password: contra,
-        status: req.body.status.label ? req.body.status.label : req.body.status,
-        type: req.body.typeUser.label ? req.body.typeUser.label : req.body.typeUser,
-        change_date: req.body.change_date,
-        store: req.body.store.label ? req.body.store.label : req.body.store,
-        updatedAt: new Date()
-    };
-    console.log(2);
-    console.log(myquery);
-    console.log(updatetaStusInfo);
+    if (req.body.password === req.body.passwordC) {
+        var contra = req.body.password;
+        const updatetaStusInfo = {
+            email: req.body.email,
+            name: req.body.name,
+            password: contra,
+            status: req.body.status.label ? req.body.status.label : req.body.status,
+            type: req.body.typeUser.label ? req.body.typeUser.label : req.body.typeUser,
+            change_date: req.body.change_date,
+            store: req.body.store.label ? req.body.store.label : req.body.store,
+            updatedAt: new Date()
+        };
 
-    await User.updateOne(myquery, updatetaStusInfo);
-        
-    return res.status(200).json({ error: 0, message: "Usuario Actualizado" });
-    }else{
+
+        await User.updateOne(myquery, updatetaStusInfo);
+
+        return res.status(200).json({ error: 0, message: "Usuario Actualizado" });
+    } else {
         bcrypt.genSalt(10, (err, salt) => {
             if (err) {
                 next(err);
@@ -91,10 +88,10 @@ async function updateUser(req, res) {
                 if (err) {
                     return res.status(500).json({ error: 1, message: "Error al actualizar usuario" });
                 }
-                
-                
+
+
                 const updatetaStusInfo = {
-                    email:req.body.email,
+                    email: req.body.email,
                     name: req.body.name,
                     password: hash,
                     status: req.body.status.label ? req.body.status.label : req.body.status,
@@ -103,12 +100,9 @@ async function updateUser(req, res) {
                     store: req.body.store.label ? req.body.store.label : req.body.store,
                     updatedAt: new Date()
                 };
-                console.log(1);
-                console.log(myquery);
-                console.log(updatetaStusInfo);
-    
+
                 await User.updateOne(myquery, updatetaStusInfo);
-                    
+
                 return res.status(200).json({ error: 0, message: "Usuario Actualizado" });
             });
         });
@@ -116,7 +110,7 @@ async function updateUser(req, res) {
 }
 
 async function showCollaborator(req, res) {
-    let showCollaboratorInfo = await Collaborator.find({},{name:1,status:1,timestamp:1,store_asigned:1});
+    let showCollaboratorInfo = await Collaborator.find({}, { name: 1, status: 1, timestamp: 1, store_asigned: 1 });
     return res.json({ showCollaboratorInfo });
 }
 
@@ -128,21 +122,21 @@ async function createCollaborator(req, res) {
         status: req.body.status,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+    });
     await creatCollaboratorInfo.save();
-    return res.status(200).json({ error: 0, message:"Colaborador Ingresado", data:creatCollaboratorInfo });
+    return res.status(200).json({ error: 0, message: "Colaborador Ingresado", data: creatCollaboratorInfo });
 }
 
 async function updateCollaborator(req, res) {
-    await Collaborator.findByIdAndUpdate(req.body.id,{
+    await Collaborator.findByIdAndUpdate(req.body.id, {
         name: req.body.name,
         store_asigned: req.body.store,
         status: req.body.status,
         updatedAt: new Date(),
-      },(error,response) => {
-        if(error) return res.status(500).json({ error: 1, message:"Error en el servidor", textError: error });
-        return res.status(200).json({ error: 0, message:"Colaborador Actualizado", data: response });
-      });
+    }, (error, response) => {
+        if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
+        return res.status(200).json({ error: 0, message: "Colaborador Actualizado", data: response });
+    });
 }
 
 async function showUser(req, res) {
@@ -156,10 +150,10 @@ async function showSubsidiaria(req, res) {
 }
 
 async function getSubsidiariaActives(req, res) {
-  await Subsidiaria.find({ status: 'Activo' }, (err, subsidiarias)=>{
-    if(err) { console.log(err); return }
-    return res.json({ subsidiarias });
-  });
+    await Subsidiaria.find({ status: 'Activo' }, (err, subsidiarias) => {
+        if (err) { console.log(err); return }
+        return res.json({ subsidiarias });
+    });
 }
 
 async function createSubsidiaria(req, res) {
@@ -169,20 +163,20 @@ async function createSubsidiaria(req, res) {
         status: req.body.status,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+    });
     await creatSubsidiaria.save();
-    return res.status(200).json({ error: 0, message:"Subsidiaria Creada" });
+    return res.status(200).json({ error: 0, message: "Subsidiaria Creada" });
 }
 
 async function updateSubsidiaria(req, res) {
-    await Subsidiaria.findByIdAndUpdate(req.body.id,{
+    await Subsidiaria.findByIdAndUpdate(req.body.id, {
         name: req.body.name,
         status: req.body.status,
         updatedAt: new Date(),
-      },(error,response) => {
-        if(error) return res.status(500).json({ error: 1, message:"Error en el servidor", textError: error });
-        return res.status(200).json({ error: 0, message:"Subsidiaria Actualizada", data: response });
-      });
+    }, (error, response) => {
+        if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
+        return res.status(200).json({ error: 0, message: "Subsidiaria Actualizada", data: response });
+    });
 }
 
 async function createStore(req, res) {
@@ -193,21 +187,91 @@ async function createStore(req, res) {
         status: req.body.status,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+    });
     await creatStoreInfo.save();
-    return res.status(200).json({ error: 0, message:"Tienda Ingresado" });
+    return res.status(200).json({ error: 0, message: "Tienda Ingresado" });
 }
 
 async function updateStore(req, res) {
-    await Store.findByIdAndUpdate(req.body.id,{
+    await Store.findByIdAndUpdate(req.body.id, {
         name: req.body.name,
         sbs: req.body.sbs,
         status: req.body.status,
         updatedAt: new Date(),
-      },(error,response) => {
-        if(error) return res.status(500).json({ error: 1, message:"Error en el servidor", textError: error });
-        return res.status(200).json({ error: 0, message:"Tienda Actualizada", data: response });
-      });
+    }, (error, response) => {
+        if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
+        return res.status(200).json({ error: 0, message: "Tienda Actualizada", data: response });
+    });
+}
+
+async function showEmailtemplate(req, res) {
+    let showUserInfo = await Email_template.find();
+    return res.json({ showUserInfo });
+}
+
+async function createEmailtemplate(req, res) {
+    const creatEmailtemplateInfo = Email_template({
+        email: req.body.email,
+        template: req.body.template.value ? req.body.template.value : req.body.template,
+        status: req.body.status.value ? req.body.status.value : req.body.status,
+        date_at: new Date(),
+        date_update: new Date(),
+    });
+    await creatEmailtemplateInfo.save();
+    return res.status(200).json({ error: 0, message: "Email Ingresado" });
+}
+
+async function updateEmailtemplate(req, res) {
+    await Email_template.findByIdAndUpdate(req.body.id, {
+        email: req.body.email,
+        template: req.body.template.value ? req.body.template.value : req.body.template,
+        status: req.body.status.value ? req.body.status.value : req.body.status,
+        date_update: new Date()
+    }, (error, response) => {
+        if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
+        return res.status(200).json({ error: 0, message: "Email Actualizada", data: response });
+    });
+}
+
+/* Template Asigned Email*/
+async function showTemplateAsignedEmail(req, res) {
+    let showTemplateAsignationEmail = await TemplateAsignationEmail.find();
+    return res.json({ showTemplateAsignationEmail });
+}
+
+async function createTemplateAsignedEmail(req, res) {
+    const createTemplateAsignationEmail = TemplateAsignationEmail({
+        name: req.body.name,
+        status: req.body.status.value ? req.body.status.value : req.body.status,
+        date_at: new Date(),
+        date_update: new Date(),
+    });
+    await createTemplateAsignationEmail.save();
+    return res.status(200).json({ error: 0, message: "Template Ingresado" });
+}
+
+async function updateTemplateAsignedEmail(req, res) {
+
+    await TemplateAsignationEmail.findByIdAndUpdate(req.body.id, {
+        name: req.body.name,
+        status: req.body.status.value ? req.body.status.value : req.body.status,
+        date_update: new Date()
+    }, (error, response) => {
+        if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
+        return res.status(200).json({ error: 0, message: "Template Actualizada", data: response });
+    });
+}
+
+/*Retorna Email Asignados*/
+
+async function returnEmailsAsigned(req, res) {
+    const { template } = req.body;
+    var emails = [];
+    let showUserInfo = await Email_template.find({ template: template, status: "Activo" });
+    showUserInfo.map((elementos) => {
+        return emails.push(elementos.email)
+    })
+    return res.json({ emails });
 }
 
 module.exports = {
@@ -225,5 +289,12 @@ module.exports = {
     createSubsidiaria,
     updateSubsidiaria,
     createStore,
-    updateStore
+    updateStore,
+    showEmailtemplate,
+    createEmailtemplate,
+    updateEmailtemplate,
+    showTemplateAsignedEmail,
+    createTemplateAsignedEmail,
+    updateTemplateAsignedEmail,
+    returnEmailsAsigned
 }

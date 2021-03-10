@@ -20,56 +20,56 @@ const SettingController = require('../controllers/SettingController');
 
 const routesProtected = express.Router();
 
-routesProtected.use((req, res, next) =>{
+routesProtected.use((req, res, next) => {
 
     const token = req.headers.token;
-    if(token){
+    if (token) {
         console.log(token)
-        jwt.verify(token, process.env.SECRET_KEY, (err, decoded) =>{
+        jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
             console.log("1")
-            if(err){
+            if (err) {
                 console.log("2")
-                res.json({message:'Token Inválida.'});
-            }else{
+                res.json({ message: 'Token Inválida.' });
+            } else {
                 console.log("3")
                 req.decoded = decoded;
                 next();
             }
         });
-    }else{
-        res.status(400).json({message:'No se envio Token.'});
+    } else {
+        res.status(400).json({ message: 'No se envio Token.' });
         console.log("Murio")
     }
 });
 
-router.get('/',userController.getUsers);
+router.get('/', userController.getUsers);
 
-router.post('/login',userController.Login);
+router.post('/login', userController.Login);
 
 
-router.post('/login/google', async(req, res) =>{
+router.post('/login/google', async (req, res) => {
     console.log(req.body.user);
     User.findOne({
         email: req.body.user
-      })
+    })
         .then(user => {
             console.log(user);
-            if(user){
-                    const payload = {
-                        check:  true,
-                        user_data: user
-                       };
-                    let token = jwt.sign(payload, process.env.SECRET_KEY, {
-                        expiresIn: 1440
-                      })
-                    res.send({token, user})
-            }else{
+            if (user) {
+                const payload = {
+                    check: true,
+                    user_data: user
+                };
+                let token = jwt.sign(payload, process.env.SECRET_KEY, {
+                    expiresIn: 1440
+                })
+                res.send({ token, user })
+            } else {
                 console.log('Usuario Incorrecto');
-                res.status(400).json({err:'2', message:'Usuario Incorrecto'})
+                res.status(400).json({ err: '2', message: 'Usuario Incorrecto' })
             }
         })
         .catch(err => {
-            res.status(400).json({error: err})
+            res.status(400).json({ error: err })
         })
 })
 
@@ -78,6 +78,7 @@ router.post('/login/google', async(req, res) =>{
 ---------------------------------------------*/
 router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSaleReport)
 router.post('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
+router.post('/binnacles/sales_show_by_id', binnacleSaleController.getBinnacleSaleById)
 router.get('/binnacles/sales/:id', binnacleSaleController.getBinnacleSaleReportBefore)
 router.get('/binnacles/sales_totals', binnacleSaleController.getBinnacleSaleReportTotal)
 router.get('/binnacles/sales_totals_send_firebase', binnacleSaleController.getBinnacleSaleReportTotalSendFirebase)
@@ -124,7 +125,7 @@ router.post('/user/store', ticketController.getOneStoreActive);
 ----------------- COLLABORATOR --------------
 ---------------------------------------------*/
 
-router.get('/collaborator/get',collaboratorController.getCollaborator);
+router.get('/collaborator/get', collaboratorController.getCollaborator);
 
 
 /*-------------------------------------------
@@ -133,9 +134,9 @@ router.get('/collaborator/get',collaboratorController.getCollaborator);
 
 router.post('/sales/create',binnacleSaleController.setBinnacleSalesCreate);
 router.post('/sales/delete',binnacleSaleController.deleteDataSale);
+router.post('/sales/update', binnacleSaleController.setBinnacleSalesUpdate);
 router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
 router.post('/sales/report/:date_start/:date_end',binnacleSaleController.getDataReport);
-
 
 /*-----------------------------------------------------
 ----------------- MERCADERIA DAÑADA -------------------
@@ -150,8 +151,8 @@ router.post('/damaged_merchandise/report/:date_start/:date_end', DamagedMerchand
 router.post('/certificate/create', CertificateController.store_certificate);
 router.post('/certificates/actives', CertificateController.getCertificatesActives);
 router.post('/certificates/exchange', CertificateController.getCertificates);
-router.post('/certificates/report/:date_start/:date_end', CertificateController.getDataReport);
 router.put('/certificate/exchange', CertificateController.updateCertificate);
+router.post('/certificates/report/:date_start/:date_end', CertificateController.getDataReport);
 /*-----------------------------------------------------
 ----------------------- RETREATS ----------------------
 -------------------------------------------------------*/
@@ -163,7 +164,7 @@ router.post('/retreatsBinacleList', RetreatsController.showRetreatsBinacleList);
 router.post('/retreatsUpdate', RetreatsController.updateRetreats);
 router.post('/retreatsUpdateRove', RetreatsController.updateRetreatsRemove);
 router.post('/createdUpdate', RetreatsController.createdRetreats);
-
+router.post('/retreats/report/:date_start/:date_end', RetreatsController.getDataReport);
 /*-----------------------------------------------------
 ----------------------- SETITNGS ----------------------
 -------------------------------------------------------*/
@@ -189,4 +190,18 @@ router.put('/subsidiariaUpdate', SettingController.updateSubsidiaria);
 /* TIENDA */
 router.post('/storeCreate', SettingController.createStore);
 router.put('/storeUpdate', SettingController.updateStore);
+
+/* EMAIL TEMPLATE */
+router.post('/emailTemplateShow', SettingController.showEmailtemplate);
+router.post('/emailTemplateCreate', SettingController.createEmailtemplate);
+router.put('/emailTemplateUpdate', SettingController.updateEmailtemplate);
+
+/* TEMPLATE  ASIGNED EMAIL*/
+router.post('/templateAsignedEmaileShow', SettingController.showTemplateAsignedEmail);
+router.post('/templateAsignedEmailCreate', SettingController.createTemplateAsignedEmail);
+router.put('/templateAsignedEmailUpdate', SettingController.updateTemplateAsignedEmail);
+
+/*Optiene emails asignados al correo*/
+router.post('/emailsAsigned', SettingController.returnEmailsAsigned);
+
 module.exports = router;
