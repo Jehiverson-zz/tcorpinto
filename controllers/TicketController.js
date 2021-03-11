@@ -7,6 +7,7 @@ const TicketInmediates = require("../models/TicketInmediates");
 const TicketInmediate = require("../models/TicketInmediate");
 const TicketPhoto = require("../models/TicketPhoto");
 const TicketExternal = require('../models/TicketExternal');
+const Email_template = require('../models/Email_template');
 const { firestore } = require('../firebase');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
