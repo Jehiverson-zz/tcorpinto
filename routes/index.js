@@ -137,6 +137,7 @@ router.post('/sales/delete',binnacleSaleController.deleteDataSale);
 router.post('/sales/update', binnacleSaleController.setBinnacleSalesUpdate);
 router.post('/sales/validationDataSale',binnacleSaleController.validationDataSale);
 router.post('/sales/report/:date_start/:date_end',binnacleSaleController.getDataReport);
+router.post('/sales/payment_methods/report/:date_start/:date_end',binnacleSaleController.getDataReportMethods);
 
 /*-----------------------------------------------------
 ----------------- MERCADERIA DAÑADA -------------------

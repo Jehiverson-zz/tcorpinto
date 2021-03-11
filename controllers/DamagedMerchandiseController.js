@@ -186,7 +186,7 @@ async function getDamageMerchandise(req,res) {
 async function getDataReport(req, res) {
     let query;
     if(req.body.role == "admin"){
-        if(req.body.store){
+        if(req.body.store && req.body.store != "Todas"){
             query = {
                 timestamp:{
                     $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
