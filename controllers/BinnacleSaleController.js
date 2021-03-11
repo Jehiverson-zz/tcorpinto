@@ -44,6 +44,7 @@ async function getBinnacleSale(req, res) {
             "manager": res.manager,
             "fact": res.fact,
             "diferencia": res.diff,
+            "date": res.date_created
         })
     })
     dataStore.reverse()
@@ -299,7 +300,8 @@ async function getBinnacleSaleReportTotal(req, res) {
             "total_vendores": res.sales_totals,
             "manager": res.manager,
             "fact": res.fact,
-            "diferencia": res.diff
+            "diferencia": res.diff,
+            "date": res.date_created
         })
     })
 
@@ -318,7 +320,8 @@ async function getBinnacleSaleReportTotal(req, res) {
             "total_vendores": res.sales_totals,
             "manager": res.manager,
             "fact": res.fact,
-            "diferencia": res.diffy
+            "diferencia": res.diffy,
+            "date": res.date_created
         })
     })
 
@@ -350,7 +353,8 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
             "total_vendores": res.sales_totals ? res.sales_totals : 0,
             "manager": res.manager,
             "fact": res.fact ? res.fact : 0,
-            "diferencia": res.diffy ? res.diffy : 0
+            "diferencia": res.diffy ? res.diffy : 0,
+            "date": res.date_created
         })
     })
 
@@ -369,7 +373,8 @@ async function getBinnacleSaleReportTotalSendFirebase(req, res) {
             "total_vendores": res.sales_totals ? res.sales_totals : 0,
             "manager": res.manager,
             "fact": res.fact ? res.fact : 0,
-            "diferencia": res.diffy ? res.diffy : 0
+            "diferencia": res.diffy ? res.diffy : 0,
+            "date": res.date_created
         })
     })
 
@@ -390,7 +395,7 @@ async function setBinnacleSalesCreate(req, res) {
     let sale = new BinnacleSaleByte();
     let currency_format = {
         symbol: 'Q.',//simbolo
-        decimal: '.',//punto de los decimales
+        decimal: '.',//punto de los decimales                   
         thousand: ',', //separador entre miles
         precision: 2, // número de decimales
         format: '%s %v' // %s es el simbolo %v es el valor
@@ -793,33 +798,40 @@ async function deleteBinnacleDailies(req, res) {
 }
 
 async function getDataReport(req, res) {
+    let inicio = req.params.date_start.split("-");
+    let anio_inicial = parseInt(inicio[0])
+    let mes_inicial = parseInt(inicio[1])
+    let dia_inicial = parseInt(inicio[2])
+    let final = req.params.date_end.split("-")
+    let anio_final = parseInt(final[0])
+    let mes_final = parseInt(final[1])
+    let dia_final = parseInt(final[2])
+    let array_fechas = [];
     let query;
-    if (req.body.role == "admin") {
-        if (req.body.store) {
+    console.log(req.params, inicio, final)
+    for (let anio = anio_inicial; anio <= anio_final; anio++) {
+        for (let mes = mes_inicial; mes <= mes_final; mes++) {
+            for (let dia = dia_inicial; dia <= 31; dia++) {
+                array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+            }
+        }
+    }
+    if(req.body.role == "admin"){
+        if(req.body.store && req.body.store != "Todas"){
             query = {
-                date_created: {
-                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-                },
+                $or: array_fechas,
                 store_creat: req.body.store
             }
-        } else {
-            query = {
-                date_created: {
-                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-                }
-            }
+        }else{
+            query = { $or: array_fechas }
         }
     } else {
         query = {
-            date_created: {
-                $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-            },
+            $or: array_fechas,
             store_creat: req.body.store
         }
     }
+    console.log(query)
     let dataStore = [];
     let salesNew = await BinnacleSaleByte.find(query, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
 
@@ -838,16 +850,74 @@ async function getDataReport(req, res) {
             "manager": res.manager,
             "fact": res.fact,
             "diferencia": res.diff,
+            "date": res.date_created
         })
     })
     dataStore.reverse()
     return res.json({ data: dataStore });
 }
 
+async function getDataReportMethods(req, res) {
+    let inicio = req.params.date_start.split("-");
+    let anio_inicial = parseInt(inicio[0])
+    let mes_inicial = parseInt(inicio[1])
+    let dia_inicial = parseInt(inicio[2])
+    let final = req.params.date_end.split("-")
+    let anio_final = parseInt(final[0])
+    let mes_final = parseInt(final[1])
+    let dia_final = parseInt(final[2])
+    let array_fechas = [];
+
+    console.log(req.params, req.body)
+    for (let anio = anio_inicial; anio <= anio_final; anio++) {
+        for (let mes = mes_inicial; mes <= mes_final; mes++) {
+            for (let dia = dia_inicial; dia <= 31; dia++) {
+                array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+            }
+        }
+    }
+    let salesNew = await BinnacleSaleByte.find({
+        $or: array_fechas,
+        store_creat: req.body.store
+    }, { _id: 1,
+        date_created: 1,
+        store_creat: 1,
+        sale_daily: 1,
+        manager: 1,
+        cash_quetzales: 1,
+        cash_dolares: 1,
+        credomatic: 1,
+        visa: 1,
+        visaOnline: 1,
+        visaDolares: 1,
+        masterCard: 1,
+        credicuotas: 1,
+        visaCuotas: 1,
+        numb_send_cash_value: 1,
+        lifeMilesNum: 1,
+        lifeMilesVa: 1,
+        extIva: 1,
+        loyalty: 1,
+        Authorized_Expenditure_v: 1,
+        retreats: 1,
+        total_on: 1,
+        note_credit: 1,
+        diff: 1,
+        box_square: 1,
+        diference: 1,
+        cashBackVa: 1,
+        giftcard: 1 });
+
+    console.log(salesNew)
+
+    salesNew.reverse()
+    return res.json({ data: salesNew });
+}
+
 async function getDataReportDailies(req, res) {
     let query;
-    if (req.body.role == "admin") {
-        if (req.body.store) {
+    if(req.body.role == "admin"){
+        if(req.body.store && req.body.store != "Todas"){
             query = {
                 date_created: {
                     $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
@@ -894,5 +964,6 @@ module.exports = {
     deleteBinnacleDailies,
     getBinnacleDailies,
     getDataReport,
+    getDataReportMethods,
     getDataReportDailies
 }

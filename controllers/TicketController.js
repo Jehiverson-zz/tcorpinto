@@ -1428,7 +1428,7 @@ async function getDataReport(req,res) {
     tickets_fotografia = null;
 
     if(req.body.role == "admin"){
-        if(req.body.store){
+        if(req.body.store && req.body.store != "Todas"){
             query = {
                 timestamp:{
                     $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
