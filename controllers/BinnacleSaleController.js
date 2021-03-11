@@ -14,15 +14,16 @@ let mm = hoy.getMonth() + 1;
 let yyyy = hoy.getFullYear();
 //Obtiene los colaboradores
 async function getBinnacleSale(req, res) {
+    console.log("Reporte");
     const dataStore = [];
     var salesNew
     if (req.body.type === 'admin') {
         salesNew = await BinnacleSaleByte.find({
-            date_created: { $in: [/^2020/i, /^2021/] }
+            date_created: req.body.dateStart
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     } else {
         salesNew = await BinnacleSaleByte.find({
-            date_created: { $in: [/^2020/i, /^2021/] },
+            date_created: req.body.dateStart,
             store_creat: req.body.store
         }, { _id: 1, date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1, daily_goal: 1, fact: 1 });
     }
@@ -793,28 +794,28 @@ async function deleteBinnacleDailies(req, res) {
 
 async function getDataReport(req, res) {
     let query;
-    if(req.body.role == "admin"){
-        if(req.body.store){
+    if (req.body.role == "admin") {
+        if (req.body.store) {
             query = {
-                date_created:{
-                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                date_created: {
+                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                 },
                 store_creat: req.body.store
             }
-        }else{
+        } else {
             query = {
-                date_created:{
-                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                date_created: {
+                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                 }
             }
         }
-    }else{
+    } else {
         query = {
-            date_created:{
-                $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            date_created: {
+                $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
             },
             store_creat: req.body.store
         }
@@ -845,36 +846,36 @@ async function getDataReport(req, res) {
 
 async function getDataReportDailies(req, res) {
     let query;
-    if(req.body.role == "admin"){
-        if(req.body.store){
+    if (req.body.role == "admin") {
+        if (req.body.store) {
             query = {
-                date_created:{
-                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                date_created: {
+                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                 },
                 store_created: req.body.store
             }
-        }else{
+        } else {
             query = {
-                date_created:{
-                    $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                date_created: {
+                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                 }
             }
         }
-    }else{
+    } else {
         query = {
-            date_created:{
-                $gt:  Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt:  Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            date_created: {
+                $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
             },
             store_created: req.body.store
         }
     }
     await BinnacleDailies.find(query).exec((err, result) => {
-        if(err) return res.status(500).send('Algo salío mal')
-        if(!result) return res.status(404).send({ message: 'No existen datos en el rango de fechas especificado' })
-        return res.status(200).send({data: result});
+        if (err) return res.status(500).send('Algo salío mal')
+        if (!result) return res.status(404).send({ message: 'No existen datos en el rango de fechas especificado' })
+        return res.status(200).send({ data: result });
     });
 }
 
