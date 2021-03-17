@@ -808,13 +808,16 @@ async function getDataReport(req, res) {
     let dia_final = parseInt(final[2])
     let array_fechas = [];
     let query;
-    console.log(req.params, inicio, final)
-    for (let anio = anio_inicial; anio <= anio_final; anio++) {
-        for (let mes = mes_inicial; mes <= mes_final; mes++) {
-            for (let dia = dia_inicial; dia <= 31; dia++) {
-                array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+    if(req.params.date_start !== req.params.date_end){
+        for (let anio = anio_inicial; anio <= anio_final; anio++) {
+            for (let mes = mes_inicial; mes <= mes_final; mes++) {
+                for (let dia = dia_inicial; dia <= 31; dia++) {
+                    array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+                }
             }
         }
+    }else{
+        array_fechas.push({date_created:`${anio_inicial}-${mes_inicial}-${dia_inicial}`});
     }
     if(req.body.role == "admin"){
         if(req.body.store && req.body.store != "Todas"){
@@ -858,6 +861,7 @@ async function getDataReport(req, res) {
 }
 
 async function getDataReportMethods(req, res) {
+    let query;
     let inicio = req.params.date_start.split("-");
     let anio_inicial = parseInt(inicio[0])
     let mes_inicial = parseInt(inicio[1])
@@ -868,18 +872,27 @@ async function getDataReportMethods(req, res) {
     let dia_final = parseInt(final[2])
     let array_fechas = [];
 
-    console.log(req.params, req.body)
-    for (let anio = anio_inicial; anio <= anio_final; anio++) {
-        for (let mes = mes_inicial; mes <= mes_final; mes++) {
-            for (let dia = dia_inicial; dia <= 31; dia++) {
-                array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+    if(req.params.date_start !== req.params.date_end){
+        for (let anio = anio_inicial; anio <= anio_final; anio++) {
+            for (let mes = mes_inicial; mes <= mes_final; mes++) {
+                for (let dia = dia_inicial; dia <= 31; dia++) {
+                    array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+                }
             }
         }
+        query = {
+            $or: array_fechas,
+            store_creat: req.body.store
+        }
+    }else{
+        query = {
+            date_created:`${anio_inicial}-${mes_inicial< 10?'0'+mes_inicial:mes_inicial}-${dia_inicial<10?'0'+dia_inicial:dia_inicial}`,
+            store_creat: req.body.store
+        }
     }
-    let salesNew = await BinnacleSaleByte.find({
-        $or: array_fechas,
-        store_creat: req.body.store
-    }, { _id: 1,
+
+    console.log(query)
+    let salesNew = await BinnacleSaleByte.find(query, { _id: 1,
         date_created: 1,
         store_creat: 1,
         sale_daily: 1,
@@ -908,7 +921,6 @@ async function getDataReportMethods(req, res) {
         cashBackVa: 1,
         giftcard: 1 });
 
-    console.log(salesNew)
 
     salesNew.reverse()
     return res.json({ data: salesNew });
@@ -917,7 +929,43 @@ async function getDataReportMethods(req, res) {
 async function getDataReportDailies(req, res) {
     let query;
     if(req.body.role == "admin"){
-        if(req.body.store && req.body.store != "Todas"){
+        if(req.params.date_start !== req.params.date_end){
+            if(req.body.store && req.body.store != "Todas"){
+                query = {
+                    date_created: {
+                        $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    },
+                    store_created: req.body.store
+                }
+            } else {
+                query = {
+                    date_created: {
+                        $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    }
+                }
+            }
+        }else{
+            if(req.body.store && req.body.store !== "Todas"){
+                query = {
+                    date_created:{
+                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                    },
+                    store_created: req.body.store
+                }
+            }else{
+                query = {
+                    date_created: {
+                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                     },
+                }
+            }
+        }
+    } else {
+        if(req.params.date_start !== req.params.date_end){
             query = {
                 date_created: {
                     $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
@@ -925,21 +973,14 @@ async function getDataReportDailies(req, res) {
                 },
                 store_created: req.body.store
             }
-        } else {
+        }else{
             query = {
-                date_created: {
-                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-                }
+                date_created:{
+                    $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                    $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                },
+                store_created: req.body.store
             }
-        }
-    } else {
-        query = {
-            date_created: {
-                $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-            },
-            store_created: req.body.store
         }
     }
     await BinnacleDailies.find(query).exec((err, result) => {
