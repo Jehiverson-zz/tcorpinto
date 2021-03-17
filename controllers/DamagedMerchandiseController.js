@@ -207,16 +207,16 @@ async function getDataReport(req, res) {
             if(req.body.store && req.body.store !== "Todas"){
                 query = {
                     timestamp:{
-                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
-                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                        $gte: moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                        $lt: moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                     },
                     store_created: req.body.store
                 }
             }else{
                 query = {
                     timestamp: {
-                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
-                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                        $gte: moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                        $lt: moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                      },
                 }
             }
@@ -225,16 +225,16 @@ async function getDataReport(req, res) {
         if(req.params.date_start !== req.params.date_end){
             query = {
                 timestamp:{
-                    $gt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
-                    $lt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD")
+                    $gt: moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
+                    $lt: moment(new Date(req.params.date_start)).format("YYYY-MM-DD")
                 },
                 store_created: req.body.store
             }
         }else{
             query = {
                 timestamp:{
-                    $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
-                    $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                    $gte: moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                    $lt: moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                 },
                 store_created: req.body.store
             }
