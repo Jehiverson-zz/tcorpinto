@@ -817,7 +817,7 @@ async function getDataReport(req, res) {
             }
         }
     }else{
-        array_fechas.push({date_created:`${anio_inicial}-${mes_inicial}-${dia_inicial}`});
+        array_fechas.push({date_created:`${anio_inicial}-${mes_inicial< 10?'0'+mes_inicial:mes_inicial}-${dia_inicial<10?'0'+dia_inicial:dia_inicial}`});
     }
     if(req.body.role == "admin"){
         if(req.body.store && req.body.store != "Todas"){
