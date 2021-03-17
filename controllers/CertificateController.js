@@ -219,8 +219,8 @@ async function getDataReport(req, res) {
     }else{
         query = {
             date_start_cer: {
-                $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
-                $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
              },
         }
     }

@@ -337,7 +337,43 @@ async function getDataReport(req,res) {
     retiro = null,
     retiro_debito = null;
     if(req.body.role == "admin"){
-        if(req.body.name && req.body.name!== 'Todos'){
+        if(req.params.date_start !== req.params.date_end){
+            if(req.body.name && req.body.name!== 'Todos'){
+                query = {
+                    date_created:{
+                        $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    },
+                    name: req.body.name
+                }
+            }else{
+                query = {
+                    date_created:{
+                        $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    }
+                }
+            }
+        }else{
+            if(req.body.name && req.body.name!== 'Todos'){
+                query = {
+                    date_created:{
+                        $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                    },
+                    name: req.body.name
+                }
+            }else{
+                query = {
+                    date_created:{
+                        $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                    }
+                }
+            }
+        }
+    }else{
+        if(req.params.date_start !== req.params.date_end){
             query = {
                 date_created:{
                     $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
@@ -348,18 +384,11 @@ async function getDataReport(req,res) {
         }else{
             query = {
                 date_created:{
-                    $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-                }
+                    $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                    $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                },
+                name: req.body.name
             }
-        }
-    }else{
-        query = {
-            date_created:{
-                $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-            },
-            name: req.body.name
         }
     }
 
