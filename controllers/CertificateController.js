@@ -208,22 +208,23 @@ await Certificate.updateOne({ _id: req.body.id }, dataUpdate, (err, result) => {
 }
 
 async function getDataReport(req, res) {
-    console.log(req.params);
     let query;
-    query = {
-        $or:[
-        {date_start_cer:{
-            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-        }},
-        {date_end_cer:{
-            $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-            $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-        }}]
+    if(req.params.date_start !== req.params.date_end){
+        query = {
+            date_start_cer:{
+                $gt:  Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                $lt:  Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+            }
+        }
+    }else{
+        query = {
+            date_start_cer: {
+                $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+             },
+        }
     }
     await Certificate.find(query).exec((err, result) => {
-        console.log("ERROR", err)
-        console.log("RESULT", result)
         if(err) return res.status(500).send('Algo salío mal')
         if(!result) return res.status(404).send({ message: 'No existen datos en el rango de fechas especificado' })
         return res.status(200).send({data: result});

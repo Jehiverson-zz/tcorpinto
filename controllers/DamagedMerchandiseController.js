@@ -186,29 +186,58 @@ async function getDamageMerchandise(req,res) {
 async function getDataReport(req, res) {
     let query;
     if(req.body.role == "admin"){
-        if(req.body.store && req.body.store != "Todas"){
+        if(req.params.date_start !== req.params.date_end){
+            if(req.body.store && req.body.store != "Todas"){
+                query = {
+                    timestamp:{
+                        $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt:  moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    },
+                    store_created: req.body.store
+                }
+            }else{
+                query = {
+                    timestamp:{
+                        $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt:  moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    }
+                }
+            }
+        }else{
+            if(req.body.store && req.body.store !== "Todas"){
+                query = {
+                    timestamp:{
+                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                    },
+                    store_created: req.body.store
+                }
+            }else{
+                query = {
+                    timestamp: {
+                        $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                        $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                     },
+                }
+            }
+        }
+    }else{
+        if(req.params.date_start !== req.params.date_end){
             query = {
                 timestamp:{
-                    $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    $gt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
+                    $lt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD")
                 },
                 store_created: req.body.store
             }
         }else{
             query = {
                 timestamp:{
-                    $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt:  moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-                }
+                    $gte: new Date(new Date(req.params.date_start).setHours(18, 0, 0)),
+                    $lt: new Date(new Date(req.params.date_end).setHours(41, 59, 59))
+                },
+                store_created: req.body.store
             }
-        }
-    }else{
-        query = {
-            timestamp:{
-                $gt:  moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                $lt:  moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
-            },
-            store_created: req.body.store
         }
     }
     await DamagedMerchandise.find(query).exec((err, result) => {
