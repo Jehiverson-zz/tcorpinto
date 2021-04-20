@@ -933,16 +933,16 @@ async function getDataReportDailies(req, res) {
             if(req.body.store && req.body.store != "Todas"){
                 query = {
                     date_created: {
-                        $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                        $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                        $gt: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                     },
                     store_created: req.body.store
                 }
             } else {
                 query = {
                     date_created: {
-                        $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                        $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                        $gt: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                     }
                 }
             }
@@ -968,22 +968,21 @@ async function getDataReportDailies(req, res) {
         if(req.params.date_start !== req.params.date_end){
             query = {
                 date_created: {
-                    $gt: Moment(req.params.date_start).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-                    $lt: Moment(req.params.date_end).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+                    $gt: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
+                    $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ")
                 },
                 store_created: req.body.store
             }
         }else{
             query = {
                 date_created:{
-                    $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z+00:00"),
-                    $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z+00:00")
+                    $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
+                    $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                 },
                 store_created: req.body.store
             }
         }
     }
-    console.log(query)
     await BinnacleDailies.find(query).exec((err, result) => {
         console.log(err);
         if (err) return res.status(500).send('Algo salío mal')
