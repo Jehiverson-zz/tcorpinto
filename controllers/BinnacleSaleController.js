@@ -205,7 +205,7 @@ async function getBinnacleSaleReport(req, res) {
 
 async function getBinnacleSaleReportDate(req, res) {
     const { dateIn, dateOut } = req.params;
-    if(moment(dateIn, 'YYYY-MM-DD',true).isValid() && moment(dateOut, 'YYYY-MM-DD',true).isValid()){
+    if(momentToday(dateIn, 'YYYY-MM-DD',true).isValid() && momentToday(dateOut, 'YYYY-MM-DD',true).isValid()){
         if (new Date(dateIn) <=new Date(dateOut)) {
             const fechasDatos = [];
             //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
@@ -333,7 +333,7 @@ async function getBinnacleSaleReportDate(req, res) {
 
 async function getBinnacleSaleMethodReportDate(req, res) {
     const { dateIn, dateOut } = req.params;
-    if(moment(dateIn, 'YYYY-MM-DD',true).isValid() && moment(dateOut, 'YYYY-MM-DD',true).isValid()){
+    if(momentToday(dateIn, 'YYYY-MM-DD',true).isValid() && momentToday(dateOut, 'YYYY-MM-DD',true).isValid()){
         if (new Date(dateIn) <=new Date(dateOut)) {
             const fechasDatos = [];
             //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
