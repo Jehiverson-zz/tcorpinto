@@ -323,7 +323,7 @@ async function getBinnacleSaleReportDate(req, res) {
 
             return res.json({ dataStore });
         } else {
-            return res.json('La fecha inicial no puede ser mayor');
+            return res.json('Error, En la fecha');
         }
     } else {
         return res.json('Ingrese una fecha valida');
