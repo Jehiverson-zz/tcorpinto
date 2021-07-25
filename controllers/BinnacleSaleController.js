@@ -205,7 +205,7 @@ async function getBinnacleSaleReport(req, res) {
 
 async function getBinnacleSaleReportDate(req, res) {
     const { dateIn, dateOut } = req.params;
-    if (new Date(dateIn) && new Date(dateOut)) {
+    if(moment(dateIn, 'YYYY-MM-DD',true).isValid() && moment(dateOut, 'YYYY-MM-DD',true).isValid()){
         if (new Date(dateIn) <=new Date(dateOut)) {
             const fechasDatos = [];
             //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
@@ -326,14 +326,14 @@ async function getBinnacleSaleReportDate(req, res) {
             return res.json('Error, En la fecha');
         }
     } else {
-        return res.json('Ingrese una fecha valida');
+        return res.status(400).json({ message: "Error, fechas en formato incorrecto" });
     }
 
 }
 
 async function getBinnacleSaleMethodReportDate(req, res) {
     const { dateIn, dateOut } = req.params;
-    if (new Date(dateIn) && new Date(dateOut)) {
+    if(moment(dateIn, 'YYYY-MM-DD',true).isValid() && moment(dateOut, 'YYYY-MM-DD',true).isValid()){
         if (new Date(dateIn) <=new Date(dateOut)) {
             const fechasDatos = [];
             //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
@@ -541,7 +541,7 @@ async function getBinnacleSaleMethodReportDate(req, res) {
             return res.json('La fecha inicial no puede ser mayor');
         }
     } else {
-        return res.json('Ingrese una fecha valida');
+        return res.status(400).json({ message: "Error, fechas en formato incorrecto" });
     }
 
 }
