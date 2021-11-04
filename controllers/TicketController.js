@@ -42,7 +42,7 @@ async function storeTicketSystemTransfer(req, res) {
             let result_email = await email(
                 params,
                 data_store_asigned !== null?data_store_asigned.email:"jrodriguez@corpinto.com",
-                params.length < 1? params[0].email:"jrodriguez@corpinto.com",
+                params.length > 0? params[0].email:"jrodriguez@corpinto.com",
                 'Nuevo Ticket De Traslado Sistema Informática',
                 `<table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
                     <tr>
@@ -181,7 +181,7 @@ async function storeTicketInmediates(req, res) {
                 params,
                 emailsDefault,
                 //'dlara2017229@gmail.com',
-                data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
+                data_store_asigned.email,
                 'Nuevo Ticket Entregas Inmediatas',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -326,7 +326,7 @@ async function storeTicketPhotoRetreats(req, res) {
             email(
                 params,
                 '',
-                params.length < 1? params[0].email:"jrodriguez@corpinto.com",
+                params.length > 0? params[0].email:"jrodriguez@corpinto.com",
                 'Retiro de Mercaderia para fotografía',
                 `<table style="display:none!important;">
                 <tr>
@@ -920,7 +920,7 @@ async function inactivateTicket(req, res) {
             await email(
                 params,
                 data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
-                req.body.email?req.body.email:"jrodriguez@corpinto.com",
+                req.body.email,
                 'Ticket Traslado De Sistema Cancelado',
                 `<table style="display:none!important;">
                 <tr>
@@ -1024,7 +1024,7 @@ async function inactivateTicketInmediate(req, res) {
             email(
                 params,
                 data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
-                req.body.email?req.body.email:"jrodriguez@corpinto.com",
+                req.body.email,
                 'Ticket Envio Inmediato Cancelado',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -1128,7 +1128,7 @@ async function inactivatePhotoRetreats(req, res) {
             email(
                 [inactive],
                 data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
-                req.body.email?req.body.email:"jrodriguez@corpinto.com",
+                req.body.email,
                 'Cancelar Retiro Fotografía',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
@@ -1245,7 +1245,7 @@ async function completeTicket(req, res) {
             await email(
                 params,
                 data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
-                req.body.email?req.body.email:"jrodriguez@corpinto.com",
+                req.body.email,
                 'Ticket De Traslado sistema Completado',
                 `<!-- pre-header -->
                 <table style="display:none!important;">
