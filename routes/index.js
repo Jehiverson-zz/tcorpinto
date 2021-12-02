@@ -18,6 +18,8 @@ const CertificateController = require('../controllers/CertificateController');
 const RetreatsController = require('../controllers/RetreatsController');
 const SettingController = require('../controllers/SettingController');
 
+const ChangeDataController = require('../controllers/ChangeDataController');
+
 const routesProtected = express.Router();
 
 routesProtected.use((req, res, next) => {
@@ -207,4 +209,8 @@ router.put('/templateAsignedEmailUpdate', SettingController.updateTemplateAsigne
 /*Optiene emails asignados al correo*/
 router.post('/emailsAsigned', SettingController.returnEmailsAsigned);
 
+
+/* Cambio de nombres historico*/
+router.post('/changeNameStore', ChangeDataController.changeNameStore);
+router.get('/getDateBefore', ChangeDataController.getDateBefore);
 module.exports = router;
