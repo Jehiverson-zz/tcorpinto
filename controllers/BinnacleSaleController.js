@@ -636,6 +636,7 @@ async function getBinnacleSaleReportTotal(req, res) {
 
     
     salesNew.map((res) => {
+        let beforeDay = Moment(hoy, 'DD-MM-YYYY').subtract(1,'days').format();
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
             "fechaCreacion": fecha,
@@ -651,7 +652,8 @@ async function getBinnacleSaleReportTotal(req, res) {
             "manager": res.manager,
             "fact": res.fact,
             "diferencia": res.diff,
-            "date": res.date_created
+            "date": res.date_created,
+            "diaAnterior": beforeDay
         })
     })
 
