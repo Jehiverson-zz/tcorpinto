@@ -627,7 +627,7 @@ async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
         //date_created: { $regex: "2020" }
-        date_created: { $in: [/^2020/i, /^2021/] }
+        date_created: { $in: [/^2020/i, /^2021/, /^2022/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -683,7 +683,7 @@ async function getBinnacleSaleReportTotal(req, res) {
 async function getBinnacleSaleReportTotalSendFirebase(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
-        date_created: { $in: [/^2020/i, /^2021/] }
+        date_created: { $in: [/^2020/i, /^2021/, /^2022/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
