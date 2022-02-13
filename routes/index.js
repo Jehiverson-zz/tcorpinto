@@ -71,6 +71,7 @@ router.post('/login/google', async (req, res) => {
             }
         })
         .catch(err => {
+            console.log(err);
             res.status(400).json({ error: err })
         })
 })

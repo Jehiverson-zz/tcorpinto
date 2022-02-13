@@ -1061,7 +1061,7 @@ async function setBinnacleSalesUpdate(req, res) {
 
 /* Valida si existe un dato de venta anterior*/
 async function validationDataSale(req, res) {
-    console.log(req.body)
+/*     console.log(req.body)
     let dateValid;
     if (req.body.dateStart) {
         dateValid = Moment(req.body.dateStart).format('YYYY-MM-DD')
@@ -1072,14 +1072,29 @@ async function validationDataSale(req, res) {
         } else {
             mm_f = "0" + mm
         }
-
+        
         dateValid = yyyy + "-" + mm_f + "-" + dd;
+    } */
+
+    var momenthoy = Moment().tz("America/Guatemala").format("yyyy-MM-DD");
+    var yesterday = momentToday(momenthoy).subtract(1, 'd');
+    var tomorrow = momentToday(momenthoy).add(1, 'd');
+    var durationYesterday = momentToday.duration(yesterday.diff(req.body.dateStart)).asDays();
+    var durationTomorrow = momentToday.duration(tomorrow.diff(req.body.dateStart)).asDays();
+
+    if(durationYesterday != 0  && durationYesterday != -1 &&  durationTomorrow != 0 &&  durationTomorrow != 1  ){
+        return res.status(200).json({ error: true, message: "Fecha fuera de rangos permitido. Unicamente puede ser de un dia anterior y un dia posterior a la fecha actual." });
+    }
+    console.log(req.body.dateStart);
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: req.body.dateStart }, store_creat: req.body.StoreDefault, manager: req.body.manager
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1 });
+    console.log(salesNew.length);
+    if(salesNew.length > 0){
+        return res.status(200).json({ error: true, message: "Ya cuenta con un dato de venta en esta fecha."})
     }
 
-    let salesNew = await BinnacleSaleByte.find({
-        date_created: { $regex: dateValid }, store_creat: req.body.StoreDefault, manager: req.body.manager
-    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1 });
-    return res.json({ salesNew });
+    return res.status(200).json({ error: false });
 }
 
 /* Eliminar Dato de venta*/
