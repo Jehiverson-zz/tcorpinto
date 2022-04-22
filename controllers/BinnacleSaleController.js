@@ -13,6 +13,7 @@ let dd = hoy.getDate();
 let mm = hoy.getMonth() + 1;
 let yyyy = hoy.getFullYear();
 //Obtiene los colaboradores
+
 async function getBinnacleSale(req, res) {
     console.log("Reporte");
     const dataStore = [];
@@ -199,7 +200,355 @@ async function getBinnacleSaleReport(req, res) {
     return res.json({ dataStore });
 }
 
+//----------------------------------------------------------------
+// -------------------------  API POR FECHA TI ---------------------------
+
+async function getBinnacleSaleReportDate(req, res) {
+    const { dateIn, dateOut } = req.params;
+    if(momentToday(dateIn, 'YYYY-MM-DD',true).isValid() && momentToday(dateOut, 'YYYY-MM-DD',true).isValid()){
+        if (new Date(dateIn) <=new Date(dateOut)) {
+            const fechasDatos = [];
+            //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
+            const DayIn = Moment(dateIn).format('DD');
+            const DayOut = Moment(dateOut).format('DD');
+            const MothIn = Moment(dateIn).format('MM');
+            const MonthOut = Moment(dateOut).format('MM');
+            const YearIn = Moment(dateIn).format('YYYY');
+            const YearOut = Moment(dateOut).format('YYYY');
+
+            if (YearIn == YearOut) {
+                console.log("Mismo Año");
+                var monthDay = 0;
+                if (MothIn == MonthOut) {
+                    console.log("Mismo Mes");
+                    for (var d = DayIn; d <= DayOut; d++) {
+                        //console.log(`--${MothIn}-${j}`)
+                        //console.log(Moment(new Date(`${YearOut}-${MothIn < 10?"0"+parseInt(MothIn):parseInt(MothIn)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                        fechasDatos.push({ date_created: { $regex: Moment(new Date(`${YearOut}-${MothIn < 10 ? "0" + parseInt(MothIn) : parseInt(MothIn)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                    }
+                } else {
+                    console.log("Distinto Mes");
+                    for (var m = MothIn; m <= MonthOut; m++) {
+                        monthDay++;
+                        const DayStart = monthDay == 1 ? parseInt(DayIn) : 1;
+                        const DayEnd = m == MonthOut ? parseInt(DayOut) : new Date(YearOut, m, 0).getDate();
+                        console.log(DayStart, DayEnd, m)
+                        for (var d = DayStart; d <= DayEnd; d++) {
+                            //console.log(`${YearOut}-${m < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)
+                            //console.log(Moment(new Date(`${YearOut}-${m < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                            fechasDatos.push({ date_created: { $regex: Moment(new Date(`${YearOut}-${m < 10 ? "0" + parseInt(m) : parseInt(m)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                        }
+                    }
+                }
+            } else {
+                console.log("Distinto Año");
+                var diferens = 0;
+                for (var yb = YearIn; yb <= YearOut; yb++) {
+                    diferens++;
+                }
+                //console.log("Distinto Año");
+                var monthDay = 0;
+                var monthDefault = 0;
+                var monthFinish = 0;
+                var yearDefault = 0;
+
+                for (var y = YearIn; y <= YearOut; y++) {
+                    //console.log(`este es el año ${y}`);
+                    yearDefault++;
+                    monthDefault = yearDefault == 1 ? MothIn : 1;
+                    monthFinish = yearDefault == diferens ? MonthOut : 12;
+                    //console.log(`este es el año ${y} y sus meses son ${monthDefault} - ${monthFinish}`);
+                    for (var m = monthDefault; m <= monthFinish; m++) {
+                        //console.log(`este mes es----${y}/${m}`);
+                        monthDay++;
+                        const DayStart = monthDay == 1 ? DayIn : 1;
+                        const DayEnd = m == MonthOut ? y == YearOut ? DayOut : new Date(y, m, 0).getDate() : new Date(y, m, 0).getDate();
+                        //console.log("Dia que muere----",y,'-----', m,'----',MonthOut,'----',DayEnd)
+                        //  console.log(`este es el dia ${DayStart} - ${DayEnd}`)
+                        for (var d = DayStart; d <= DayEnd; d++) {
+                            //console.log(Moment(new Date(`${y}-${parseInt(m) < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                            //console.log(new Date(`${y}-${parseInt(m) < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`),"-------------------------",`${y}-${m < 10?"0"+m:m}-0${d}T19:02:12.501+00:00`)
+                            fechasDatos.push({ date_created: { $regex: Moment(new Date(`${y}-${parseInt(m) < 10 ? "0" + parseInt(m) : parseInt(m)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                        }
+                    }
+                }
+            }
+            var query = { $or: fechasDatos }
+            let salesNew = await BinnacleSaleByte.find(query, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
+
+            let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+                date_created: { $gte: `${dateIn}T19:02:12.501+00:00`, $lt: `${dateOut}T19:02:12.501+00:00` },
+            }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
+
+            const dataStore = [];
+            salesNew.map((res) => {
+                let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+                dataStore.push({
+                    "fechaCreacion": fecha,
+                    "Dia": Moment(fecha).format('DD'),
+                    "Mes": Moment(fecha).format('MM'),
+                    "Año": Moment(fecha).format('YYYY'),
+                    "tienda": res.store_creat,
+                    "ventas": res.sale_daily,
+                    "metas": res.daily_goal,
+                    "venta_año_anterior": res.year_before_sale,
+                    "total_personas": res.people_totals,
+                    "total_vendores": res.sales_totals,
+                    "manager": res.manager,
+                    "fact": res.fact,
+                    "diferencia": res.diff,
+                    "date": res.date_created
+                })
+            })
+
+            salesBefore_2020.map((res) => {
+                let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+                dataStore.push({
+                    "fechaCreacion": fecha,
+                    "Dia": Moment(fecha).format('DD'),
+                    "Mes": Moment(fecha).format('MM'),
+                    "Año": Moment(fecha).format('YYYY'),
+                    "tienda": res.store_creat,
+                    "ventas": res.sale_daily,
+                    "metas": res.daily_goal,
+                    "venta_año_anterior": res.year_before_sale,
+                    "total_personas": res.people_totals,
+                    "total_vendores": res.sales_totals,
+                    "manager": res.manager,
+                    "fact": res.fact,
+                    "diferencia": res.diffy,
+                    "date": res.date_created
+                })
+            })
+
+            return res.json({ dataStore });
+        } else {
+            return res.json('Error, En la fecha');
+        }
+    } else {
+        return res.status(400).json({ message: "Error, fechas en formato incorrecto" });
+    }
+
+}
+
+async function getBinnacleSaleMethodReportDate(req, res) {
+    const { dateIn, dateOut } = req.params;
+    if(momentToday(dateIn, 'YYYY-MM-DD',true).isValid() && momentToday(dateOut, 'YYYY-MM-DD',true).isValid()){
+        if (new Date(dateIn) <=new Date(dateOut)) {
+            const fechasDatos = [];
+            //console.log(`Datos -------------- ${dateIn}- ${dateOut}`);
+            const DayIn = Moment(dateIn).format('DD');
+            const DayOut = Moment(dateOut).format('DD');
+            const MothIn = Moment(dateIn).format('MM');
+            const MonthOut = Moment(dateOut).format('MM');
+            const YearIn = Moment(dateIn).format('YYYY');
+            const YearOut = Moment(dateOut).format('YYYY');
+
+            if (YearIn == YearOut) {
+                console.log("Mismo Año");
+                var monthDay = 0;
+                if (MothIn == MonthOut) {
+                    console.log("Mismo Mes");
+                    for (var d = DayIn; d <= DayOut; d++) {
+                        //console.log(`--${MothIn}-${j}`)
+                        //console.log(Moment(new Date(`${YearOut}-${MothIn < 10?"0"+parseInt(MothIn):parseInt(MothIn)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                        fechasDatos.push({ date_created: { $regex: Moment(new Date(`${YearOut}-${MothIn < 10 ? "0" + parseInt(MothIn) : parseInt(MothIn)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                    }
+                } else {
+                    console.log("Distinto Mes");
+                    for (var m = MothIn; m <= MonthOut; m++) {
+                        monthDay++;
+                        const DayStart = monthDay == 1 ? parseInt(DayIn) : 1;
+                        const DayEnd = m == MonthOut ? parseInt(DayOut) : new Date(YearOut, m, 0).getDate();
+                        console.log(DayStart, DayEnd, m)
+                        for (var d = DayStart; d <= DayEnd; d++) {
+                            //console.log(`${YearOut}-${m < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)
+                            //console.log(Moment(new Date(`${YearOut}-${m < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                            fechasDatos.push({ date_created: { $regex: Moment(new Date(`${YearOut}-${m < 10 ? "0" + parseInt(m) : parseInt(m)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                        }
+                    }
+                }
+            } else {
+                console.log("Distinto Año");
+                var diferens = 0;
+                for (var yb = YearIn; yb <= YearOut; yb++) {
+                    diferens++;
+                }
+                //console.log("Distinto Año");
+                var monthDay = 0;
+                var monthDefault = 0;
+                var monthFinish = 0;
+                var yearDefault = 0;
+
+                for (var y = YearIn; y <= YearOut; y++) {
+                    //console.log(`este es el año ${y}`);
+                    yearDefault++;
+                    monthDefault = yearDefault == 1 ? MothIn : 1;
+                    monthFinish = yearDefault == diferens ? MonthOut : 12;
+                    //console.log(`este es el año ${y} y sus meses son ${monthDefault} - ${monthFinish}`);
+                    for (var m = monthDefault; m <= monthFinish; m++) {
+                        //console.log(`este mes es----${y}/${m}`);
+                        monthDay++;
+                        const DayStart = monthDay == 1 ? DayIn : 1;
+                        const DayEnd = m == MonthOut ? y == YearOut ? DayOut : new Date(y, m, 0).getDate() : new Date(y, m, 0).getDate();
+                        //console.log("Dia que muere----",y,'-----', m,'----',MonthOut,'----',DayEnd)
+                        //  console.log(`este es el dia ${DayStart} - ${DayEnd}`)
+                        for (var d = DayStart; d <= DayEnd; d++) {
+                            //console.log(Moment(new Date(`${y}-${parseInt(m) < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD'));
+                            //console.log(new Date(`${y}-${parseInt(m) < 10?"0"+parseInt(m):parseInt(m)}-${d<10?"0"+parseInt(d):(d)}T19:02:12.501+00:00`),"-------------------------",`${y}-${m < 10?"0"+m:m}-0${d}T19:02:12.501+00:00`)
+                            fechasDatos.push({ date_created: { $regex: Moment(new Date(`${y}-${parseInt(m) < 10 ? "0" + parseInt(m) : parseInt(m)}-${d < 10 ? "0" + parseInt(d) : (d)}T19:02:12.501+00:00`)).format('YYYY-MM-DD') } })
+                        }
+                    }
+                }
+            }
+            var query = { $or: fechasDatos }
+            let salesNew = await BinnacleSaleByte.find(query);
+
+            let salesBefore_2020 = await BinnacleSaleByteBefore.find({
+                date_created: { $gte: `${dateIn}T19:02:12.501+00:00`, $lt: `${dateOut}T19:02:12.501+00:00` },
+            });
+
+            const dataStore = [];
+            
+            salesNew.map((res) => {
+                let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+                dataStore.push({
+                    "fechaCreacion": fecha,
+                    "Dia": Moment(fecha).format('DD'),
+                    "Mes": Moment(fecha).format('MM'),
+                    "Año": Moment(fecha).format('YYYY'),
+                    "tienda": res.store_creat,
+                    "ventas": res.sale_daily,
+                    "metas": res.daily_goal,
+                    "venta_año_anterior": res.year_before_sale,
+                    "total_personas": res.people_totals,
+                    "total_vendores": res.sales_totals,
+                    "manager": res.manager,
+                    "fact": res.fact,
+                    "diferencia": res.diff,
+        
+                    "factura_sistema_de": res.fac_sis_from,
+                    "factura_sistema_hasta": res.fac_sis_to,
+                    "total_sistema": res.total_sis,
+        
+                    "factura_manual_de": res.fac_man_from,
+                    "factura_manual_hasta": res.fac_man_to,
+                    "total_manual": res.total_man,
+        
+                    "nota_credito_de": res.fact_nt_c_f,
+                    "nota_credito_hasta": res.fact_nt_c_to,
+                    "nota_credito_total": res.fact_nt_c,
+        
+                    "total_online": res.total_on,
+        
+                    "efectivo_quetzales": res.cash_quetzales,
+                    "efectivo_dolares": res.cash_dolares,
+        
+                    "credomatic": res.credomatic,
+                    "visa": res.visa,
+                    "visa_dolares": res.visaDolares,
+                    "masterCard": res.masterCard,
+                    "crediCuotas": res.credicuotas,
+                    "visaCuotas": res.visaCuotas,
+        
+                    "factura_send_contra_entrega_desde": res.fact_send_CE_from,
+                    "factura_send_contra_entrega_hasta": res.fact_send_CE_to,
+                    "factura_send_contra_entrega_total": res.fact_send_CEV,
+        
+                    "nota_de_credito": res.note_credit,
+                    "ticket_quetzales": res.ticket_quetzales,
+                    "missing": res.missing,
+                    "cuadre_de_caja": res.box_square,
+                    "Numero_de_envio_en_efectivo": res.numb_send_cash_value,
+                    "Numero_Life_Miles": res.lifeMilesNum,
+                    "Numero_Life_Miles_Valor": res.lifeMilesVa,
+                    "Execto_iva": res.extIva,
+                    "Loyalty": res.loyalty,
+                    "Gasto_Autorizado": res.Authorized_Expenditure_v,
+                    "Retiros": res.retreats,
+                    "Cashback_valor": res.cashBackVa,
+                    "Giftcard": res.giftcard,
+                    "Observacion_Metodos": res.obs_method,
+                    "Factores_que_afectaron_venta": res.fact
+                })
+            })
+        
+            salesBefore_2020.map((res) => {
+                let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
+                dataStore.push({
+                    "fechaCreacion": fecha,
+                    "Dia": Moment(fecha).format('DD'),
+                    "Mes": Moment(fecha).format('MM'),
+                    "Año": Moment(fecha).format('YYYY'),
+                    "tienda": res.store_creat,
+                    "ventas": res.sale_daily,
+                    "metas": res.daily_goal,
+                    "venta_año_anterior": res.year_before_sale,
+                    "total_personas": res.people_totals,
+                    "total_vendores": res.sales_totals,
+                    "manager": res.manager,
+                    "fact": res.fact,
+                    "diferencia": res.diff,
+        
+                    "factura_sistema_de": res.fac_sis_from,
+                    "factura_sistema_hasta": res.fac_sis_to,
+                    "total_sistema": res.total_sis,
+        
+                    "factura_manual_de": res.fac_man_from,
+                    "factura_manual_hasta": res.fac_man_to,
+                    "total_manual": res.total_man,
+        
+                    "nota_credito_de": res.fact_nt_c_f,
+                    "nota_credito_hasta": res.fact_nt_c_to,
+                    "nota_credito_total": res.fact_nt_c,
+        
+                    "total_online": res.total_on,
+        
+                    "efectivo_quetzales": res.cash_quetzales,
+                    "efectivo_dolares": res.cash_dolares,
+        
+                    "credomatic": res.credomatic,
+                    "visa": res.visa,
+                    "visa_dolares": res.visaDolares,
+                    "masterCard": res.masterCard,
+                    "crediCuotas": res.credicuotas,
+                    "visaCuotas": res.visaCuotas,
+        
+                    "factura_send_contra_entrega_desde": res.fact_send_CE_from,
+                    "factura_send_contra_entrega_hasta": res.fact_send_CE_to,
+                    "factura_send_contra_entrega_total": res.fact_send_CEV,
+        
+                    "nota_de_credito": res.note_credit,
+                    "ticket_quetzales": res.ticket_quetzales,
+                    "missing": res.missing,
+                    "cuadre_de_caja": res.box_square,
+                    "Numero_de_envio_en_efectivo": res.numb_send_cash_value,
+                    "Numero_Life_Miles": res.lifeMilesNum,
+                    "Numero_Life_Miles_Valor": res.lifeMilesVa,
+                    "Execto_iva": res.extIva,
+                    "Loyalty": res.loyalty,
+                    "Gasto_Autorizado": res.Authorized_Expenditure_v,
+                    "Retiros": res.retreats,
+                    "Cashback_valor": res.cashBackVa,
+                    "Giftcard": res.giftcard,
+                    "Observacion_Metodos": res.obs_method,
+                    "Factores_que_afectaron_venta": res.fact
+                })
+            })
+
+            return res.json({ dataStore });
+        } else {
+            return res.json('La fecha inicial no puede ser mayor');
+        }
+    } else {
+        return res.status(400).json({ message: "Error, fechas en formato incorrecto" });
+    }
+
+}
+
+
 async function getBinnacleSaleReportBefore(req, res) {
+    console.log(req.body);
     const dataStore = [];
     let dateInic = req.params.id + "-01-01T19:02:12.501+00:00"
     let dateFin = req.params.id + "-12-31T19:02:12.501+00:00"
@@ -278,14 +627,16 @@ async function getBinnacleSaleReportTotal(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
         //date_created: { $regex: "2020" }
-        date_created: { $in: [/^2020/i, /^2021/] }
+        date_created: { $in: [/^2020/i, /^2021/, /^2022/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
         date_created: { $gte: "2018-01-01T19:02:12.501+00:00", $lt: "2020-08-18T19:02:12.501+00:00" },
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
+    
     salesNew.map((res) => {
+        let beforeDay = Moment(hoy, 'DD-MM-YYYY').subtract(1,'days').format();
         let fecha = Moment(res.date_created).format('YYYY-MM-DDT08:00:00.80Z')
         dataStore.push({
             "fechaCreacion": fecha,
@@ -301,7 +652,8 @@ async function getBinnacleSaleReportTotal(req, res) {
             "manager": res.manager,
             "fact": res.fact,
             "diferencia": res.diff,
-            "date": res.date_created
+            "date": res.date_created,
+            "diaAnterior": beforeDay
         })
     })
 
@@ -331,7 +683,7 @@ async function getBinnacleSaleReportTotal(req, res) {
 async function getBinnacleSaleReportTotalSendFirebase(req, res) {
     const dataStore = [];
     let salesNew = await BinnacleSaleByte.find({
-        date_created: { $in: [/^2020/i, /^2021/] }
+        date_created: { $in: [/^2020/i, /^2021/, /^2022/] }
     }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1 });
 
     let salesBefore_2020 = await BinnacleSaleByteBefore.find({
@@ -709,7 +1061,7 @@ async function setBinnacleSalesUpdate(req, res) {
 
 /* Valida si existe un dato de venta anterior*/
 async function validationDataSale(req, res) {
-    console.log(req.body)
+/*     console.log(req.body)
     let dateValid;
     if (req.body.dateStart) {
         dateValid = Moment(req.body.dateStart).format('YYYY-MM-DD')
@@ -720,14 +1072,29 @@ async function validationDataSale(req, res) {
         } else {
             mm_f = "0" + mm
         }
-
+        
         dateValid = yyyy + "-" + mm_f + "-" + dd;
+    } */
+
+    var momenthoy = Moment().tz("America/Guatemala").format("yyyy-MM-DD");
+    var yesterday = momentToday(momenthoy).subtract(1, 'd');
+    var tomorrow = momentToday(momenthoy).add(1, 'd');
+    var durationYesterday = momentToday.duration(yesterday.diff(req.body.dateStart)).asDays();
+    var durationTomorrow = momentToday.duration(tomorrow.diff(req.body.dateStart)).asDays();
+
+    if(durationYesterday != 0  && durationYesterday != -1 &&  durationTomorrow != 0 &&  durationTomorrow != 1  ){
+        return res.status(200).json({ error: true, message: "Fecha fuera de rangos permitido. Unicamente puede ser de un dia anterior y un dia posterior a la fecha actual." });
+    }
+    console.log(req.body.dateStart);
+    let salesNew = await BinnacleSaleByte.find({
+        date_created: { $regex: req.body.dateStart }, store_creat: req.body.StoreDefault, manager: req.body.manager
+    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1 });
+    console.log(salesNew.length);
+    if(salesNew.length > 0){
+        return res.status(200).json({ error: true, message: "Ya cuenta con un dato de venta en esta fecha."})
     }
 
-    let salesNew = await BinnacleSaleByte.find({
-        date_created: { $regex: dateValid }, store_creat: req.body.StoreDefault, manager: req.body.manager
-    }, { date_created: 1, store_creat: 1, sale_daily: 1, manager: 1, year_before_sale: 1 });
-    return res.json({ salesNew });
+    return res.status(200).json({ error: false });
 }
 
 /* Eliminar Dato de venta*/
@@ -808,24 +1175,24 @@ async function getDataReport(req, res) {
     let dia_final = parseInt(final[2])
     let array_fechas = [];
     let query;
-    if(req.params.date_start !== req.params.date_end){
+    if (req.params.date_start !== req.params.date_end) {
         for (let anio = anio_inicial; anio <= anio_final; anio++) {
             for (let mes = mes_inicial; mes <= mes_final; mes++) {
                 for (let dia = dia_inicial; dia <= 31; dia++) {
-                    array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+                    array_fechas.push({ date_created: `${anio}-${mes < 10 ? '0' + mes : mes}-${dia < 10 ? '0' + dia : dia}` });
                 }
             }
         }
-    }else{
-        array_fechas.push({date_created:`${anio_inicial}-${mes_inicial< 10?'0'+mes_inicial:mes_inicial}-${dia_inicial<10?'0'+dia_inicial:dia_inicial}`});
+    } else {
+        array_fechas.push({ date_created: `${anio_inicial}-${mes_inicial < 10 ? '0' + mes_inicial : mes_inicial}-${dia_inicial < 10 ? '0' + dia_inicial : dia_inicial}` });
     }
-    if(req.body.role == "admin"){
-        if(req.body.store && req.body.store != "Todas"){
+    if (req.body.role == "admin") {
+        if (req.body.store && req.body.store != "Todas") {
             query = {
                 $or: array_fechas,
                 store_creat: req.body.store
             }
-        }else{
+        } else {
             query = { $or: array_fechas }
         }
     } else {
@@ -872,11 +1239,11 @@ async function getDataReportMethods(req, res) {
     let dia_final = parseInt(final[2])
     let array_fechas = [];
 
-    if(req.params.date_start !== req.params.date_end){
+    if (req.params.date_start !== req.params.date_end) {
         for (let anio = anio_inicial; anio <= anio_final; anio++) {
             for (let mes = mes_inicial; mes <= mes_final; mes++) {
                 for (let dia = dia_inicial; dia <= 31; dia++) {
-                    array_fechas.push({date_created:`${anio}-${mes < 10?'0'+mes:mes}-${dia<10?'0'+dia:dia}`});
+                    array_fechas.push({ date_created: `${anio}-${mes < 10 ? '0' + mes : mes}-${dia < 10 ? '0' + dia : dia}` });
                 }
             }
         }
@@ -884,15 +1251,16 @@ async function getDataReportMethods(req, res) {
             $or: array_fechas,
             store_creat: req.body.store
         }
-    }else{
+    } else {
         query = {
-            date_created:`${anio_inicial}-${mes_inicial< 10?'0'+mes_inicial:mes_inicial}-${dia_inicial<10?'0'+dia_inicial:dia_inicial}`,
+            date_created: `${anio_inicial}-${mes_inicial < 10 ? '0' + mes_inicial : mes_inicial}-${dia_inicial < 10 ? '0' + dia_inicial : dia_inicial}`,
             store_creat: req.body.store
         }
     }
 
     console.log(query)
-    let salesNew = await BinnacleSaleByte.find(query, { _id: 1,
+    let salesNew = await BinnacleSaleByte.find(query, {
+        _id: 1,
         date_created: 1,
         store_creat: 1,
         sale_daily: 1,
@@ -919,7 +1287,8 @@ async function getDataReportMethods(req, res) {
         box_square: 1,
         diference: 1,
         cashBackVa: 1,
-        giftcard: 1 });
+        giftcard: 1
+    });
 
 
     salesNew.reverse()
@@ -928,9 +1297,9 @@ async function getDataReportMethods(req, res) {
 
 async function getDataReportDailies(req, res) {
     let query;
-    if(req.body.role == "admin"){
-        if(req.params.date_start !== req.params.date_end){
-            if(req.body.store && req.body.store != "Todas"){
+    if (req.body.role == "admin") {
+        if (req.params.date_start !== req.params.date_end) {
+            if (req.body.store && req.body.store != "Todas") {
                 query = {
                     date_created: {
                         $gt: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
@@ -946,26 +1315,26 @@ async function getDataReportDailies(req, res) {
                     }
                 }
             }
-        }else{
-            if(req.body.store && req.body.store !== "Todas"){
+        } else {
+            if (req.body.store && req.body.store !== "Todas") {
                 query = {
-                    date_created:{
+                    date_created: {
                         $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
                         $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                     },
                     store_created: req.body.store
                 }
-            }else{
+            } else {
                 query = {
                     date_created: {
                         $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
                         $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
-                     },
+                    },
                 }
             }
         }
     } else {
-        if(req.params.date_start !== req.params.date_end){
+        if (req.params.date_start !== req.params.date_end) {
             query = {
                 date_created: {
                     $gt: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
@@ -973,9 +1342,9 @@ async function getDataReportDailies(req, res) {
                 },
                 store_created: req.body.store
             }
-        }else{
+        } else {
             query = {
-                date_created:{
+                date_created: {
                     $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
                     $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
                 },
@@ -996,6 +1365,8 @@ module.exports = {
     getBinnacleSale,
     getBinnacleSaleById,
     getBinnacleSaleReport,
+    getBinnacleSaleReportDate,
+    getBinnacleSaleMethodReportDate,
     getBinnacleSaleReportBefore,
     getBinnacleSaleReportTotal,
     getBinnacleSaleReportTotalSendFirebase,

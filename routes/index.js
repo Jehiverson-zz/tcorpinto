@@ -18,6 +18,8 @@ const CertificateController = require('../controllers/CertificateController');
 const RetreatsController = require('../controllers/RetreatsController');
 const SettingController = require('../controllers/SettingController');
 
+const ChangeDataController = require('../controllers/ChangeDataController');
+
 const routesProtected = express.Router();
 
 routesProtected.use((req, res, next) => {
@@ -69,6 +71,7 @@ router.post('/login/google', async (req, res) => {
             }
         })
         .catch(err => {
+            console.log(err);
             res.status(400).json({ error: err })
         })
 })
@@ -76,6 +79,8 @@ router.post('/login/google', async (req, res) => {
 /*-------------------------------------------
 ----------------- TOCKETS -------------------
 ---------------------------------------------*/
+router.get('/binnacles/sales/report/:dateIn/:dateOut', binnacleSaleController.getBinnacleSaleReportDate)
+router.get('/binnacles/sales/report/methods/:dateIn/:dateOut', binnacleSaleController.getBinnacleSaleMethodReportDate)
 router.get('/binnacles/sales_show_report', binnacleSaleController.getBinnacleSaleReport)
 router.post('/binnacles/sales_show', binnacleSaleController.getBinnacleSale)
 router.post('/binnacles/sales_show_by_id', binnacleSaleController.getBinnacleSaleById)
@@ -205,4 +210,8 @@ router.put('/templateAsignedEmailUpdate', SettingController.updateTemplateAsigne
 /*Optiene emails asignados al correo*/
 router.post('/emailsAsigned', SettingController.returnEmailsAsigned);
 
+
+/* Cambio de nombres historico*/
+router.post('/changeNameStore', ChangeDataController.changeNameStore);
+router.get('/getDateBefore', ChangeDataController.getDateBefore);
 module.exports = router;

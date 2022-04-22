@@ -17,7 +17,7 @@ const cloudinary = require('../cloudinary.config');
 async function storeTicketSystemTransfer(req, res) {
     let params = req.body;
     let Ticket = new TicketSystem();
-
+    console.log("---------0------------");
     //Se genera en el ticket de la tranferencia
     Ticket.status = 'Pendiente';
     Ticket.store_created = params[0].store_created;
@@ -32,16 +32,17 @@ async function storeTicketSystemTransfer(req, res) {
         }
         Ticket.product.push(producto);
     })
-
+    console.log("---------1------------");
     let data_store_asigned = await User.findOne({ store: params[0].store_asigned });
-
+    console.log("---------2------------", data_store_asigned);
     Ticket.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
         if (storedTicket) {
+            console.log("---------3------------");
             let result_email = await email(
                 params,
-                data_store_asigned.email,
-                params[0].email,
+                data_store_asigned !== null?data_store_asigned.email:"jrodriguez@corpinto.com",
+                params.length > 0? params[0].email:"jrodriguez@corpinto.com",
                 'Nuevo Ticket De Traslado Sistema Informática',
                 `<table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
                     <tr>
@@ -127,7 +128,8 @@ async function storeTicketSystemTransfer(req, res) {
                     </tr>
                 </table>`
             );
-            console.log(result_email)
+            console.log(result_email);
+            console.log("---------4------------");
             return res.status(200).send({ ticket: storedTicket, message: 'Ticket creado exitosamente!' });
         }
     });
@@ -167,6 +169,10 @@ async function storeTicketInmediates(req, res) {
     showUser.map((elementos) => {
         return emailsDefault.push(elementos.email)
     });
+
+    if(emailsDefault.length < 0){
+        emailsDefault.push("jrodriguez@corpinto.com");
+    }
 
     Inmediates.save(async (err, storedTicket) => {
         if (err) return res.status(500).send({ message: 'Error al crear el ticket' });
@@ -320,7 +326,7 @@ async function storeTicketPhotoRetreats(req, res) {
             email(
                 params,
                 '',
-                params[0].email,
+                params.length > 0? params[0].email:"jrodriguez@corpinto.com",
                 'Retiro de Mercaderia para fotografía',
                 `<table style="display:none!important;">
                 <tr>
@@ -903,6 +909,7 @@ async function getExernalRetreats(req, res) {
 //Inactiva los tikets de traslados de sistema
 async function inactivateTicket(req, res) {
     let ticket_id = req.params.id;
+    
     TicketSystem.findByIdAndUpdate(ticket_id, { status: 'Cancelado' }, async (err, inactive) => {
         if (err) return res.status(500).send({ message: "Error al eliminar ticket" });
 
@@ -912,7 +919,7 @@ async function inactivateTicket(req, res) {
             let params = [inactive]
             await email(
                 params,
-                data_store_asigned.email,
+                data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
                 req.body.email,
                 'Ticket Traslado De Sistema Cancelado',
                 `<table style="display:none!important;">
@@ -1016,7 +1023,7 @@ async function inactivateTicketInmediate(req, res) {
             let data_store_asigned = await User.findOne({ store: inactive.store_asigned });
             email(
                 params,
-                data_store_asigned.email,
+                data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
                 req.body.email,
                 'Ticket Envio Inmediato Cancelado',
                 `<!-- pre-header -->
@@ -1120,7 +1127,7 @@ async function inactivatePhotoRetreats(req, res) {
             let data_store_asigned = await User.findOne({ store: inactive.store_asigned });
             email(
                 [inactive],
-                data_store_asigned.email,
+                data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
                 req.body.email,
                 'Cancelar Retiro Fotografía',
                 `<!-- pre-header -->
@@ -1237,7 +1244,7 @@ async function completeTicket(req, res) {
             let data_store_asigned = await User.findOne({ store: complete.store_asigned });
             await email(
                 params,
-                data_store_asigned.email,
+                data_store_asigned.email?data_store_asigned.email:"jrodriguez@corpinto.com",
                 req.body.email,
                 'Ticket De Traslado sistema Completado',
                 `<!-- pre-header -->
@@ -1383,16 +1390,19 @@ function randomNumber() {
 }
 //Generar Email
 async function email(data, reseptor, emisor, titulo, template) {
+    console.log("---------+1------------");
     let randsend = randomNumber();
     let Moment = require("moment-timezone");
-    let hoy = Moment().tz("America/Guatemala")._d;
+    let hoy = new Date(Moment().tz("America/Guatemala").format());
+    //console.log(hoy.format());
     let dd = hoy.getDate();
     let mm = hoy.getMonth() + 1;
-    let yyyy = hoy.getFullYear();
+    let yyyy = hoy.getFullYear(); 
+    console.log(dd, mm, yyyy);
     // Generate test SMTP service account from ethereal.email
     // Only needed if you don't have a real mail account for testing
-    let testAccount = await nodemailer.createTestAccount();
-
+    //let testAccount = await nodemailer.createTestAccount();
+    console.log("---------+2------------");
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -1403,18 +1413,19 @@ async function email(data, reseptor, emisor, titulo, template) {
             pass: "m1$0n@lc0rp!nt0" // generated ethereal password
         }
     });
-
+    console.log("---------+3------------");
     // send mail with defined transport object
     let info = await transporter.sendMail({
         from: 'noreply@corpinto.com', // sender address
         to: reseptor, // list of receivers
         cc: emisor,
-        bcc: 'dlara2017229@gmail.com',
+        //bcc: 'dlara2017229@gmail.com',
         subject:
             `${titulo} ${data[0].store_created} ${dd}/${mm}/${yyyy} - Ticket ${randsend}`,
         text: "", // plain text body
         html: template, // html body
     }, async function (err, json) {
+        console.log("---------+4------------");
         if (err) console.log(`ERROR EN EL ENVÍO: ${err}`);
         if (json) console.log(`CORREO SE ENVIADO EXITOSAMENTE: ${json}`);
     });

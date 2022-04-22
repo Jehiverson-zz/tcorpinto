@@ -193,12 +193,32 @@ async function createStore(req, res) {
 }
 
 async function updateStore(req, res) {
+
+    //
+    var showStoreAfter = await Store.findById(req.body.id);
+    console.log(1, showStoreAfter);
+
+    var showUserInfo = await User.find({store:showStoreAfter.name});
+    console.log(2,showUserInfo)
+
+
+    showUserInfo.map(async (userData)=>{
+        await User.findByIdAndUpdate(userData._id,{
+            store:req.body.name,
+        }, (error, response) => {
+            if (error) return false
+            return true
+        }); 
+    });
+
+    console.log(updateUser);
+
     await Store.findByIdAndUpdate(req.body.id, {
         name: req.body.name,
         sbs: req.body.sbs,
         status: req.body.status,
         updatedAt: new Date(),
-    }, (error, response) => {
+    }, async(error, response) => {
         if (error) return res.status(500).json({ error: 1, message: "Error en el servidor", textError: error });
         return res.status(200).json({ error: 0, message: "Tienda Actualizada", data: response });
     });

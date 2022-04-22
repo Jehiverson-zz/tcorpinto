@@ -44,6 +44,14 @@ async function storeDamagedMerchandise(req,res) {
                 showUserDefault.map((elementos) => {
                     return emailsDefault.push(elementos.email)
                 });
+                
+                if(emailsDefault.length < 1){
+                    emailsDefault.push("jrodriguez@corpinto.com");
+                }
+
+                if(emails.length < 1){
+                    emails.push("jrodriguez@corpinto.com");
+                }
 
                 email(
                     params,
@@ -260,14 +268,15 @@ function randomNumber() {
 async function email(data, reseptor, emisor, titulo, template) {
     let randsend = randomNumber();
     let Moment = require("moment-timezone");
-    let hoy = Moment().tz("America/Guatemala")._d;
+    let hoy = new Date(Moment().tz("America/Guatemala").format());
+    //console.log(hoy.format());
     let dd = hoy.getDate();
     let mm = hoy.getMonth() + 1;
     let yyyy = hoy.getFullYear();
 
     // Generate test SMTP service account from ethereal.email
     // Only needed if you don't have a real mail account for testing
-    let testAccount = await nodemailer.createTestAccount();
+    //let testAccount = await nodemailer.createTestAccount();
 
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
