@@ -12,6 +12,7 @@ const { firestore } = require('../firebase');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
 const Moment = require('moment');
+const momentTimeZone = require("moment-timezone");
 const cloudinary = require('../cloudinary.config');
 //Crea los tickets de traslado de sistema
 async function storeTicketSystemTransfer(req, res) {
@@ -23,6 +24,7 @@ async function storeTicketSystemTransfer(req, res) {
     Ticket.store_created = params[0].store_created;
     Ticket.store_asigned = params[0].store_asigned;
     Ticket.fact = params[0].bill
+    Ticket.timestamp = Moment().utc();
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
@@ -141,9 +143,9 @@ async function storeTicketInmediates(req, res) {
     let file = req.file;
     let result = await cloudinary.uploader.upload(file.path);
     let address_send = `Nombre: ${params[0].client}, Dirreccion: ${params[0].address}, Celular 1: ${params[0].phone1}, Celular 2: ${params[0].phone2}, Horarios: ${params[0].hours}, Total a cobrar: ${params[0].total};`
-    let fecha = await axios.get('https://us-central1-pruebas-241e9.cloudfunctions.net/app/get-date')
+    /*let fecha = Moment().utc(); await axios.get('https://us-central1-pruebas-241e9.cloudfunctions.net/app/get-date')
         .then(res => res.data)
-        .catch(err => console.log(err));
+        .catch(err => console.log(err)); */
 
     Inmediates.store_created = params[0].store_created;
     Inmediates.store_asigned = params[0].store_asigned;
@@ -152,7 +154,7 @@ async function storeTicketInmediates(req, res) {
     Inmediates.fact = params[0].bill;
     Inmediates.fact_img = result.public_id;
     Inmediates.desc = address_send;
-    Inmediates.timestamp = fecha;
+    Inmediates.timestamp = Moment().utc();
 
     params.map(data => {
         let producto = {
@@ -308,6 +310,7 @@ async function storeTicketPhotoRetreats(req, res) {
     Ticket.store_created = params[0].store_created;
     Ticket.store_asigned = "Pruebas Sistemas";
     Ticket.caurier = params[0].caurier;
+    Ticket.timestamp = Moment().utc();
 
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
@@ -450,10 +453,11 @@ async function storeTicketExternalRetreats(req, res) {
 
     //Se genera en el ticket de la tranferencia
     Ticket.store_created = params[0].store_created;
-    Ticket.name = params[0].person_retreats,
-    Ticket.manager = params[0].person_authorizing,
-    Ticket.inv_val = params[0].bill,
-    Ticket.status = "Completado"
+    Ticket.name = params[0].person_retreats;
+    Ticket.manager = params[0].person_authorizing;
+    Ticket.inv_val = params[0].bill;
+    Ticket.status = "Completado";
+    Ticket.timestamp = Moment().utc();
     //insertamos los productos que se transferiran con el ticket
     params.map(data => {
         let producto = {
@@ -1443,16 +1447,16 @@ async function getDataReport(req,res) {
             if(req.body.store && req.body.store != "Todas"){
                 query = {
                     timestamp:{
-                        $gt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
-                        $lt: Moment(new Date(req.params.date_end)).format("YYYY-MM-DD")
+                        $gt: Moment(new Date(`${req.params.date_start}T06:00:00`)).format("YYYY-MM-DD HH:MM:ss"),
+                        $lt: Moment(new Date(`${req.params.date_end}T05:59:59`)).format("YYYY-MM-DD HH:MM:ss")
                     },
                     store_created: req.body.store
                 }
             }else{
                 query = {
                     timestamp:{
-                        $gt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
-                        $lt: Moment(new Date(req.params.date_end)).format("YYYY-MM-DD")
+                        $gt: Moment(new Date(`${req.params.date_start} 06:00:00`)).format("YYYY-MM-DDTHH:MM:ss"),
+                        $lt: Moment(new Date(`${req.params.date_end} 05:59:59`)).format("YYYY-MM-DDTHH:MM:ss")
                     }
                 }
             }
@@ -1460,16 +1464,16 @@ async function getDataReport(req,res) {
             if(req.body.store && req.body.store !== "Todas"){
                 query = {
                     timestamp:{
-                        $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
-                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                        $gte: Moment(new Date(`${req.params.date_start} 06:00:00`)).format("YYYY-MM-DD HH:MM:ss"),
+                        $lt: Moment(new Date(`${req.params.date_end} 05:59:59`)).format("YYYY-MM-DD HH:MM:ss")
                     },
                     store_created: req.body.store
                 }
             }else{
                 query = {
                     timestamp: {
-                        $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
-                        $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                        $gte: Moment(new Date(`${req.params.date_start} 06:00:00`)).format("YYYY-MM-DD HH:MM:ss"),
+                        $lt: Moment(new Date(`${req.params.date_end} 05:59:59`)).format("YYYY-MM-DD HH:MM:ss")
                      },
                 }
             }
@@ -1478,16 +1482,16 @@ async function getDataReport(req,res) {
         if(req.params.date_start !== req.params.date_end){
             query = {
                 timestamp:{
-                    $gt: Moment(new Date(req.params.date_start)).format("YYYY-MM-DD"),
-                    $lt: Moment(new Date(req.params.date_end)).format("YYYY-MM-DD")
+                    $gt: Moment(new Date(`${req.params.date_start} 06:00:00`)).format("YYYY-MM-DD HH:MM:ss"),
+                    $lt: Moment(new Date(`${req.params.date_end} 05:59:59`)).format("YYYY-MM-DD HH:MM:ss")
                 },
                 store_created: req.body.store
             }
         }else{
             query = {
                 timestamp:{
-                    $gte: Moment(new Date(req.params.date_start)).utcOffset('+00:00').format("YYYY-MM-DDT00:00:00.80Z"),
-                    $lt: Moment(new Date(req.params.date_end)).utcOffset('+00:00').format("YYYY-MM-DDT23:59:59.80Z")
+                    $gte: Moment(new Date(`${req.params.date_start} 06:00:00`)).format("YYYY-MM-DD HH:MM:ss"),
+                    $lt: Moment(new Date(`${req.params.date_end} 05:59:59`)).format("YYYY-MM-DD HH:MM:ss")
                 },
                 store_created: req.body.store
             }
@@ -1515,11 +1519,21 @@ async function getDataReport(req,res) {
             break;
         }
 
+        let ticketSistemaFinal = [];
+        let ticketsInmediateFinal = [];
+        let ticketExternoFinal = [];
+        let ticketFotoFinal = [];
+
+        traslado_sistema.map(item => ticketSistemaFinal.push({...item._doc, timestamp:momentTimeZone(item._doc.timestamp).tz("America/Guatemala").format("DD-MM-YYYY HH:MM:ss")}))
+        entrega_inmediata.map(item => ticketsInmediateFinal.push({...item._doc, timestamp:momentTimeZone(item._doc.timestamp).tz("America/Guatemala").format("DD-MM-YYYY HH:MM:ss")}));
+        retiro_externo.map(item => ticketExternoFinal.push({...item._doc, timestamp:momentTimeZone(item._doc.timestamp).tz("America/Guatemala").format("DD-MM-YYYY HH:MM:ss")}));
+        tickets_fotografia.map(item => ticketFotoFinal.push({...item._doc, timestamp:momentTimeZone(item._doc.timestamp).tz("America/Guatemala").format("DD-MM-YYYY HH:MM:ss")}));
+        console.log(ticketSistemaFinal);
     return res.status(200).json({ data: {
-        traslado_sistema: traslado_sistema != null ? traslado_sistema:null,
-        entrega_inmediata: entrega_inmediata != null ? entrega_inmediata:null,
-        retiro_externo: retiro_externo != null ? retiro_externo: null,
-        tickets_fotografia: tickets_fotografia != null ? tickets_fotografia: null,
+        traslado_sistema: traslado_sistema != null ? ticketSistemaFinal:null,
+        entrega_inmediata: entrega_inmediata != null ? ticketsInmediateFinal:null,
+        retiro_externo: retiro_externo != null ? ticketExternoFinal: null,
+        tickets_fotografia: tickets_fotografia != null ? ticketFotoFinal: null,
         type: req.body.type
     } })
 }
